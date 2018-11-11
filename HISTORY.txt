@@ -1,0 +1,7 @@
+# RCSB_UTILS_CHEMREF HISTORY
+
+  1-Nov-2018  - V0.10 Created module supporting DrugBank and CCDC model mapping
+#
+
+
+
