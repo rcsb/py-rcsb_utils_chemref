@@ -39,7 +39,8 @@ class DrugBankUtilsTests(unittest.TestCase):
         self.__exampleFile = os.path.join(self.__dirPath, 'DrugBank', 'full_example.xml.gz')
         self.__fullDrugBankFile = os.path.join(self.__dirPath, 'DrugBank', 'full_database.xml.gz')
         #
-        self.__fullDrugBankMappingFile = os.path.join(HERE, 'test-output', 'drugbank_pdb_mapping.json')
+        self.__drugBankMappingFile = os.path.join(HERE, 'test-output', 'drugbank_pdb_mapping.json')
+        self.__drugBankDescriptorFile = os.path.join(HERE, 'test-output', 'drugbank_inchikey_mapping.json')
 
     def tearDown(self):
         pass
@@ -52,16 +53,15 @@ class DrugBankUtilsTests(unittest.TestCase):
         logger.info("DrugBank example keys %r" % rL[0].keys())
         logger.info("DrugBank example aliases %r" % rL[0]['aliases'])
 
-    def testReadDrugBankFull(self):
+    def testMatchPdbDrugBank(self):
         dbu = DrugBankUtils()
         dL = dbu.read(self.__fullDrugBankFile)
         logger.info("DrugBank full record length %d" % len(dL))
+        dbD = {}
         mD = {}
         for d in dL:
             dbId = d['drugbank_id']
             pdbIds = ''
-            # if 'pdb_entries' in d:
-            #    pdbIds = d['pdb_entries']
             if 'external_identifiers' in d:
                 for exD in d['external_identifiers']:
                     if exD['resource'] == 'PDB':
@@ -86,9 +86,20 @@ class DrugBankUtilsTests(unittest.TestCase):
                                 if 'target_interactions' not in mD[exD['identifier']]:
                                     mD[exD['identifier']]['target_interactions'] = []
                                 mD[exD['identifier']]['target_interactions'].append(tD)
-
         logger.info("Match length is %d" % len(mD))
-        self.__serializeJson(self.__fullDrugBankMappingFile, mD)
+        dbD['id_map'] = mD
+        #
+        inD = {}
+        for d in dL:
+            dbId = d['drugbank_id']
+            if 'inchikey' in d and d['inchikey'] and len(d['inchikey']) > 13:
+                if d['inchikey'] not in inD:
+                    inD[d['inchikey']] = []
+                inD[d['inchikey']].append({'drugbank_id': dbId, 'inchikey': d['inchikey'], 'name': d['name']})
+        #
+        logger.info("Drugbank InChIKey dictionary length %d" % len(inD))
+        dbD['inchikey_map'] = inD
+        self.__serializeJson(self.__drugBankMappingFile, dbD)
         #
         #
 
@@ -100,7 +111,7 @@ class DrugBankUtilsTests(unittest.TestCase):
 def readDrugBankInfo():
     suiteSelect = unittest.TestSuite()
     suiteSelect.addTest(DrugBankUtilsTests("testReadDrugBankExample"))
-    suiteSelect.addTest(DrugBankUtilsTests("testReadDrugBankFull"))
+    suiteSelect.addTest(DrugBankUtilsTests("testMatchPdbDrugBank"))
     return suiteSelect
 
 
