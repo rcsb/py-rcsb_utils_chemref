@@ -9,7 +9,7 @@
 #
 ##
 """
-Various utilities for extracting data from DrugBank repository exported data files.
+Various utilities for extracting data from CCDC correspondence data files.
 
 """
 

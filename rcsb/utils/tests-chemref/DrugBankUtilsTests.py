@@ -36,7 +36,7 @@ class DrugBankUtilsTests(unittest.TestCase):
 
     def setUp(self):
         self.__dirPath = os.path.join(os.path.dirname(TOPDIR), 'rcsb', 'mock-data')
-        self.__exampleFile = os.path.join(self.__dirPath, 'DrugBank', 'full_example.xml.gz')
+        self.__exampleFile = os.path.join(self.__dirPath, 'DrugBank', 'full_example.xml')
         self.__fullDrugBankFile = os.path.join(self.__dirPath, 'DrugBank', 'full_database.xml.gz')
         #
         self.__drugBankMappingFile = os.path.join(HERE, 'test-output', 'drugbank_pdb_mapping.json')
@@ -50,8 +50,9 @@ class DrugBankUtilsTests(unittest.TestCase):
         rL = dbu.read(self.__exampleFile)
         #
         logger.info("DrugBank example length %d" % len(rL))
-        logger.info("DrugBank example keys %r" % rL[0].keys())
-        logger.info("DrugBank example aliases %r" % rL[0]['aliases'])
+        logger.debug("DrugBank example keys %r" % rL[0].keys())
+        logger.debug("DrugBank example aliases %r" % rL[0]['aliases'])
+        self.assertTrue(len(rL), 2)
 
     def testMatchPdbDrugBank(self):
         dbu = DrugBankUtils()
@@ -87,6 +88,7 @@ class DrugBankUtilsTests(unittest.TestCase):
                                     mD[exD['identifier']]['target_interactions'] = []
                                 mD[exD['identifier']]['target_interactions'].append(tD)
         logger.info("Match length is %d" % len(mD))
+        self.assertGreater(len(mD), 5000)
         dbD['id_map'] = mD
         #
         inD = {}
@@ -98,6 +100,8 @@ class DrugBankUtilsTests(unittest.TestCase):
                 inD[d['inchikey']].append({'drugbank_id': dbId, 'inchikey': d['inchikey'], 'name': d['name']})
         #
         logger.info("Drugbank InChIKey dictionary length %d" % len(inD))
+        #
+        self.assertGreater(len(inD), 9000)
         dbD['inchikey_map'] = inD
         self.__serializeJson(self.__drugBankMappingFile, dbD)
         #

@@ -49,14 +49,23 @@ class DrugBankUtils(object):
         """ Parse the iput DrugBank export XML data file.
         """
         tree = []
-        with gzip.open(filePath, mode='rb') as ifh:
-            logger.debug('Parsing drugbank at %s', filePath)
-            t = time.time()
-            tree = ET.parse(ifh)
-            logger.debug('Parsed drugbank in %.2f seconds', time.time() - t)
+        if filePath[-3:] == '.gz':
+            with gzip.open(filePath, mode='rb') as ifh:
+                logger.debug('Parsing drugbank at %s', filePath)
+                t = time.time()
+                tree = ET.parse(ifh)
+                logger.debug('Parsed drugbank in %.2f seconds', time.time() - t)
+        else:
+            with open(filePath, mode='rb') as ifh:
+                logger.debug('Parsing drugbank at %s', filePath)
+                t = time.time()
+                tree = ET.parse(ifh)
+                logger.debug('Parsed drugbank in %.2f seconds', time.time() - t)
         return tree.getroot()
 
     def __processDrugElement(self, drugElement):
+        """
+        """
         assert drugElement.tag == "{ns}drug".format(ns=self.__ns)
 
         doc = {
@@ -65,9 +74,16 @@ class DrugBankUtils(object):
             'cas_number': drugElement.findtext("{ns}cas-number".format(ns=self.__ns)),
             'name': drugElement.findtext("{ns}name".format(ns=self.__ns)),
             'description': drugElement.findtext("{ns}description".format(ns=self.__ns)),
+            'indication': drugElement.findtext("{ns}indication".format(ns=self.__ns)),
+            'pharmacodynamics': drugElement.findtext("{ns}pharmacodynamics".format(ns=self.__ns)),
+            'mechanism-of-action': drugElement.findtext("{ns}mechanism-of-action".format(ns=self.__ns)),
             'groups': [
                 group.text
                 for group in drugElement.findall("{ns}groups/{ns}group".format(ns=self.__ns))
+            ],
+            'affected-organisms': [
+                org.text
+                for org in drugElement.findall("{ns}affected-organisms/{ns}affected-organism".format(ns=self.__ns))
             ],
             'atc_codes': [
                 code.get('code')
@@ -163,7 +179,7 @@ class DrugBankUtils(object):
             )
             if elem.text.strip()
         }
-        doc['products'] = products
+        doc['products'] = list(products)
         #
         doc['target_interactions'] = []
         targetCategories = ['target', 'enzyme', 'carrier', 'transporter']
@@ -175,6 +191,8 @@ class DrugBankUtils(object):
                     continue
                 doc['target_interactions'].append(targetDoc)
 
+        if 'categories' in doc and len(doc['categories']):
+            doc['drug_categories'] = [c['name'] for c in doc['categories']]
         return doc
 
     def __getTargetInfo(self, category, target):
@@ -183,6 +201,7 @@ class DrugBankUtils(object):
             'organism': target.findtext('{ns}organism'.format(ns=self.__ns)),
             'known_action': target.findtext('{ns}known-action'.format(ns=self.__ns)),
             'name': target.findtext('{ns}name'.format(ns=self.__ns)),
+            'amino-acid-sequence': target.findtext('{ns}polypeptide/{ns}amino-acid-sequence[@format="FASTA"]'.format(ns=self.__ns)),
             'actions': [
                 action.text
                 for action in target.findall('{ns}actions/{ns}action'.format(ns=self.__ns))
