@@ -1,8 +1,8 @@
 # File: setup.py
 # Date: 1-Nov-2018
 #
-# Update:
-
+# Updates:
+#
 #
 import re
 
