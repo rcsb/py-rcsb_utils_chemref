@@ -7,7 +7,7 @@
 # external resources (e.g. DrugBank).
 #
 # Update:
-#
+#. 7-Jan-2019 jdw qualify default section name in config path lookup
 ##
 
 __docformat__ = "restructuredtext en"
@@ -45,7 +45,7 @@ class ChemRefDataPrep(object):
         """
         oL = []
         if extResource == 'DrugBank':
-            drugBankFilePath = self.__cfgOb.getPath('DRUGBANK_DATA_LOCATOR')
+            drugBankFilePath = self.__cfgOb.getPath('DRUGBANK_DATA_LOCATOR', sectionName=self.__cfgOb.getDefaultSectionName())
             dbDocL = self.fetchDocuments(extResource, drugBankFilePath)
             oL = []
             for dbDoc in dbDocL:
@@ -109,7 +109,7 @@ class ChemRefDataPrep(object):
 
         """
         oD = {}
-        oD['__drugbank_id'] = dbObj['drugbank_id']
+        oD['_drugbank_id'] = dbObj['drugbank_id']
         dbiD = {}
         textKeys = [('drugbank_id', 'drugbank_id'),
                     ('name', 'name'),
