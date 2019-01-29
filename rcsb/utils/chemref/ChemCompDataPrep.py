@@ -14,7 +14,7 @@ __author__ = "John Westbrook"
 __email__ = "jwest@rcsb.rutgers.edu"
 __license__ = "Apache 2.0"
 
-
+import copy
 import logging
 
 from mmcif.api.DictionaryApi import DictionaryApi
@@ -37,7 +37,7 @@ class ChemCompDataPrep(object):
         self.__mU = MarshalUtil(workPath=self.__workPath)
         #
 
-    def exportContexts(self, jsonFilePath, includeContexts=['WWPDB_LOCAL', 'RCSB_LOCAL', 'WWPDB_DEPRECATED', 'WWPDB_DIFFRN_DATA']):
+    def exportContexts(self, jsonFilePath, includeContexts=['WWPDB_LOCAL', 'RCSB_LOCAL', 'WWPDB_DEPRECATED', 'WWPDB_DIFFRN_DATA', 'CHEM_COMP_INT']):
         catD, atD = self.getContextInfo(includeContexts=includeContexts)
         exD = {'categoryContexts': catD, 'attributeContexts': atD}
         ok = self.__mU.doExport(jsonFilePath, exD, format='json', indent=3)
@@ -58,22 +58,23 @@ class ChemCompDataPrep(object):
         """
         for container in containerList:
             #  - filter categories first
-            catNameL = container.getObjNameList()
+            catNameL = copy.deepcopy(container.getObjNameList())
             for catName in catNameL:
+                logger.debug("Test category %s" % catName)
                 for context, fL in contextD['categoryContexts'].items():
                     if catName in fL:
-                        logger.info("Filtering category %s" % catName)
+                        logger.info("Filtering category %s in context %s" % (catName, context))
                         container.remove(catName)
                         break
             #  - filter attributes in remaining categories
-            catNameL = container.getObjNameList()
+            catNameL = copy.deepcopy(container.getObjNameList())
             for catName in catNameL:
                 cObj = container.getObj(catName)
                 atNameL = cObj.getAttributeList()
                 for atName in atNameL:
                     for context, fL in contextD['attributeContexts'].items():
                         if {'cat': catName, 'at': atName} in fL:
-                            logger.info("Filtering attribute %s %s" % (catName, atName))
+                            logger.info("Filtering category %s attribute %s" % (catName, atName))
                             cObj.removeAttribute(atName)
 
     def getContextInfo(self, includeContexts=['WWPDB_LOCAL']):
