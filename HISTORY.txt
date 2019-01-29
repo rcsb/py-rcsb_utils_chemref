@@ -5,6 +5,7 @@
  10-Dec-2018  - V0.12 Adjustments for DrugBank schema compliance
   7-Jan-2019  - V0.13 Qualify default section name in config path lookup
  25-Jan-2019  - V0.14 DrugBank schema extension
+ 29-Jan-2019. - V0.15 Add context filtering feature in module ChemCompDataPrep
 #
 
 
