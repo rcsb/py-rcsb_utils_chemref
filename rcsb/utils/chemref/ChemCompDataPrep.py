@@ -6,7 +6,7 @@
 # Utilities for processing chemical component definitions.
 #
 # Update:
-#  29-Jan-2019 jdw
+#  31-Jan-2019 jdw make copy of all category and attribute lists on remove cycles.
 ##
 
 __docformat__ = "restructuredtext en"
@@ -63,18 +63,18 @@ class ChemCompDataPrep(object):
                 logger.debug("Test category %s" % catName)
                 for context, fL in contextD['categoryContexts'].items():
                     if catName in fL:
-                        logger.info("Filtering category %s in context %s" % (catName, context))
+                        logger.info("Category filtering on %s in context %s" % (catName, context))
                         container.remove(catName)
                         break
             #  - filter attributes in remaining categories
             catNameL = copy.deepcopy(container.getObjNameList())
             for catName in catNameL:
                 cObj = container.getObj(catName)
-                atNameL = cObj.getAttributeList()
+                atNameL = copy.deepcopy(cObj.getAttributeList())
                 for atName in atNameL:
                     for context, fL in contextD['attributeContexts'].items():
                         if {'cat': catName, 'at': atName} in fL:
-                            logger.info("Filtering category %s attribute %s" % (catName, atName))
+                            logger.info("Attribute filter in category %s attribute %s" % (catName, atName))
                             cObj.removeAttribute(atName)
 
     def getContextInfo(self, includeContexts=['WWPDB_LOCAL']):

@@ -5,7 +5,7 @@
 # Version: 0.001
 #
 # Updates:
-#
+#   31-Jan-2019 jdw make copy of all category and attribute lists on remove cycles.
 ##
 """
 Tests for processing chemical componet reference definitions.
