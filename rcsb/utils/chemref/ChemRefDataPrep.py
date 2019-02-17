@@ -7,7 +7,8 @@
 # external resources (e.g. DrugBank).
 #
 # Update:
-#. 7-Jan-2019 jdw qualify default section name in config path lookup
+#  7-Jan-2019 jdw qualify default section name in config path lookup
+# 16-Feb-2019 jdw add drugbank_container_identifiers ...
 ##
 
 __docformat__ = "restructuredtext en"
@@ -110,6 +111,8 @@ class ChemRefDataPrep(object):
         """
         oD = {}
         oD['_drugbank_id'] = dbObj['drugbank_id']
+        oD['drugbank_container_identifiers'] = {'drugbank_id': dbObj['drugbank_id']}
+
         dbiD = {}
         textKeys = [('drugbank_id', 'drugbank_id'),
                     ('name', 'name'),

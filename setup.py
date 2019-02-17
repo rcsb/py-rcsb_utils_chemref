@@ -45,8 +45,8 @@ setup(
         'console_scripts': []
     },
     #
-    install_requires=['mmcif >= 0.30',
-                      'rcsb.utils.io >= 0.20',
+    install_requires=['mmcif >= 0.34',
+                      'rcsb.utils.io >= 0.21',
                       'rcsb.utils.config >= 0.16'],
     packages=find_packages(exclude=['rcsb.mock-data', 'rcsb.utils.tests-chemref', 'rcsb.utils.tests-*', 'tests.*']),
     package_data={
