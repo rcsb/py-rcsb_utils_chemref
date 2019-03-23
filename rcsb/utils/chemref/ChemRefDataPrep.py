@@ -9,6 +9,7 @@
 # Update:
 #  7-Jan-2019 jdw qualify default section name in config path lookup
 # 16-Feb-2019 jdw add drugbank_container_identifiers ...
+# 23-Mar-2019 jdw adjust item name affected_organisms
 ##
 
 __docformat__ = "restructuredtext en"
@@ -125,7 +126,7 @@ class ChemRefDataPrep(object):
                     ('groups', 'drug_groups'),
                     ('aliases', 'synonyms'),
                     ('products', 'brand_names'),
-                    ('affected-organisms', 'affected-organisms')]
+                    ('affected_organisms', 'affected_organisms')]
         # For category drugbank_info
         for textKey, docKey in textKeys:
             if textKey in dbObj and len(dbObj[textKey]):

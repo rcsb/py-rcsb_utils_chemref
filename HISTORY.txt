@@ -7,8 +7,8 @@
  25-Jan-2019  - V0.14 DrugBank schema extension
  29-Jan-2019. - V0.15 Add context filtering feature in module ChemCompDataPrep
  31-Jan-2019  - V0.16 Make copy of all category and attribute lists on remove cycles.
- 16-Feb-2019.   V0.17 add drugbank_container_identifiers.
-#
+ 16-Feb-2019    V0.17 add drugbank_container_identifiers.
+ 23-Mar-2019  - V0.18 adjust item name for affected_organisms
 
 
 
