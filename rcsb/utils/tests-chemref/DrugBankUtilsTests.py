@@ -70,6 +70,9 @@ class DrugBankUtilsTests(unittest.TestCase):
                         if exD['identifier'] not in mD:
                             mD[exD['identifier']] = []
                         mD[exD['identifier']] = {"drugbank_id": dbId, "aliases": list(d['aliases'])}
+                        #
+                        if 'atc_codes' in d and len(d['atc_codes']):
+                            mD[exD['identifier']]['atc_codes'] = d['atc_codes']
 
                         if 'target_interactions' in d:
                             for tid in d['target_interactions']:
