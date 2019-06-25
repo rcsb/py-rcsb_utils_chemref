@@ -33,12 +33,11 @@ logger = logging.getLogger()
 
 
 class ChemCompModelUtilsTests(unittest.TestCase):
-
     def setUp(self):
-        self.__dirPath = os.path.join(os.path.dirname(TOPDIR), 'rcsb', 'mock-data')
-        self.__modelFile = os.path.join(self.__dirPath, 'chem_comp_models', 'chem_comp_model.cif.gz')
+        self.__dirPath = os.path.join(os.path.dirname(TOPDIR), "rcsb", "mock-data")
+        self.__modelFile = os.path.join(self.__dirPath, "chem_comp_models", "chem_comp_model.cif.gz")
         #
-        self.__modelMappingFile = os.path.join(HERE, 'test-output', 'ccdc_pdb_mapping.json')
+        self.__modelMappingFile = os.path.join(HERE, "test-output", "ccdc_pdb_mapping.json")
 
     def tearDown(self):
         pass
@@ -47,10 +46,10 @@ class ChemCompModelUtilsTests(unittest.TestCase):
         ccm = ChemCompModelUtils()
         rD = ccm.getMapping(self.__modelFile)
         #
-        logger.info("Model match length %d" % len(rD))
+        logger.info("Model match length %d", len(rD))
         for ccId in rD:
             if len(rD[ccId]) > 1:
-                logger.info("Match length for %r %d" % (ccId, len(rD[ccId])))
+                logger.info("Match length for %r %d", ccId, len(rD[ccId]))
 
         self.__serializeJson(self.__modelMappingFile, rD)
         #
@@ -67,8 +66,7 @@ def readChemCompModelInfo():
     return suiteSelect
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
-    if True:
-        mySuite = readChemCompModelInfo()
-        unittest.TextTestRunner(verbosity=2).run(mySuite)
+    mySuite = readChemCompModelInfo()
+    unittest.TextTestRunner(verbosity=2).run(mySuite)

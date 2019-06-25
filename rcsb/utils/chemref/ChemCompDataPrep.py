@@ -33,18 +33,20 @@ class ChemCompDataPrep(object):
     def __init__(self, cfgOb, **kwargs):
         #
         self.__cfgOb = cfgOb
-        self.__workPath = kwargs.get('workPath', None)
+        self.__workPath = kwargs.get("workPath", None)
         self.__mU = MarshalUtil(workPath=self.__workPath)
+        self.__dApi = None
         #
 
-    def exportContexts(self, jsonFilePath, includeContexts=['WWPDB_LOCAL', 'RCSB_LOCAL', 'WWPDB_DEPRECATED', 'WWPDB_DIFFRN_DATA', 'CHEM_COMP_INT']):
+    def exportContexts(self, jsonFilePath, includeContexts=None):
+        includeContexts = includeContexts if includeContexts else ["WWPDB_LOCAL", "RCSB_LOCAL", "WWPDB_DEPRECATED", "WWPDB_DIFFRN_DATA", "CHEM_COMP_INT"]
         catD, atD = self.getContextInfo(includeContexts=includeContexts)
-        exD = {'categoryContexts': catD, 'attributeContexts': atD}
-        ok = self.__mU.doExport(jsonFilePath, exD, format='json', indent=3)
+        exD = {"categoryContexts": catD, "attributeContexts": atD}
+        ok = self.__mU.doExport(jsonFilePath, exD, format="json", indent=3)
         return ok
 
     def importContexts(self, jsonFilePath):
-        cD = self.__mU.doImport(jsonFilePath, format='json')
+        cD = self.__mU.doImport(jsonFilePath, format="json")
         return cD
 
     def filterByContext(self, inpPath, outPath, contextD=None):
@@ -60,10 +62,10 @@ class ChemCompDataPrep(object):
             #  - filter categories first
             catNameL = copy.deepcopy(container.getObjNameList())
             for catName in catNameL:
-                logger.debug("Test category %s" % catName)
-                for context, fL in contextD['categoryContexts'].items():
+                logger.debug("Test category %s", catName)
+                for context, fL in contextD["categoryContexts"].items():
                     if catName in fL:
-                        logger.info("Category filtering on %s in context %s" % (catName, context))
+                        logger.info("Category filtering on %s in context %s", catName, context)
                         container.remove(catName)
                         break
             #  - filter attributes in remaining categories
@@ -72,15 +74,16 @@ class ChemCompDataPrep(object):
                 cObj = container.getObj(catName)
                 atNameL = copy.deepcopy(cObj.getAttributeList())
                 for atName in atNameL:
-                    for context, fL in contextD['attributeContexts'].items():
-                        if {'cat': catName, 'at': atName} in fL:
-                            logger.info("Attribute filter in category %s attribute %s" % (catName, atName))
+                    for context, fL in contextD["attributeContexts"].items():
+                        if {"cat": catName, "at": atName} in fL:
+                            logger.info("Attribute filter in category %s attribute %s", catName, atName)
                             cObj.removeAttribute(atName)
 
-    def getContextInfo(self, includeContexts=['WWPDB_LOCAL']):
+    def getContextInfo(self, includeContexts=None):
         """
         """
-        dictLocator = self.__cfgOb.getPath('PDBX_DICT_LOCATOR', sectionName=self.__cfgOb.getDefaultSectionName())
+        includeContexts = includeContexts if includeContexts else ["WWPDB_LOCAL"]
+        dictLocator = self.__cfgOb.getPath("PDBX_DICT_LOCATOR", sectionName=self.__cfgOb.getDefaultSectionName())
         containerList = self.__mU.doImport(dictLocator, format="mmcif-dict")
         self.__dApi = DictionaryApi(containerList=containerList, consolidate=True, replaceDefinition=True, verbose=True)
         categoryList = self.__dApi.getCategoryList()
@@ -89,18 +92,19 @@ class ChemCompDataPrep(object):
         return categoryContextIndex, attributeContextIndex
         #
 
-    def __indexContexts(self, dictSchema, includeContexts=['WWPDB_LOCAL']):
+    def __indexContexts(self, dictSchema, includeContexts=None):
         """  Extract the category an item level dictionary contexts.
         """
+        includeContexts = includeContexts if includeContexts else ["WWPDB_LOCAL"]
         catIndex = {}
         atIndex = {}
         for catName in dictSchema:
-            for c in self.__dApi.getCategoryContextList(catName):
-                if includeContexts and c in includeContexts:
-                    catIndex.setdefault(c, []).append(catName)
+            for cV in self.__dApi.getCategoryContextList(catName):
+                if includeContexts and cV in includeContexts:
+                    catIndex.setdefault(cV, []).append(catName)
 
             for atName in dictSchema[catName]:
-                for c in self.__dApi.getContextList(catName, atName):
-                    if includeContexts and c in includeContexts:
-                        atIndex.setdefault(c, []).append({'cat': catName, 'at': atName})
+                for cV in self.__dApi.getContextList(catName, atName):
+                    if includeContexts and cV in includeContexts:
+                        atIndex.setdefault(cV, []).append({"cat": catName, "at": atName})
         return catIndex, atIndex

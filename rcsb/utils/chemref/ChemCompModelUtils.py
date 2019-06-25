@@ -37,9 +37,9 @@ class ChemCompModelUtils(object):
         try:
             mU = MarshalUtil()
             cL = mU.doImport(filePath, format="mmcif")
-            logger.debug("Container list %d" % len(cL))
+            logger.debug("Container list %d", len(cL))
         except Exception as e:
-            logger.exception("Failing with %s" % str(e))
+            logger.exception("Failing with %s", str(e))
         return cL
 
     def getMapping(self, modelFilePath):
@@ -70,17 +70,17 @@ class ChemCompModelUtils(object):
         dataContainerL = self.__readCifFile(modelFilePath)
 
         for dataContainer in dataContainerL:
-            logger.debug("Processing model %r" % dataContainer.getName())
-            cObj = dataContainer.getObj('pdbx_chem_comp_model')
-            ccId = cObj.getValue('comp_id', 0)
+            logger.debug("Processing model %r", dataContainer.getName())
+            cObj = dataContainer.getObj("pdbx_chem_comp_model")
+            ccId = cObj.getValue("comp_id", 0)
             #
             if ccId not in rD:
                 rD[ccId] = []
 
-            tObj = dataContainer.getObj('pdbx_chem_comp_model_reference')
+            tObj = dataContainer.getObj("pdbx_chem_comp_model_reference")
             for iRow in range(tObj.getRowCount()):
-                dbName = tObj.getValue('db_name', iRow)
-                dbCode = tObj.getValue('db_code', iRow)
-                rD[ccId].append({'db_name': dbName, 'db_code': dbCode})
+                dbName = tObj.getValue("db_name", iRow)
+                dbCode = tObj.getValue("db_code", iRow)
+                rD[ccId].append({"db_name": dbName, "db_code": dbCode})
 
         return rD

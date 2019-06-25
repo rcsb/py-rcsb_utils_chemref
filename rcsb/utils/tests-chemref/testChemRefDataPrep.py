@@ -26,7 +26,7 @@ import unittest
 from rcsb.utils.chemref.ChemRefDataPrep import ChemRefDataPrep
 from rcsb.utils.config.ConfigUtil import ConfigUtil
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
 logger = logging.getLogger()
 
 
@@ -35,18 +35,17 @@ TOPDIR = os.path.dirname(os.path.dirname(HERE))
 
 
 class ChemRefDataPrepTests(unittest.TestCase):
-
-    def __init__(self, methodName='runTest'):
+    def __init__(self, methodName="runTest"):
         super(ChemRefDataPrepTests, self).__init__(methodName)
         self.__verbose = True
 
     def setUp(self):
         #
         #
-        mockTopPath = os.path.join(TOPDIR, 'mock-data')
-        logger.info("mockTopPath %s" % mockTopPath)
-        configPath = os.path.join(mockTopPath, 'config', 'dbload-setup-example.yml')
-        configName = 'site_info'
+        mockTopPath = os.path.join(TOPDIR, "mock-data")
+        logger.info("mockTopPath %s", mockTopPath)
+        configPath = os.path.join(mockTopPath, "config", "dbload-setup-example.yml")
+        configName = "site_info"
         self.__cfgOb = ConfigUtil(configPath=configPath, defaultSectionName=configName, mockTopPath=mockTopPath)
         # self.__cfgOb.dump()
         self.__resourceName = "MONGO_DB"
@@ -55,21 +54,18 @@ class ChemRefDataPrepTests(unittest.TestCase):
         self.__chunkSize = 10
         self.__documentLimit = 1000
 
-        self.__exampleFilePath = os.path.join(mockTopPath, 'DrugBank', 'full_example.xml')
-        self.__fullDrugBankFilePath = os.path.join(mockTopPath, 'DrugBank', 'full_database.xml.gz')
+        self.__exampleFilePath = os.path.join(mockTopPath, "DrugBank", "full_example.xml")
+        self.__fullDrugBankFilePath = os.path.join(mockTopPath, "DrugBank", "full_database.xml.gz")
         #
         # self.__drugBankMappingFile = os.path.join(HERE, 'test-output', 'drugbank_pdb_mapping.json')
         # self.__drugBankDescriptorFile = os.path.join(HERE, 'test-output', 'drugbank_inchikey_mapping.json')
         #
         self.__startTime = time.time()
-        logger.debug("Starting %s at %s" % (self.id(),
-                                            time.strftime("%Y %m %d %H:%M:%S", time.localtime())))
+        logger.debug("Starting %s at %s", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()))
 
     def tearDown(self):
         endTime = time.time()
-        logger.debug("Completed %s at %s (%.4f seconds)\n" % (self.id(),
-                                                              time.strftime("%Y %m %d %H:%M:%S", time.localtime()),
-                                                              endTime - self.__startTime))
+        logger.debug("Completed %s at %s (%.4f seconds)\n", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - self.__startTime)
 
     def testGetDrugBankDataExample(self):
         extResource = "DrugBank"
@@ -78,9 +74,9 @@ class ChemRefDataPrepTests(unittest.TestCase):
         self.assertEqual(len(dL), 2)
         #
         oL = []
-        for d in dL:
-            oD = crl.buildDocument(extResource, d)
-            logger.debug("loadable document %r" % (list(oD.items())))
+        for dD in dL:
+            oD = crl.buildDocument(extResource, dD)
+            logger.debug("loadable document %r", list(oD.items()))
             oL.append(oD)
         self.assertEqual(len(oL), 2)
 
@@ -89,10 +85,10 @@ class ChemRefDataPrepTests(unittest.TestCase):
         oL = []
         crl = ChemRefDataPrep(self.__cfgOb)
         dL = crl.fetchDocuments(extResource, self.__fullDrugBankFilePath)
-        for d in dL:
-            oL.append(crl.buildDocument(extResource, d))
+        for dD in dL:
+            oL.append(crl.buildDocument(extResource, dD))
         #
-        logger.debug("Processed document length %d" % len(oL))
+        logger.debug("Processed document length %d", len(oL))
         self.assertGreater(len(oL), 11000)
 
     def testGetDrugBankLoadableDocs(self):
@@ -101,23 +97,20 @@ class ChemRefDataPrepTests(unittest.TestCase):
         dL = crl.fetchDocuments(extResource, self.__exampleFilePath)
         self.assertEqual(len(dL), 2)
         exIdD = {}
-        for d in dL:
-            exIdD[d['drugbank_id']] = True
+        for dD in dL:
+            exIdD[dD["drugbank_id"]] = True
         dList = crl.getDocuments(extResource, exIdD)
-        logger.info("document list length %d" % len(dList))
+        logger.info("document list length %d", len(dList))
 
 
 def accessionMappingSuite():
     suiteSelect = unittest.TestSuite()
-    if True:
-        suiteSelect.addTest(ChemRefDataPrepTests("testGetDrugBankDataExample"))
-        suiteSelect.addTest(ChemRefDataPrepTests("testGetDrugBankDataFull"))
-        suiteSelect.addTest(ChemRefDataPrepTests("testGetDrugBankLoadableDocs"))
+    suiteSelect.addTest(ChemRefDataPrepTests("testGetDrugBankDataExample"))
+    suiteSelect.addTest(ChemRefDataPrepTests("testGetDrugBankDataFull"))
+    suiteSelect.addTest(ChemRefDataPrepTests("testGetDrugBankLoadableDocs"))
     return suiteSelect
 
 
-if __name__ == '__main__':
-    #
-    if (True):
-        mySuite = accessionMappingSuite()
-        unittest.TextTestRunner(verbosity=2).run(mySuite)
+if __name__ == "__main__":
+    mySuite = accessionMappingSuite()
+    unittest.TextTestRunner(verbosity=2).run(mySuite)
