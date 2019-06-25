@@ -36,7 +36,7 @@ class ChemCompModelUtils(object):
         cL = []
         try:
             mU = MarshalUtil()
-            cL = mU.doImport(filePath, format="mmcif")
+            cL = mU.doImport(filePath, fmt="mmcif")
             logger.debug("Container list %d", len(cL))
         except Exception as e:
             logger.exception("Failing with %s", str(e))

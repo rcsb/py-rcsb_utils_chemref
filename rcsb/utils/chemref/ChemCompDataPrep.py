@@ -42,17 +42,17 @@ class ChemCompDataPrep(object):
         includeContexts = includeContexts if includeContexts else ["WWPDB_LOCAL", "RCSB_LOCAL", "WWPDB_DEPRECATED", "WWPDB_DIFFRN_DATA", "CHEM_COMP_INT"]
         catD, atD = self.getContextInfo(includeContexts=includeContexts)
         exD = {"categoryContexts": catD, "attributeContexts": atD}
-        ok = self.__mU.doExport(jsonFilePath, exD, format="json", indent=3)
+        ok = self.__mU.doExport(jsonFilePath, exD, fmt="json", indent=3)
         return ok
 
     def importContexts(self, jsonFilePath):
-        cD = self.__mU.doImport(jsonFilePath, format="json")
+        cD = self.__mU.doImport(jsonFilePath, fmt="json")
         return cD
 
     def filterByContext(self, inpPath, outPath, contextD=None):
-        containerList = self.__mU.doImport(inpPath, format="mmcif")
+        containerList = self.__mU.doImport(inpPath, fmt="mmcif")
         self.__filterContextInPlace(containerList, contextD)
-        ok = self.__mU.doExport(outPath, containerList, format="mmcif")
+        ok = self.__mU.doExport(outPath, containerList, fmt="mmcif")
         return ok
 
     def __filterContextInPlace(self, containerList, contextD=None):
@@ -84,7 +84,7 @@ class ChemCompDataPrep(object):
         """
         includeContexts = includeContexts if includeContexts else ["WWPDB_LOCAL"]
         dictLocator = self.__cfgOb.getPath("PDBX_DICT_LOCATOR", sectionName=self.__cfgOb.getDefaultSectionName())
-        containerList = self.__mU.doImport(dictLocator, format="mmcif-dict")
+        containerList = self.__mU.doImport(dictLocator, fmt="mmcif-dict")
         self.__dApi = DictionaryApi(containerList=containerList, consolidate=True, replaceDefinition=True, verbose=True)
         categoryList = self.__dApi.getCategoryList()
         dictSchema = {catName: self.__dApi.getAttributeNameList(catName) for catName in categoryList}

@@ -115,7 +115,7 @@ class AtcClassificationUtils:
         atcDomainPath = os.path.join(atcDirPath, "atc-py%s.pic" % str(pyVersion))
         #
         if useCache and self.__mU.exists(atcDomainPath):
-            sD = self.__mU.doImport(atcDomainPath, format="pickle")
+            sD = self.__mU.doImport(atcDomainPath, fmt="pickle")
             logger.debug("Atce name length %d parent length %d assignments %d", len(sD["names"]), len(sD["parents"]), len(sD["assignments"]))
             nD = sD["names"]
             pD = sD["parents"]
@@ -124,7 +124,7 @@ class AtcClassificationUtils:
             fn = "atc.csv" % version
             fp = os.path.join(atcDirPath, fn)
             logger.info("Fetch ATC term descriptions from source %s", fp)
-            desL = self.__mU.doImport(fp, format="csv", rowFormat="dict", uncomment=False)
+            desL = self.__mU.doImport(fp, fmt="csv", rowFormat="dict", uncomment=False)
             #
             nD = self.__extractDescription(desL)
             # JDW TODO in progress
@@ -133,7 +133,7 @@ class AtcClassificationUtils:
             # pD = self.__extractHierarchy(hieL, nD)
             # pdbD = self.__buildAssignments(dmD)
             atcD = {"names": nD, "parents": pD, "assignments": pdbD}
-            ok = self.__mU.doExport(atcDomainPath, atcD, format="pickle")
+            ok = self.__mU.doExport(atcDomainPath, atcD, fmt="pickle")
             logger.debug("Cache save status %r", ok)
             #
         return nD, pD, pdbD
