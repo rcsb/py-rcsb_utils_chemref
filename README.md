@@ -1,6 +1,8 @@
-## RCSB Python Chemical Reference Utility Classes
+# RCSB Python Chemical Reference Utility Classes
 
-### Introduction
+ [![Build Status](https://dev.azure.com/jdwestbrook/jdwestbrook/_apis/build/status/rcsb.py-rcsb_utils_chemref?branchName=master)](https://dev.azure.com/jdwestbrook/jdwestbrook/_build/latest?definitionId=4&branchName=master)
+
+## Introduction
 
 This module contains a collection of utility classes for accessing and packaging
 PDB chemical reference data.
@@ -30,6 +32,9 @@ tox
 Installation is via the program [pip](https://pypi.python.org/pypi/pip).
 
 ```bash
+pip install rcsb.utils.chemref
+
+or install the local repository using:
+
 pip install -e .
 ```
-
