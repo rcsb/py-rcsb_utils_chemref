@@ -11,6 +11,4 @@
  23-Mar-2019  - V0.18 adjust item name for affected_organisms
  10-Apr-2019  - V0.19 add atc_codes
  25-Jun-2019  - V0.20 Update development workflows
-
-
-
+ 12-Aug-2019  - V0.21 Refactor DrugBank workflow

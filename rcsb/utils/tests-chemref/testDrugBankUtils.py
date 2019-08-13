@@ -18,12 +18,12 @@ __author__ = "John Westbrook"
 __email__ = "jwest@rcsb.rutgers.edu"
 __license__ = "Apache 2.0"
 
-import json
 import logging
 import os
 import unittest
 
 from rcsb.utils.chemref.DrugBankUtils import DrugBankUtils
+from rcsb.utils.config.ConfigUtil import ConfigUtil
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 TOPDIR = os.path.dirname(os.path.dirname(HERE))
@@ -34,90 +34,45 @@ logger = logging.getLogger()
 
 class DrugBankUtilsTests(unittest.TestCase):
     def setUp(self):
-        self.__dirPath = os.path.join(os.path.dirname(TOPDIR), "rcsb", "mock-data")
-        self.__exampleFile = os.path.join(self.__dirPath, "DrugBank", "full_example.xml")
-        self.__fullDrugBankFile = os.path.join(self.__dirPath, "DrugBank", "full_database.xml.gz")
-        #
-        self.__drugBankMappingFile = os.path.join(HERE, "test-output", "drugbank_pdb_mapping.json")
-        self.__drugBankDescriptorFile = os.path.join(HERE, "test-output", "drugbank_inchikey_mapping.json")
+        mockTopPath = os.path.join(TOPDIR, "mock-data")
+        configPath = os.path.join(mockTopPath, "config", "dbload-setup-example.yml")
+        configName = "site_info"
+        cfgOb = ConfigUtil(configPath=configPath, defaultSectionName=configName, mockTopPath=mockTopPath)
+        self.__user = cfgOb.getSecret("DRUGBANK_AUTH_USERNAME", sectionName=configName)
+        self.__pw = cfgOb.getSecret("DRUGBANK_AUTH_PASSWORD", sectionName=configName)
+        self.__workPath = os.path.join(HERE, "test-output")
 
     def tearDown(self):
         pass
 
-    def testReadDrugBankExample(self):
-        dbu = DrugBankUtils()
-        rL = dbu.read(self.__exampleFile)
-        #
-        logger.info("DrugBank example length %d", len(rL))
-        logger.debug("DrugBank example keys %r", rL[0].keys())
-        logger.debug("DrugBank example aliases %r", rL[0]["aliases"])
-        self.assertTrue(len(rL), 2)
+    def testReadDrugBankInfo(self):
+        dbu = DrugBankUtils(dirPath=self.__workPath, useCache=False, clearCache=True, username=self.__user, password=self.__pw)
+        dbMapD = dbu.getMapping()
+        logger.info("Mapping length %d", len(dbMapD))
+        self.assertGreaterEqual(len(dbMapD["id_map"]), 5850)
+        dbDocL = dbu.getDocuments()
+        self.assertGreaterEqual(len(dbDocL), 5850)
 
-    def testMatchPdbDrugBank(self):
-        dbu = DrugBankUtils()
-        dL = dbu.read(self.__fullDrugBankFile)
-        logger.info("DrugBank full record length %d", len(dL))
-        dbD = {}
-        mD = {}
-        for dD in dL:
-            dbId = dD["drugbank_id"]
-            pdbIds = ""
-            if "external_identifiers" in dD:
-                for exD in dD["external_identifiers"]:
-                    if exD["resource"] == "PDB":
-                        logger.debug("dbId %s pdbids %r ccids %r", dbId, pdbIds, exD["identifier"])
-                        if exD["identifier"] not in mD:
-                            mD[exD["identifier"]] = []
-                        mD[exD["identifier"]] = {"drugbank_id": dbId, "aliases": list(dD["aliases"])}
-                        #
-                        if "atc_codes" in dD and dD["atc_codes"]:
-                            mD[exD["identifier"]]["atc_codes"] = dD["atc_codes"]
-
-                        if "target_interactions" in dD:
-                            for tid in dD["target_interactions"]:
-                                tD = {}
-                                tD["type"] = tid["category"]
-                                tD["name"] = tid["name"]
-                                tD["organism"] = tid["organism"]
-                                if tid["actions"]:
-                                    tD["actions"] = tid["actions"]
-                                if tid["known_action"]:
-                                    tD["known_action"] = tid["known_action"]
-                                if "uniprot_ids" in tid:
-                                    tD["uniprot_ids"] = tid["uniprot_ids"]
-                                #
-                                if "target_interactions" not in mD[exD["identifier"]]:
-                                    mD[exD["identifier"]]["target_interactions"] = []
-                                mD[exD["identifier"]]["target_interactions"].append(tD)
-        logger.info("Match length is %d", len(mD))
-        self.assertGreater(len(mD), 5000)
-        dbD["id_map"] = mD
+    def testReReadDrugBankInfo(self):
+        dbu = DrugBankUtils(dirPath=self.__workPath, useCache=False, clearCache=True, username=self.__user, password=self.__pw)
+        dbMapD = dbu.getMapping()
+        logger.info("Mapping length %d", len(dbMapD))
+        self.assertGreaterEqual(len(dbMapD["id_map"]), 5850)
+        dbDocL = dbu.getDocuments()
+        self.assertGreaterEqual(len(dbDocL), 5850)
         #
-        inD = {}
-        for dD in dL:
-            dbId = dD["drugbank_id"]
-            if "inchikey" in dD and dD["inchikey"] and len(dD["inchikey"]) > 13:
-                if dD["inchikey"] not in inD:
-                    inD[dD["inchikey"]] = []
-                inD[dD["inchikey"]].append({"drugbank_id": dbId, "inchikey": dD["inchikey"], "name": dD["name"]})
-        #
-        logger.info("Drugbank InChIKey dictionary length %d", len(inD))
-        #
-        self.assertGreater(len(inD), 9000)
-        dbD["inchikey_map"] = inD
-        self.__serializeJson(self.__drugBankMappingFile, dbD)
-        #
-        #
-
-    def __serializeJson(self, filePath, oD):
-        with open(filePath, "w") as outfile:
-            json.dump(oD, outfile, indent=3)
+        dbu = DrugBankUtils(dirPath=self.__workPath, useCache=True, clearCache=False)
+        dbMapD = dbu.getMapping()
+        logger.info("Mapping length %d", len(dbMapD))
+        self.assertGreaterEqual(len(dbMapD["id_map"]), 5850)
+        dbDocL = dbu.getDocuments()
+        self.assertGreaterEqual(len(dbDocL), 5850)
 
 
 def readDrugBankInfo():
     suiteSelect = unittest.TestSuite()
-    suiteSelect.addTest(DrugBankUtilsTests("testReadDrugBankExample"))
-    suiteSelect.addTest(DrugBankUtilsTests("testMatchPdbDrugBank"))
+    suiteSelect.addTest(DrugBankUtilsTests("testReadDrugBankInfo"))
+    suiteSelect.addTest(DrugBankUtilsTests("testReReadDrugBankInfo"))
     return suiteSelect
 
 

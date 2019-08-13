@@ -4,7 +4,7 @@
 # Date:    1-Nov-2018
 #
 # Updates:
-
+# http://ftp.wwpdb.org/pub/pdb/data/component-models/complete/chem_comp_model.cif.gz
 ##
 """
 Utilities to read resource file containing compilation of CCDC models correspondences
@@ -17,35 +17,76 @@ __email__ = "jwest@rcsb.rutgers.edu"
 __license__ = "Apache 2.0"
 
 import logging
+import os
 
+from rcsb.utils.io.FileUtil import FileUtil
 from rcsb.utils.io.MarshalUtil import MarshalUtil
 
 logger = logging.getLogger(__name__)
 
 
 class ChemCompModelUtils(object):
+    """Utilities to read the resource file containing with a compilation of CCDC models correspondences
+    for PDB chemical components.
     """
-    """
 
-    def __init__(self):
-        self.__ns = None
+    def __init__(self, **kwargs):
+        urlTarget = kwargs.get("urlTarget", "http://ftp.wwpdb.org/pub/pdb/data/component-models/complete/chem_comp_model.cif.gz")
+        dirPath = kwargs.get("dirPath", ".")
+        useCache = kwargs.get("useCache", True)
+        clearCache = kwargs.get("clearCache", False)
+        mappingFileName = kwargs.get("mappingFileName", "ccdc_pdb_mapping.json")
+        #
+        self.__mU = MarshalUtil(workPath=dirPath)
+        self.__mappingD = self.__reload(urlTarget, dirPath, mappingFileName, useCache=useCache, clearCache=clearCache)
 
-    def __readCifFile(self, filePath):
-        """ Read input CIF file and return a container list.
+    def getMapping(self):
+        return self.__mappingD
+
+    def __reload(self, urlTarget, dirPath, mappingFileName, useCache=True, clearCache=False):
+        """Reload input mmCIF model mapping resource file and return a container list.
+
+        Args:
+            urlTarget (str): target url for resource file
+            dirPath (str): path to the directory containing cache files
+            mappingFileName (str): mapping file name
+            useCache (bool, optional): flag to use cached files. Defaults to True.
+            clearCache (bool, optional): flag to clear any cached files. Defaults to False.
+
+        Returns:
+            (dict): mapping dictionary (pdb_ccId -> CCDC details)
         """
-        cL = []
-        try:
-            mU = MarshalUtil()
-            cL = mU.doImport(filePath, fmt="mmcif")
-            logger.debug("Container list %d", len(cL))
-        except Exception as e:
-            logger.exception("Failing with %s", str(e))
-        return cL
 
-    def getMapping(self, modelFilePath):
-        """
+        mD = {}
+        #
+        fU = FileUtil()
+        fn = fU.getFileName(urlTarget)
+        filePath = os.path.join(dirPath, fn)
+        mappingFilePath = os.path.join(dirPath, mappingFileName)
+        #
+        if clearCache:
+            try:
+                os.remove(filePath)
+                os.remove(mappingFilePath)
+            except Exception:
+                pass
+        #
+        if useCache and fU.exists(mappingFilePath):
+            mD = self.__mU.doImport(mappingFilePath, fmt="json")
+        else:
+            ok = True
+            if useCache and not fU.exists(filePath):
+                logger.info("Fetching url %s to resource file %s", urlTarget, filePath)
+                ok = fU.get(urlTarget, filePath)
+            if ok:
+                cL = self.__mU.doImport(filePath, fmt="mmcif")
+                mD = self.__buildMapping(cL)
+                ok = self.__mU.doExport(mappingFilePath, mD, fmt="json", indent=3)
+        #
+        return mD
 
-        Example:
+    def __buildMapping(self, cL):
+        """Return a dictionary of identfier correspondences for CCDC/CSD models.
 
         data_M_010_00001
             #
@@ -67,9 +108,7 @@ class ChemCompModelUtils(object):
         #
         """
         rD = {}
-        dataContainerL = self.__readCifFile(modelFilePath)
-
-        for dataContainer in dataContainerL:
+        for dataContainer in cL:
             logger.debug("Processing model %r", dataContainer.getName())
             cObj = dataContainer.getObj("pdbx_chem_comp_model")
             ccId = cObj.getValue("comp_id", 0)

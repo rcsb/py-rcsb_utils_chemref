@@ -1,205 +1,292 @@
 ##
-# File:    DrugBankUtils.py
+# File: DrugBankUtils.py
 # Author:  J. Westbrook
-# Date:    17-Oct-2018
-# Version: 0.001
+# Date:  8-Aug-2019
+#
+# Build loadable correspondence data from DrugBank.
 #
 # Update:
 #
 ##
-"""
-Various utilities for extracting data from DrugBank repository data.
 
-Approach is inspired by a useful examples at:
+__docformat__ = "restructuredtext en"
+__author__ = "John Westbrook"
+__email__ = "jwest@rcsb.rutgers.edu"
+__license__ = "Apache 2.0"
 
-https://github.com/dhimmel/drugbank/blob/gh-pages/parse.ipynb
-and https://github.com/bio2bel
 
-"""
-import gzip
-import itertools as itt
 import logging
-import time
-from datetime import datetime
+import os
 
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
+from rcsb.utils.chemref.DrugBankReader import DrugBankReader
+from rcsb.utils.io.FileUtil import FileUtil
+from rcsb.utils.io.MarshalUtil import MarshalUtil
+
+# from rcsb.utils.io.MarshalUtil import MarshalUtil
 
 logger = logging.getLogger(__name__)
 
 
 class DrugBankUtils(object):
-    """
+    """ Utilities to read the DrugBank resource file and build loadable documents and identifier
+    correspondences.
     """
 
-    def __init__(self):
-        self.__ns = "{http://www.drugbank.ca}"
+    def __init__(self, **kwargs):
+        #
+        urlTarget = kwargs.get("urlTarget", "https://www.drugbank.ca/releases/latest/downloads/all-full-database")
+        dirPath = kwargs.get("dirPath", ".")
+        useCache = kwargs.get("useCache", True)
+        clearCache = kwargs.get("clearCache", False)
+        username = kwargs.get("username", None)
+        password = kwargs.get("password", None)
 
-    def read(self, filePath):
-        xrt = self.__parse(filePath)
-        rL = []
-        for drugElement in xrt:
-            rL.append(self.__processDrugElement(drugElement))
-        return rL
+        mappingFileName = kwargs.get("mappingFileName", "drugbank_pdb_mapping.json")
+        #
+        self.__mU = MarshalUtil(workPath=dirPath)
+        self.__dbMapD, self.__dbObjL = self.__reload(urlTarget, dirPath, mappingFileName, useCache=useCache, clearCache=clearCache, username=username, password=password)
         #
 
-    def __parse(self, filePath):
-        """ Parse the iput DrugBank export XML data file.
+    def getMapping(self):
+        return self.__dbMapD
+
+    def getDocuments(self, mapD=None):
+        """[summary]
+
+        Args:
+            mapD ([type], optional): mapping dictionary {drugbank_id: ccId}. Defaults to None.
+
+        Returns:
+            (list): loadable DrugBank documents
         """
-        tree = []
-        if filePath[-3:] == ".gz":
-            with gzip.open(filePath, mode="rb") as ifh:
-                logger.debug("Parsing drugbank at %s", filePath)
-                tV = time.time()
-                tree = ET.parse(ifh)
-                logger.debug("Parsed drugbank in %.2f seconds", time.time() - tV)
+        if mapD:
+            return self.__buildDocuments(self.__dbObjL, mapD)
         else:
-            with open(filePath, mode="rb") as ifh:
-                logger.debug("Parsing drugbank at %s", filePath)
-                tV = time.time()
-                tree = ET.parse(ifh)
-                logger.debug("Parsed drugbank in %.2f seconds", time.time() - tV)
-        return tree.getroot()
+            dbIdD = {}
+            if "id_map" in self.__dbMapD:
+                for ccId, dD in self.__dbMapD["id_map"].items():
+                    if "drugbank_id" in dD:
+                        dbIdD[dD["drugbank_id"]] = ccId
+            return self.__buildDocuments(self.__dbObjL, dbIdD)
 
-    def __processDrugElement(self, drugElement):
+    def __reload(self, urlTarget, dirPath, mappingFileName, useCache=True, clearCache=False, username=None, password=None):
+        """ Reload DrugBank mapping data and optionally supporting repository data file.
+
+        Args:
+            urlTarget (str): target url for resource file
+            dirPath (str): path to the directory containing cache files
+            mappingFileName (str): mapping file name
+            useCache (bool, optional): flag to use cached files. Defaults to True.
+            clearCache (bool, optional): flag to clear any cached files. Defaults to False.
+
+        Returns:
+            (dict, list): identifiers mapping dictionary (pdb_ccId -> DrugBank details), DrugBank object list
         """
-        """
-        assert drugElement.tag == "{ns}drug".format(ns=self.__ns)
-
-        doc = {
-            "type": drugElement.get("type"),
-            "drugbank_id": drugElement.findtext("{ns}drugbank-id[@primary='true']".format(ns=self.__ns)),
-            "cas_number": drugElement.findtext("{ns}cas-number".format(ns=self.__ns)),
-            "name": drugElement.findtext("{ns}name".format(ns=self.__ns)),
-            "description": drugElement.findtext("{ns}description".format(ns=self.__ns)),
-            "indication": drugElement.findtext("{ns}indication".format(ns=self.__ns)),
-            "pharmacodynamics": drugElement.findtext("{ns}pharmacodynamics".format(ns=self.__ns)),
-            "mechanism-of-action": drugElement.findtext("{ns}mechanism-of-action".format(ns=self.__ns)),
-            "groups": [group.text for group in drugElement.findall("{ns}groups/{ns}group".format(ns=self.__ns))],
-            "affected-organisms": [org.text for org in drugElement.findall("{ns}affected-organisms/{ns}affected-organism".format(ns=self.__ns))],
-            "atc_codes": [code.get("code") for code in drugElement.findall("{ns}atc-codes/{ns}atc-code".format(ns=self.__ns))],
-            "categories": [
-                {"name": el.findtext("{ns}category".format(ns=self.__ns)), "mesh_id": el.findtext("{ns}mesh-id".format(ns=self.__ns))}
-                for el in drugElement.findall("{ns}categories/{ns}category".format(ns=self.__ns))
-            ],
-            "patents": [
-                {
-                    "patent_id": el.findtext("{ns}number".format(ns=self.__ns)),
-                    "country": el.findtext("{ns}country".format(ns=self.__ns)),
-                    "approved": datetime.strptime(el.findtext("{ns}approved".format(ns=self.__ns)), "%Y-%m-%d"),
-                    "expires": datetime.strptime(el.findtext("{ns}expires".format(ns=self.__ns)), "%Y-%m-%d"),
-                    "pediatric_extension": el.findtext("{ns}pediatric-extension".format(ns=self.__ns)) != "false",
-                }
-                for el in drugElement.findall("{ns}patents/{ns}patent".format(ns=self.__ns))
-            ],
-            "external_identifiers": [
-                {"resource": el.findtext("{ns}resource".format(ns=self.__ns)), "identifier": el.findtext("{ns}identifier".format(ns=self.__ns))}
-                for el in drugElement.findall("{ns}external-identifiers/{ns}external-identifier".format(ns=self.__ns))
-            ],
-            "pdb_entries": [pdbId.text for pdbId in drugElement.findall("{ns}pdb-entries/{ns}pdb-entry".format(ns=self.__ns))],
-            "inchi": drugElement.findtext("{ns}calculated-properties/{ns}property[{ns}kind='InChI']/{ns}value".format(ns=self.__ns)),
-            "inchikey": drugElement.findtext("{ns}calculated-properties/{ns}property[{ns}kind='InChIKey']/{ns}value".format(ns=self.__ns)),
-            "exp_prop": [
-                {
-                    "kind": el.findtext("{ns}kind".format(ns=self.__ns)),
-                    "value": el.findtext("{ns}value".format(ns=self.__ns)),
-                    "source": el.findtext("{ns}source".format(ns=self.__ns)),
-                }
-                for el in drugElement.findall("{ns}experimental-properties/{ns}property".format(ns=self.__ns))
-            ],
-            "calc_prop": [
-                {
-                    "kind": el.findtext("{ns}kind".format(ns=self.__ns)),
-                    "value": el.findtext("{ns}value".format(ns=self.__ns)),
-                    "source": el.findtext("{ns}source".format(ns=self.__ns)),
-                }
-                for el in drugElement.findall("{ns}calculated-properties/{ns}property".format(ns=self.__ns))
-            ],
-            "products": [
-                {
-                    "name": el.findtext("{ns}name".format(ns=self.__ns)),
-                    "labeller": el.findtext("{ns}labeller".format(ns=self.__ns)),
-                    "ndc-id": el.findtext("{ns}ndc-id".format(ns=self.__ns)),
-                    "ndc-product-code": el.findtext("{ns}ndc-product-code".format(ns=self.__ns)),
-                    "dpd-id": el.findtext("{ns}dpd-id".format(ns=self.__ns)),
-                    "ema-product-code": el.findtext("{ns}ema-product-code".format(ns=self.__ns)),
-                    "ema-ma-number": el.findtext("{ns}ema-ma-number".format(ns=self.__ns)),
-                    "started-marketing-on": el.findtext("{ns}started-marketing-on".format(ns=self.__ns)),
-                    "ended-marketing-on": el.findtext("{ns}ended-marketing-on".format(ns=self.__ns)),
-                    "dosage-form": el.findtext("{ns}dosage-form".format(ns=self.__ns)),
-                    "strength": el.findtext("{ns}strength".format(ns=self.__ns)),
-                    "route": el.findtext("{ns}route".format(ns=self.__ns)),
-                    "fda-application-number": el.findtext("{ns}fda-application-number".format(ns=self.__ns)),
-                    "generic": el.findtext("{ns}generic".format(ns=self.__ns)),
-                    "over-the-counter": el.findtext("{ns}over-the-counter".format(ns=self.__ns)),
-                    "approved": el.findtext("{ns}approved".format(ns=self.__ns)),
-                    "country": el.findtext("{ns}country".format(ns=self.__ns)),
-                    "source": el.findtext("{ns}source".format(ns=self.__ns)),
-                }
-                for el in drugElement.findall("{ns}products/{ns}product".format(ns=self.__ns))
-            ],
-        }
-        aliases = {
-            elem.text.strip().encode("ascii", "xmlcharrefreplace").decode("utf-8")
-            for elem in itt.chain(drugElement.findall("{ns}synonyms/{ns}synonym".format(ns=self.__ns)), drugElement.findall("{ns}salts/{ns}salt/{ns}name".format(ns=self.__ns)))
-            if elem.text.strip()
-        }
-        aliases.add(doc["name"])
-        doc["aliases"] = aliases
-
-        products = {
-            elem.text.strip().encode("ascii", "xmlcharrefreplace").decode("utf-8")
-            for elem in itt.chain(
-                drugElement.findall("{ns}international-brands/{ns}international-brand".format(ns=self.__ns)),
-                drugElement.findall("{ns}products/{ns}product/{ns}name".format(ns=self.__ns)),
-            )
-            if elem.text.strip()
-        }
-        doc["products"] = list(products)
+        dbMapD = {}
+        dbObjL = []
+        fU = FileUtil()
+        mappingFilePath = os.path.join(dirPath, mappingFileName)
+        filePath = os.path.join(dirPath, "full database.xml")
         #
-        doc["target_interactions"] = []
-        targetCategories = ["target", "enzyme", "carrier", "transporter"]
-        for category in targetCategories:
-            targets = drugElement.findall("{ns}{category}s/{ns}{category}".format(ns=self.__ns, category=category))
-            for target in targets:
-                targetDoc = self.__getTargetInfo(category, target)
-                if not targetDoc:
+        if clearCache:
+            try:
+                os.remove(filePath)
+                os.remove(mappingFilePath)
+            except Exception:
+                pass
+        #
+        if useCache and fU.exists(mappingFilePath):
+            logger.debug("Using cached %r", mappingFilePath)
+            dbMapD = self.__mU.doImport(mappingFilePath, fmt="json")
+
+        ok = True
+        if not fU.exists(filePath):
+            if not username or not password:
+                logger.warning("Missing credentials for DrugBank file download...")
+            logger.debug("Fetching url %s to resource file %s", urlTarget, filePath)
+            zipFilePath = os.path.join(dirPath, "full_database.zip")
+            ok = fU.get(urlTarget, zipFilePath, username=username, password=password)
+            fp = fU.uncompress(zipFilePath, outputDir=dirPath)
+            ok = fp.endswith("full database.xml")
+        if ok:
+            logger.debug("Reading %r", filePath)
+            xTree = self.__mU.doImport(filePath, fmt="xml")
+            dbr = DrugBankReader()
+            dbObjL = dbr.read(xTree)
+            dbMapD = self.__buildMapping(dbObjL)
+            ok = self.__mU.doExport(mappingFilePath, dbMapD, fmt="json", indent=3)
+        else:
+            logger.error("Drugbank resource file missing %r", fp)
+        #
+        return dbMapD, dbObjL
+
+    def __buildDocuments(self, dbObjL, dbIdD=None):
+        """Build loadable documents subject to corresponding identifiers in the input mapping dictionary.
+
+        Args:
+            dbObjL (list): list of extracted DrugBank objects
+            dbIdD (dict, optional): dictionary of DrugBank identifier mapping. Defaults to None.
+
+        Returns:
+            (list): DrugBank loadable documents
+        """
+        dbIdD = dbIdD if dbIdD else {}
+        dbDocL = []
+        for dbObj in dbObjL:
+            if "drugbank_id" in dbObj:
+                if dbIdD and dbObj["drugbank_id"] not in dbIdD:
                     continue
-                doc["target_interactions"].append(targetDoc)
+                lD = self.__buildDocument(dbObj)
+                dbDocL.append(lD)
+            else:
+                logger.debug("dbObj.keys() %r", list(dbObj.keys()))
+        return dbDocL
+        #
 
-        if "categories" in doc and doc["categories"]:
-            doc["drug_categories"] = [c["name"] for c in doc["categories"]]
-        return doc
+    def __buildDocument(self, dbObj):
+        """Construct local loadable object from input DrugBank extracted data object
+        conforming to the following category organization:
 
-    def __getTargetInfo(self, category, target):
-        doc = {
-            "category": category,
-            "organism": target.findtext("{ns}organism".format(ns=self.__ns)),
-            "known_action": target.findtext("{ns}known-action".format(ns=self.__ns)),
-            "name": target.findtext("{ns}name".format(ns=self.__ns)),
-            "amino-acid-sequence": target.findtext('{ns}polypeptide/{ns}amino-acid-sequence[@format="FASTA"]'.format(ns=self.__ns)),
-            "actions": [action.text for action in target.findall("{ns}actions/{ns}action".format(ns=self.__ns))],
-            "articles": [
-                pubmed_element.text for pubmed_element in target.findall("{ns}references/{ns}articles/{ns}article/{ns}pubmed-id".format(ns=self.__ns)) if pubmed_element.text
-            ],
-        }
+         _drugbank_info.drugbank_id
+         _drugbank_info.name
+         _drugbank_info.description
+         _drugbank_info.synonyms
+         _drugbank_info.brand_names
+         _drugbank_info.affected_organisms
+         _drugbank_info.indication
+         _drugbank_info.pharmacology
+         _drugbank_info.mechanism_of_action
+         _drugbank_info.cas_number
+         _drugbank_info.drug_categories
+         _drugbank_info.drug_groups
+         _drugbank_info.atc_codes
 
-        uniprotIds = [
-            polypep.text
-            for polypep in target.findall("{ns}polypeptide/{ns}external-identifiers/{ns}external-identifier[{ns}resource='UniProtKB']/{ns}identifier".format(ns=self.__ns))
+
+         _drugbank_target.ordinal
+         _drugbank_target.name
+         _drugbank_target.interaction_type
+         _drugbank_target.target_actions
+         _drugbank_target.organism_common_name
+         _drugbank_target.reference_database_name
+         _drugbank_target.reference_database_accession_code
+         _drugbank_target.seq_one_letter_code
+
+        """
+        oD = {}
+        oD["_drugbank_id"] = dbObj["drugbank_id"]
+        oD["drugbank_container_identifiers"] = {"drugbank_id": dbObj["drugbank_id"]}
+
+        dbiD = {}
+        textKeys = [
+            ("drugbank_id", "drugbank_id"),
+            ("name", "name"),
+            ("description", "description"),
+            ("indication", "indication"),
+            ("pharmacology", "pharmacology"),
+            ("mechanism_of_action", "mechanism_of_action"),
+            ("cas_number", "cas_number"),
         ]
-        if uniprotIds:
-            doc["uniprot_ids"] = uniprotIds[0]
-
-        hgncIds = [
-            polypep.text
-            for polypep in target.findall(
-                "{ns}polypeptide/{ns}external-identifiers/{ns}external-identifier[{ns}resource='HUGO Gene Nomenclature Committee (HGNC)']/{ns}identifier".format(ns=self.__ns)
-            )
+        listKeys = [
+            ("drug_categories", "drug_categories"),
+            ("groups", "drug_groups"),
+            ("aliases", "synonyms"),
+            ("products", "brand_names"),
+            ("affected_organisms", "affected_organisms"),
+            ("atc_codes", "atc_codes"),
         ]
-        if len(hgncIds) == 1:
-            doc["hgnc_id"] = hgncIds[0][len("HGNC:") :]
+        # For category drugbank_info
+        for textKey, docKey in textKeys:
+            if textKey in dbObj and dbObj[textKey]:
+                dbiD[docKey] = dbObj[textKey].replace("\r", "").replace("\n", " ")
+        #
+        for listKey, docKey in listKeys:
+            if listKey in dbObj and dbObj[listKey]:
+                dbiD[docKey] = list(dbObj[listKey])
+            else:
+                logger.debug("MISSING KEY %s", listKey)
+        #
+        oD["drugbank_info"] = dbiD
+        #
+        # For category drugbank_target -
+        #
+        tL = []
+        if "target_interactions" in dbObj:
+            for ii, tid in enumerate(dbObj["target_interactions"], 1):
+                tD = {}
+                tD["ordinal"] = ii
+                tD["interaction_type"] = tid["category"]
+                tD["name"] = tid["name"]
+                if "organism" in tid:
+                    tD["organism_common_name"] = tid["organism"]
+                if "actions" in tid and tid["actions"]:
+                    tD["target_actions"] = tid["actions"]
+                if "amino-acid-sequence" in tid and tid["amino-acid-sequence"] and tid["amino-acid-sequence"]:
+                    tD["seq_one_letter_code"] = "".join(tid["amino-acid-sequence"].split("\n")[1:])
+                if "uniprot_ids" in tid and tid["uniprot_ids"]:
+                    tD["reference_database_name"] = "UniProt"
+                    tD["reference_database_accession_code"] = tid["uniprot_ids"]
+                #
+                tL.append(tD)
+        #
+        if tL:
+            oD["drugbank_target"] = tL
+        #
+        return oD
 
-        return doc
+    def __buildMapping(self, dbObjL):
+        """Build PDB->DrugBank identifier correspondences.
+
+        Args:
+            dbObjL (list): list of extracted DrugBank data objects
+
+        Returns:
+            (dict): dictionary DrugBank identifier correspondences
+        """
+        logger.debug("DrugBank full record length %d", len(dbObjL))
+        dbMapD = {}
+        mD = {}
+        for dD in dbObjL:
+            dbId = dD["drugbank_id"]
+            pdbIds = ""
+            if "external_identifiers" in dD:
+                for exD in dD["external_identifiers"]:
+                    if exD["resource"] == "PDB":
+                        logger.debug("dbId %s pdbids %r ccids %r", dbId, pdbIds, exD["identifier"])
+                        if exD["identifier"] not in mD:
+                            mD[exD["identifier"]] = []
+                        mD[exD["identifier"]] = {"drugbank_id": dbId, "aliases": list(dD["aliases"])}
+                        #
+                        if "atc_codes" in dD and dD["atc_codes"]:
+                            mD[exD["identifier"]]["atc_codes"] = dD["atc_codes"]
+
+                        if "target_interactions" in dD:
+                            for tid in dD["target_interactions"]:
+                                tD = {}
+                                tD["type"] = tid["category"]
+                                tD["name"] = tid["name"]
+                                tD["organism"] = tid["organism"]
+                                if tid["actions"]:
+                                    tD["actions"] = tid["actions"]
+                                if tid["known_action"]:
+                                    tD["known_action"] = tid["known_action"]
+                                if "uniprot_ids" in tid:
+                                    tD["uniprot_ids"] = tid["uniprot_ids"]
+                                #
+                                if "target_interactions" not in mD[exD["identifier"]]:
+                                    mD[exD["identifier"]]["target_interactions"] = []
+                                mD[exD["identifier"]]["target_interactions"].append(tD)
+        logger.info("Match length is %d", len(mD))
+        dbMapD["id_map"] = mD
+        #
+        inD = {}
+        for dD in dbObjL:
+            dbId = dD["drugbank_id"]
+            if "inchikey" in dD and dD["inchikey"] and len(dD["inchikey"]) > 13:
+                if dD["inchikey"] not in inD:
+                    inD[dD["inchikey"]] = []
+                inD[dD["inchikey"]].append({"drugbank_id": dbId, "inchikey": dD["inchikey"], "name": dD["name"]})
+        #
+        logger.info("Drugbank InChIKey dictionary length %d", len(inD))
+        #
+        dbMapD["inchikey_map"] = inD
+        return dbMapD

@@ -20,6 +20,9 @@ jobs:
     ${{ if eq(parameters.os, 'linux') }}:
       vmImage: 'ubuntu-latest'
 
+  variables:
+    - group: py-shared-variables
+
   steps:
     #
     # ensure the required Python versions are available
@@ -122,7 +125,10 @@ jobs:
       displayName: 'Install dependencies'
     #
     - ${{ if startsWith(parameters.tox, 'py') }}:
-      - script: ${{ format('python -m tox -e {0}', parameters.tox) }}
+      - script: |
+          echo "Variable ",$(CONFIG_SUPPORT_TOKEN_TEST)
+          echo "Variable ",$(CONFIG_SUPPORT_TOKEN_ENV)
+          ${{ format('python -m tox -e {0}', parameters.tox) }}
         displayName: 'Running tox task'
     - ${{ if and(not(startsWith(parameters.tox, 'py')), startsWith(parameters.python, '3.8')) }}:
       - script: ${{ format('python -m tox -e {0}-py38', parameters.tox) }}
