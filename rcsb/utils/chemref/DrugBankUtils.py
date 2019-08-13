@@ -17,6 +17,7 @@ __license__ = "Apache 2.0"
 
 import logging
 import os
+import time
 
 from rcsb.utils.chemref.DrugBankReader import DrugBankReader
 from rcsb.utils.io.FileUtil import FileUtil
@@ -82,6 +83,9 @@ class DrugBankUtils(object):
         Returns:
             (dict, list): identifiers mapping dictionary (pdb_ccId -> DrugBank details), DrugBank object list
         """
+        startTime = time.time()
+        logger.info("Starting db reload at %s", time.strftime("%Y %m %d %H:%M:%S", time.localtime()))
+        #
         dbMapD = {}
         dbObjL = []
         fU = FileUtil()
@@ -106,15 +110,30 @@ class DrugBankUtils(object):
             logger.debug("Fetching url %s to resource file %s", urlTarget, filePath)
             zipFilePath = os.path.join(dirPath, "full_database.zip")
             ok = fU.get(urlTarget, zipFilePath, username=username, password=password)
+            endTime = time.time()
+            logger.info("Completed db fetch at %s (%.4f seconds)\n", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
+
             fp = fU.uncompress(zipFilePath, outputDir=dirPath)
             ok = fp.endswith("full database.xml")
+            endTime = time.time()
+            logger.info("Completed unzip at %s (%.4f seconds)\n", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
+
         if ok:
             logger.debug("Reading %r", filePath)
             xTree = self.__mU.doImport(filePath, fmt="xml")
+            endTime = time.time()
+            logger.info("Completed xml read at %s (%.4f seconds)\n", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
+
             dbr = DrugBankReader()
             dbObjL = dbr.read(xTree)
+            endTime = time.time()
+            logger.info("Completed xml parse at %s (%.4f seconds)\n", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
+
             dbMapD = self.__buildMapping(dbObjL)
             ok = self.__mU.doExport(mappingFilePath, dbMapD, fmt="json", indent=3)
+            endTime = time.time()
+            logger.info("Completed db json processing at %s (%.4f seconds)\n", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
+
         else:
             logger.error("Drugbank resource file missing %r", fp)
         #

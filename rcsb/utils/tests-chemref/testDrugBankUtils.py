@@ -20,6 +20,7 @@ __license__ = "Apache 2.0"
 
 import logging
 import os
+import time
 import unittest
 
 from rcsb.utils.chemref.DrugBankUtils import DrugBankUtils
@@ -41,11 +42,14 @@ class DrugBankUtilsTests(unittest.TestCase):
         self.__user = cfgOb.getSecret("DRUGBANK_AUTH_USERNAME", sectionName=configName)
         self.__pw = cfgOb.getSecret("DRUGBANK_AUTH_PASSWORD", sectionName=configName)
         self.__workPath = os.path.join(HERE, "test-output")
+        #
+        self.__startTime = time.time()
+        logger.info("Starting %s at %s", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()))
 
     def tearDown(self):
-        pass
+        endTime = time.time()
+        logger.info("Completed %s at %s (%.4f seconds)\n", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - self.__startTime)
 
-    @unittest.skip("Long test")
     def testReadDrugBankInfo(self):
         dbu = DrugBankUtils(dirPath=self.__workPath, useCache=False, clearCache=True, username=self.__user, password=self.__pw)
         dbMapD = dbu.getMapping()
@@ -54,6 +58,7 @@ class DrugBankUtilsTests(unittest.TestCase):
         dbDocL = dbu.getDocuments()
         self.assertGreaterEqual(len(dbDocL), 5850)
 
+    @unittest.skip("Long test")
     def testReReadDrugBankInfo(self):
         dbu = DrugBankUtils(dirPath=self.__workPath, useCache=False, clearCache=True, username=self.__user, password=self.__pw)
         dbMapD = dbu.getMapping()
