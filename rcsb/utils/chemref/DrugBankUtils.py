@@ -99,8 +99,8 @@ class DrugBankUtils(object):
             logger.debug("Using cached %r", mappingFilePath)
             dbMapD = self.__mU.doImport(mappingFilePath, fmt="json")
 
-        ok = True
-        if not fU.exists(filePath):
+        ok = fU.exists(filePath)
+        if not ok:
             if not username or not password:
                 logger.warning("Missing credentials for DrugBank file download...")
             logger.debug("Fetching url %s to resource file %s", urlTarget, filePath)

@@ -1,4 +1,4 @@
 mmcif >= 0.40
 rcsb.utils.io >= 0.37
-rcsb.utils.config >= 0.20
+rcsb.utils.config >= 0.21
 configparser; python_version < "3.0"

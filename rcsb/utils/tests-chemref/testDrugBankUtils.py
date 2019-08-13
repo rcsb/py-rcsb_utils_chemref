@@ -45,6 +45,7 @@ class DrugBankUtilsTests(unittest.TestCase):
     def tearDown(self):
         pass
 
+    @unittest.skip("Long test")
     def testReadDrugBankInfo(self):
         dbu = DrugBankUtils(dirPath=self.__workPath, useCache=False, clearCache=True, username=self.__user, password=self.__pw)
         dbMapD = dbu.getMapping()
