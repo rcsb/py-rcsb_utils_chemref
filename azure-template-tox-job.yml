@@ -126,8 +126,9 @@ jobs:
     #
     - ${{ if startsWith(parameters.tox, 'py') }}:
       - script: |
-          echo "Variable ",$(CONFIG_SUPPORT_TOKEN_TEST)
-          echo "Variable ",$(CONFIG_SUPPORT_TOKEN_ENV)
+          echo "Variable ",$(VAR_CONFIG_SUPPORT_TOKEN_TEST)
+          echo "Variable ",$(VAR_CONFIG_SUPPORT_TOKEN_ENV)
+          export CONFIG_SUPPORT_TOKEN_ENV=$(VAR_CONFIG_SUPPORT_TOKEN_ENV)
           ${{ format('python -m tox -e {0}', parameters.tox) }}
         displayName: 'Running tox task'
     - ${{ if and(not(startsWith(parameters.tox, 'py')), startsWith(parameters.python, '3.8')) }}:
