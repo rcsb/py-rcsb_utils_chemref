@@ -1,5 +1,5 @@
 ##
-# File: DrugBankUtils.py
+# File: DrugBankProvider.py
 # Author:  J. Westbrook
 # Date:  8-Aug-2019
 #
@@ -23,30 +23,24 @@ from rcsb.utils.chemref.DrugBankReader import DrugBankReader
 from rcsb.utils.io.FileUtil import FileUtil
 from rcsb.utils.io.MarshalUtil import MarshalUtil
 
-# from rcsb.utils.io.MarshalUtil import MarshalUtil
-
 logger = logging.getLogger(__name__)
 
 
-class DrugBankUtils(object):
+class DrugBankProvider(object):
     """ Utilities to read the DrugBank resource file and build loadable documents and identifier
     correspondences.
     """
 
     def __init__(self, **kwargs):
         #
-        urlTarget = kwargs.get("urlTarget", "https://www.drugbank.ca/releases/latest/downloads/all-full-database")
-        dirPath = kwargs.get("dirPath", ".")
-        useCache = kwargs.get("useCache", True)
-        clearCache = kwargs.get("clearCache", False)
-        username = kwargs.get("username", None)
-        password = kwargs.get("password", None)
+        self.__dbMapD, self.__dbObjL = self.__reload(**kwargs)
+        #
 
-        mappingFileName = kwargs.get("mappingFileName", "drugbank_pdb_mapping.json")
-        #
-        self.__mU = MarshalUtil(workPath=dirPath)
-        self.__dbMapD, self.__dbObjL = self.__reload(urlTarget, dirPath, mappingFileName, useCache=useCache, clearCache=clearCache, username=username, password=password)
-        #
+    def testCache(self):
+        logger.info("Lengths map %d objl %d", len(self.__dbMapD["id_map"]), len(self.__dbObjL))
+        if (len(self.__dbMapD["id_map"]) > 5700) and (len(self.__dbObjL) > 13000):
+            return True
+        return False
 
     def getMapping(self):
         return self.__dbMapD
@@ -70,15 +64,15 @@ class DrugBankUtils(object):
                         dbIdD[dD["drugbank_id"]] = ccId
             return self.__buildDocuments(self.__dbObjL, dbIdD)
 
-    def __reload(self, urlTarget, dirPath, mappingFileName, useCache=True, clearCache=False, username=None, password=None):
+    def __reload(self, **kwargs):
         """ Reload DrugBank mapping data and optionally supporting repository data file.
 
         Args:
             urlTarget (str): target url for resource file
             dirPath (str): path to the directory containing cache files
             mappingFileName (str): mapping file name
+            docListFileName (str): document list file name
             useCache (bool, optional): flag to use cached files. Defaults to True.
-            clearCache (bool, optional): flag to clear any cached files. Defaults to False.
 
         Returns:
             (dict, list): identifiers mapping dictionary (pdb_ccId -> DrugBank details), DrugBank object list
@@ -86,54 +80,70 @@ class DrugBankUtils(object):
         startTime = time.time()
         logger.info("Starting db reload at %s", time.strftime("%Y %m %d %H:%M:%S", time.localtime()))
         #
+        urlTarget = kwargs.get("urlTarget", "https://www.drugbank.ca/releases/latest/downloads/all-full-database")
+        dirPath = kwargs.get("dirPath", ".")
+        useCache = kwargs.get("useCache", True)
+        username = kwargs.get("username", None)
+        password = kwargs.get("password", None)
+        mappingFileName = kwargs.get("mappingFileName", "drugbank_pdb_mapping.json")
+        docListFileName = kwargs.get("docListFileName", "drugbank_documents.pic")
+        mU = MarshalUtil(workPath=dirPath)
+        #
         dbMapD = {}
         dbObjL = []
         fU = FileUtil()
         mappingFilePath = os.path.join(dirPath, mappingFileName)
+        docListFilePath = os.path.join(dirPath, docListFileName)
         filePath = os.path.join(dirPath, "full database.xml")
+        mU.mkdir(dirPath)
         #
-        if clearCache:
-            try:
-                os.remove(filePath)
-                os.remove(mappingFilePath)
-            except Exception:
-                pass
+        if not useCache:
+            for fp in [filePath, mappingFilePath, docListFilePath]:
+                try:
+                    os.remove(fp)
+                except Exception:
+                    pass
         #
-        if useCache and fU.exists(mappingFilePath):
+        if useCache and fU.exists(mappingFilePath) and fU.exists(docListFilePath):
             logger.debug("Using cached %r", mappingFilePath)
-            dbMapD = self.__mU.doImport(mappingFilePath, fmt="json")
-
+            dbMapD = mU.doImport(mappingFilePath, fmt="json")
+            dbObjL = mU.doImport(docListFilePath, fmt="pickle")
+            # done all cached -
+            endTime = time.time()
+            logger.info("Completed cache recovery at %s (%.4f seconds)", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
+            return dbMapD, dbObjL
+        #
         ok = fU.exists(filePath)
         if not ok:
             if not username or not password:
                 logger.warning("Missing credentials for DrugBank file download...")
-            logger.debug("Fetching url %s to resource file %s", urlTarget, filePath)
+            logger.info("Fetching url %s to resource file %s", urlTarget, filePath)
             zipFilePath = os.path.join(dirPath, "full_database.zip")
             ok = fU.get(urlTarget, zipFilePath, username=username, password=password)
             endTime = time.time()
-            logger.info("Completed db fetch at %s (%.4f seconds)\n", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
+            logger.info("Completed db fetch at %s (%.4f seconds)", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
 
             fp = fU.uncompress(zipFilePath, outputDir=dirPath)
             ok = fp.endswith("full database.xml")
             endTime = time.time()
-            logger.info("Completed unzip at %s (%.4f seconds)\n", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
+            logger.info("Completed unzip at %s (%.4f seconds)", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
 
         if ok:
             logger.debug("Reading %r", filePath)
-            xTree = self.__mU.doImport(filePath, fmt="xml")
+            xTree = mU.doImport(filePath, fmt="xml")
             endTime = time.time()
-            logger.info("Completed xml read at %s (%.4f seconds)\n", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
+            logger.info("Completed xml read at %s (%.4f seconds)", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
 
             dbr = DrugBankReader()
             dbObjL = dbr.read(xTree)
             endTime = time.time()
-            logger.info("Completed xml parse at %s (%.4f seconds)\n", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
+            logger.info("Completed xml parse (%d) at %s (%.4f seconds)", len(dbObjL), time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
 
             dbMapD = self.__buildMapping(dbObjL)
-            ok = self.__mU.doExport(mappingFilePath, dbMapD, fmt="json", indent=3)
+            ok = mU.doExport(mappingFilePath, dbMapD, fmt="json", indent=3)
+            ok = mU.doExport(docListFilePath, dbObjL, fmt="pickle")
             endTime = time.time()
-            logger.info("Completed db json processing at %s (%.4f seconds)\n", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
-
+            logger.info("Completed db json processing at %s (%.4f seconds)", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
         else:
             logger.error("Drugbank resource file missing %r", fp)
         #
@@ -261,7 +271,7 @@ class DrugBankUtils(object):
         Returns:
             (dict): dictionary DrugBank identifier correspondences
         """
-        logger.debug("DrugBank full record length %d", len(dbObjL))
+        logger.info("DrugBank full record length %d", len(dbObjL))
         dbMapD = {}
         mD = {}
         for dD in dbObjL:

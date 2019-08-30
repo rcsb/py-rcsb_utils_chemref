@@ -1,5 +1,5 @@
 ##
-# File:    ChemCompModelUtils.py
+# File:    ChemCompModelProvider.py
 # Author:  J. Westbrook
 # Date:    1-Nov-2018
 #
@@ -25,25 +25,30 @@ from rcsb.utils.io.MarshalUtil import MarshalUtil
 logger = logging.getLogger(__name__)
 
 
-class ChemCompModelUtils(object):
+class ChemCompModelProvider(object):
     """Utilities to read the resource file containing with a compilation of CCDC models correspondences
     for PDB chemical components.
     """
 
     def __init__(self, **kwargs):
-        urlTarget = kwargs.get("urlTarget", "http://ftp.wwpdb.org/pub/pdb/data/component-models/complete/chem_comp_model.cif.gz")
+        urlTarget = kwargs.get("urlTarget", "ftp://ftp.wwpdb.org/pub/pdb/data/component-models/complete/chem_comp_model.cif.gz")
         dirPath = kwargs.get("dirPath", ".")
         useCache = kwargs.get("useCache", True)
-        clearCache = kwargs.get("clearCache", False)
         mappingFileName = kwargs.get("mappingFileName", "ccdc_pdb_mapping.json")
         #
         self.__mU = MarshalUtil(workPath=dirPath)
-        self.__mappingD = self.__reload(urlTarget, dirPath, mappingFileName, useCache=useCache, clearCache=clearCache)
+        self.__mappingD = self.__reload(urlTarget, dirPath, mappingFileName, useCache=useCache)
+
+    def testCache(self):
+        logger.info("Lengths map %d", len(self.__mappingD))
+        if len(self.__mappingD) > 1000:
+            return True
+        return False
 
     def getMapping(self):
         return self.__mappingD
 
-    def __reload(self, urlTarget, dirPath, mappingFileName, useCache=True, clearCache=False):
+    def __reload(self, urlTarget, dirPath, mappingFileName, useCache=True):
         """Reload input mmCIF model mapping resource file and return a container list.
 
         Args:
@@ -51,32 +56,31 @@ class ChemCompModelUtils(object):
             dirPath (str): path to the directory containing cache files
             mappingFileName (str): mapping file name
             useCache (bool, optional): flag to use cached files. Defaults to True.
-            clearCache (bool, optional): flag to clear any cached files. Defaults to False.
 
         Returns:
             (dict): mapping dictionary (pdb_ccId -> CCDC details)
         """
-
         mD = {}
         #
         fU = FileUtil()
         fn = fU.getFileName(urlTarget)
         filePath = os.path.join(dirPath, fn)
         mappingFilePath = os.path.join(dirPath, mappingFileName)
+        self.__mU.mkdir(dirPath)
         #
-        if clearCache:
-            try:
-                os.remove(filePath)
-                os.remove(mappingFilePath)
-            except Exception:
-                pass
+        if not useCache:
+            for fp in [filePath, mappingFilePath]:
+                try:
+                    os.remove(fp)
+                except Exception:
+                    pass
         #
         if useCache and fU.exists(mappingFilePath):
             mD = self.__mU.doImport(mappingFilePath, fmt="json")
         else:
             ok = True
-            if useCache and not fU.exists(filePath):
-                logger.info("Fetching url %s to resource file %s", urlTarget, filePath)
+            if not (useCache and fU.exists(filePath)):
+                logger.info("Fetching url %s for resource file %s", urlTarget, filePath)
                 ok = fU.get(urlTarget, filePath)
             if ok:
                 cL = self.__mU.doImport(filePath, fmt="mmcif")

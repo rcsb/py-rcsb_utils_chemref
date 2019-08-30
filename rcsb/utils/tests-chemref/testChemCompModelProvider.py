@@ -1,5 +1,5 @@
 ##
-# File:    ChemCompModelUtilsTests.py
+# File:    ChemCompModelProviderTests.py
 # Author:  J. Westbrook
 # Date:    1-Nov-2018
 # Version: 0.001
@@ -22,7 +22,7 @@ import logging
 import os
 import unittest
 
-from rcsb.utils.chemref.ChemCompModelUtils import ChemCompModelUtils
+from rcsb.utils.chemref.ChemCompModelProvider import ChemCompModelProvider
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 TOPDIR = os.path.dirname(os.path.dirname(HERE))
@@ -31,7 +31,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
 
-class ChemCompModelUtilsTests(unittest.TestCase):
+class ChemCompModelProviderTests(unittest.TestCase):
     def setUp(self):
         self.__workPath = os.path.join(HERE, "test-output")
 
@@ -39,7 +39,7 @@ class ChemCompModelUtilsTests(unittest.TestCase):
         pass
 
     def testReadChemCompModelRef(self):
-        ccm = ChemCompModelUtils(dirPath=self.__workPath, useCache=True)
+        ccm = ChemCompModelProvider(dirPath=os.path.join(self.__workPath, "chem_comp_models"), useCache=False)
         rD = ccm.getMapping()
         #
         logger.info("Model match length %d", len(rD))
@@ -50,7 +50,7 @@ class ChemCompModelUtilsTests(unittest.TestCase):
 
 def readChemCompModelInfo():
     suiteSelect = unittest.TestSuite()
-    suiteSelect.addTest(ChemCompModelUtilsTests("testReadChemCompModelRef"))
+    suiteSelect.addTest(ChemCompModelProviderTests("testReadChemCompModelRef"))
     return suiteSelect
 
 

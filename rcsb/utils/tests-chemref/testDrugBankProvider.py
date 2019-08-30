@@ -1,5 +1,5 @@
 ##
-# File:    DrugBankUtilsTests.py
+# File:    DrugBankProviderTests.py
 # Author:  J. Westbrook
 # Date:    17-Oct-2018
 # Version: 0.001
@@ -23,7 +23,7 @@ import os
 import time
 import unittest
 
-from rcsb.utils.chemref.DrugBankUtils import DrugBankUtils
+from rcsb.utils.chemref.DrugBankProvider import DrugBankProvider
 from rcsb.utils.config.ConfigUtil import ConfigUtil
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -33,15 +33,15 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
 
-class DrugBankUtilsTests(unittest.TestCase):
+class DrugBankProviderTests(unittest.TestCase):
     def setUp(self):
-        mockTopPath = os.path.join(TOPDIR, "mock-data")
-        configPath = os.path.join(mockTopPath, "config", "dbload-setup-example.yml")
-        configName = "site_info"
-        cfgOb = ConfigUtil(configPath=configPath, defaultSectionName=configName, mockTopPath=mockTopPath)
-        self.__user = cfgOb.getSecret("DRUGBANK_AUTH_USERNAME", sectionName=configName)
-        self.__pw = cfgOb.getSecret("DRUGBANK_AUTH_PASSWORD", sectionName=configName)
-        self.__workPath = os.path.join(HERE, "test-output")
+        configPath = os.path.join(HERE, "test-data", "drugbank-config-example.yml")
+        configName = "site_info_configuration"
+        cfgOb = ConfigUtil(configPath=configPath, defaultSectionName=configName)
+        self.__user = cfgOb.get("_DRUGBANK_AUTH_USERNAME", sectionName=configName)
+        self.__pw = cfgOb.get("_DRUGBANK_AUTH_PASSWORD", sectionName=configName)
+        self.__cacheDir = cfgOb.get("DRUGBANK_CACHE_DIR", sectionName=configName)
+        self.__cachePath = os.path.join(HERE, "test-output", self.__cacheDir)
         #
         self.__startTime = time.time()
         logger.info("Starting %s at %s", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()))
@@ -51,7 +51,7 @@ class DrugBankUtilsTests(unittest.TestCase):
         logger.info("Completed %s at %s (%.4f seconds)\n", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - self.__startTime)
 
     def testReadDrugBankInfo(self):
-        dbu = DrugBankUtils(dirPath=self.__workPath, useCache=False, clearCache=True, username=self.__user, password=self.__pw)
+        dbu = DrugBankProvider(dirPath=self.__cachePath, useCache=False, username=self.__user, password=self.__pw)
         dbMapD = dbu.getMapping()
         logger.info("Mapping length %d", len(dbMapD))
         self.assertGreaterEqual(len(dbMapD["id_map"]), 5850)
@@ -60,14 +60,14 @@ class DrugBankUtilsTests(unittest.TestCase):
 
     @unittest.skip("Long test")
     def testReReadDrugBankInfo(self):
-        dbu = DrugBankUtils(dirPath=self.__workPath, useCache=False, clearCache=True, username=self.__user, password=self.__pw)
+        dbu = DrugBankProvider(dirPath=self.__cachePath, useCache=False, username=self.__user, password=self.__pw)
         dbMapD = dbu.getMapping()
         logger.info("Mapping length %d", len(dbMapD))
         self.assertGreaterEqual(len(dbMapD["id_map"]), 5850)
         dbDocL = dbu.getDocuments()
         self.assertGreaterEqual(len(dbDocL), 5850)
         #
-        dbu = DrugBankUtils(dirPath=self.__workPath, useCache=True, clearCache=False)
+        dbu = DrugBankProvider(dirPath=self.__cachePath, useCache=True)
         dbMapD = dbu.getMapping()
         logger.info("Mapping length %d", len(dbMapD))
         self.assertGreaterEqual(len(dbMapD["id_map"]), 5850)
@@ -77,8 +77,8 @@ class DrugBankUtilsTests(unittest.TestCase):
 
 def readDrugBankInfo():
     suiteSelect = unittest.TestSuite()
-    suiteSelect.addTest(DrugBankUtilsTests("testReadDrugBankInfo"))
-    suiteSelect.addTest(DrugBankUtilsTests("testReReadDrugBankInfo"))
+    suiteSelect.addTest(DrugBankProviderTests("testReadDrugBankInfo"))
+    suiteSelect.addTest(DrugBankProviderTests("testReReadDrugBankInfo"))
     return suiteSelect
 
 
