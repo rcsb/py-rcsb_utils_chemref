@@ -43,9 +43,6 @@ class AtcProviderTests(unittest.TestCase):
         tnL = atcP.getTreeNodeList()
         logger.info("length of tree list %d", len(tnL))
         self.assertGreaterEqual(len(tnL), 6000)
-        logger.info("length of tree list %d", len(tnL))
-        for tn in tnL:
-            logger.info("%r", tn)
 
 
 def readAtcInfo():

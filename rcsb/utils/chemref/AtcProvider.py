@@ -103,8 +103,8 @@ class AtcProvider:
             logger.exception("Failing for %r with %s", atcId, str(e))
         return None
 
-    def getTreeNodeList(self):
-        return self.__exportTreeNodeList(self.__atcD["names"], self.__atcD["parents"])
+    def getTreeNodeList(self, filterD=None):
+        return self.__exportTreeNodeList(self.__atcD["names"], self.__atcD["parents"], filterD=filterD)
 
     def __extractNames(self, atcL):
         """
