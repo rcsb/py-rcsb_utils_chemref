@@ -110,7 +110,13 @@ class DrugBankProvider(object):
             dbObjL = mU.doImport(docListFilePath, fmt="pickle")
             # done all cached -
             endTime = time.time()
-            logger.info("Completed cache recovery at %s (%.4f seconds)", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
+            logger.info(
+                "Completed cache recovery (%d/%d) at %s (%.4f seconds)",
+                len(dbObjL),
+                len(dbMapD["id_map"]),
+                time.strftime("%Y %m %d %H:%M:%S", time.localtime()),
+                endTime - startTime,
+            )
             return dbMapD, dbObjL
         #
         ok = fU.exists(filePath)
@@ -143,7 +149,9 @@ class DrugBankProvider(object):
             ok = mU.doExport(mappingFilePath, dbMapD, fmt="json", indent=3)
             ok = mU.doExport(docListFilePath, dbObjL, fmt="pickle")
             endTime = time.time()
-            logger.info("Completed db json processing at %s (%.4f seconds)", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
+            logger.info(
+                "Completed db %d/%d processing at %s (%.4f seconds)", len(dbObjL), len(dbMapD["id_map"]), time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime
+            )
         else:
             logger.error("Drugbank resource file missing %r", fp)
         #
@@ -308,14 +316,19 @@ class DrugBankProvider(object):
         dbMapD["id_map"] = mD
         #
         inD = {}
+        atcD = {}
         for dD in dbObjL:
             dbId = dD["drugbank_id"]
             if "inchikey" in dD and dD["inchikey"] and len(dD["inchikey"]) > 13:
                 if dD["inchikey"] not in inD:
                     inD[dD["inchikey"]] = []
                 inD[dD["inchikey"]].append({"drugbank_id": dbId, "inchikey": dD["inchikey"], "name": dD["name"]})
-        #
+            #
+            if "atc_codes" in dD and dD["atc_codes"]:
+                atcD[dbId] = dD["atc_codes"]
         logger.info("Drugbank InChIKey dictionary length %d", len(inD))
+        logger.info("Drugbank ATC  dictionary length %d", len(atcD))
         #
         dbMapD["inchikey_map"] = inD
+        dbMapD["db_atc_map"] = atcD
         return dbMapD

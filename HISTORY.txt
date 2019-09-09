@@ -13,3 +13,4 @@
  12-Aug-2019  - V0.21 Refactor DrugBank workflow
  14-Aug-2019  - V0.22 Improve cache management
  29-Aug-2019  - V0.23 Add DrugBankProvider() and ChemCompModelProvider() modules
+  9-Sep-2019  - V0.24 Add AtcProvider() module and extract ATC mapping from DrugBank

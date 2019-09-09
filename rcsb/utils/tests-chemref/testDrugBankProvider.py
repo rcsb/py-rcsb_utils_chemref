@@ -58,7 +58,7 @@ class DrugBankProviderTests(unittest.TestCase):
         dbDocL = dbu.getDocuments()
         self.assertGreaterEqual(len(dbDocL), 5850)
 
-    @unittest.skip("Long test")
+    ## @VVunittest.skip("Long test")
     def testReReadDrugBankInfo(self):
         dbu = DrugBankProvider(dirPath=self.__cachePath, useCache=False, username=self.__user, password=self.__pw)
         dbMapD = dbu.getMapping()
@@ -66,6 +66,10 @@ class DrugBankProviderTests(unittest.TestCase):
         self.assertGreaterEqual(len(dbMapD["id_map"]), 5850)
         dbDocL = dbu.getDocuments()
         self.assertGreaterEqual(len(dbDocL), 5850)
+        atcD = dbMapD["db_atc_map"]
+        logger.info("atcD length %d", len(atcD))
+        self.assertGreaterEqual(len(atcD), 3100)
+        logger.info("atcD %r", atcD)
         #
         dbu = DrugBankProvider(dirPath=self.__cachePath, useCache=True)
         dbMapD = dbu.getMapping()
