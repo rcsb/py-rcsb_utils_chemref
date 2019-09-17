@@ -210,7 +210,7 @@ class DrugBankProvider(object):
 
         """
         oD = {}
-        oD["_drugbank_id"] = dbObj["drugbank_id"]
+        # oD["_drugbank_id"] = dbObj["drugbank_id"]
         oD["drugbank_container_identifiers"] = {"drugbank_id": dbObj["drugbank_id"]}
 
         dbiD = {}

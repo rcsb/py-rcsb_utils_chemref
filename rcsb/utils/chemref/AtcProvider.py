@@ -53,6 +53,7 @@ class AtcProvider:
             fp = os.path.join(atcDirPath, fn)
             logger.info("Fetch ATC term descriptions from source %s", fp)
             fileU = FileUtil(workPath=atcDirPath)
+            fileU.mkdir(atcDirPath)
             ok = fileU.get(urlTarget, fp)
             logger.info("ATC fetch status is %r", ok)
             atcL = self.__mU.doImport(fp, fmt="csv", rowFormat="dict", uncomment=False)
