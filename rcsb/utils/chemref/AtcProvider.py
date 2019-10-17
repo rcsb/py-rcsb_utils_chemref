@@ -181,15 +181,27 @@ class AtcProvider:
                         queue.append(childId)
                         visited.add(childId)
         #
+        uD = {}
         dL = []
         for tId in idL:
             if filterD and tId not in filterD:
                 continue
-            displayName = nD[tId]["name"] if tId in nD else None
-            ptId = pD[tId] if tId in pD else None
-            lL = self.getIdLineage(tId)
-            #
-            dD = {"id": tId, "name": displayName, "lineage": lL, "parents": [ptId], "depth": len(lL)}
-            dL.append(dD)
+            # id plus parents
+            idlL = self.getIdLineage(tId)
+            for iDepth, idl in enumerate(idlL, 1):
+                if idl in uD:
+                    continue
+                uD[idl] = True
+                displayName = nD[idl]["name"] if idl in nD else None
+                ptId = pD[idl] if idl in pD else None
+                #
+                # dD = {"id": tId, "name": displayName, "lineage": lL, "parents": [ptId], "depth": len(lL)}
+                #
+                if ptId:
+                    dD = {"id": idl, "name": displayName, "parents": [ptId], "depth": iDepth}
+                else:
+                    dD = {"id": idl, "name": displayName, "depth": iDepth}
+                #
+                dL.append(dD)
 
         return dL
