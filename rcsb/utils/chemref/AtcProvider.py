@@ -188,7 +188,7 @@ class AtcProvider:
                 continue
             # id plus parents
             idlL = self.getIdLineage(tId)
-            for iDepth, idl in enumerate(idlL, 1):
+            for iDepth, idl in enumerate(idlL, 0):
                 if idl in uD:
                     continue
                 uD[idl] = True
