@@ -42,8 +42,8 @@ class AtcProviderTests(unittest.TestCase):
         atcP = AtcProvider(dirPath=os.path.join(self.__cachePath, "atc"), useCache=False)
         tnL = atcP.getTreeNodeList()
         logger.info("length of tree list %d", len(tnL))
-        for tn in tnL:
-            logger.info(">>>node %r", tn)
+        # for tn in tnL:
+        #    logger.info(">>>node %r", tn)
         self.assertGreaterEqual(len(tnL), 6000)
 
 
