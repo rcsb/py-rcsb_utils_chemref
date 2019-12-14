@@ -18,3 +18,4 @@
  16-Oct-2019  - V0.26 Enumerate all ATC parents in tree node list
  17-Oct-2019  - V0.27 Ignore root node of the ATC heirarchy and reduce depth by 1.
  23-Nov-2019  - V0.28 Add module ChemCompProvider() update to pipeline to py38
+ 14-Dec-2019  - V0.29 Adjust error reporting for DrugBankProvider.testCache()

@@ -37,9 +37,13 @@ class DrugBankProvider(object):
         #
 
     def testCache(self):
-        logger.info("Lengths map %d objl %d", len(self.__dbMapD["id_map"]), len(self.__dbObjL))
-        if (len(self.__dbMapD["id_map"]) > 5700) and (len(self.__dbObjL) > 13000):
-            return True
+        try:
+            logger.info("Lengths map %d objl %d", len(self.__dbMapD["id_map"]), len(self.__dbObjL))
+            if (len(self.__dbMapD["id_map"]) > 5700) and (len(self.__dbObjL) > 13000):
+                return True
+        except Exception as e:
+            logger.debug("Failing with %s", str(e))
+
         return False
 
     def getMapping(self):
