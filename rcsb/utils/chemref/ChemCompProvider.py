@@ -28,7 +28,7 @@ class ChemCompProvider(object):
     """
 
     def __init__(self, **kwargs):
-        urlTarget = kwargs.get("ccUrlTarget", "ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz")
+        urlTarget = kwargs.get("ccUrlTarget", "http://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz")
         # self.__birdUrlTarget = kwargs.get("birdUrlTarget", "ftp://ftp.wwpdb.org/pub/pdb/data/bird/prd/prdcc-all.cif.gz")
         #
         self.__dirPath = kwargs.get("dirPath", ".")

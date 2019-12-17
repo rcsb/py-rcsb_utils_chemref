@@ -31,7 +31,7 @@ class ChemCompModelProvider(object):
     """
 
     def __init__(self, **kwargs):
-        urlTarget = kwargs.get("urlTarget", "ftp://ftp.wwpdb.org/pub/pdb/data/component-models/complete/chem_comp_model.cif.gz")
+        urlTarget = kwargs.get("urlTarget", "http://ftp.wwpdb.org/pub/pdb/data/component-models/complete/chem_comp_model.cif.gz")
         dirPath = kwargs.get("dirPath", ".")
         useCache = kwargs.get("useCache", True)
         mappingFileName = kwargs.get("mappingFileName", "ccdc_pdb_mapping.json")
