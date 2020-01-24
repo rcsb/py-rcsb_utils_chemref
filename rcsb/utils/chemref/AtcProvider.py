@@ -29,15 +29,16 @@ class AtcProvider:
     def __init__(self, **kwargs):
         #
         urlTarget = "http://data.bioontology.org/ontologies/ATC/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb&download_format=csv"
+        urlTargetFallback = "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/ATC-2018.csv.gz"
         atcDirPath = kwargs.get("dirPath", ".")
         useCache = kwargs.get("useCache", True)
         self.__version = kwargs.get("AtcVersion", "2018")
         #
         self.__mU = MarshalUtil(workPath=atcDirPath)
-        self.__atcD = self.__reload(urlTarget, atcDirPath, useCache=useCache, version=self.__version)
+        self.__atcD = self.__reload(urlTarget, urlTargetFallback, atcDirPath, useCache=useCache, version=self.__version)
         #
 
-    def __reload(self, urlTarget, atcDirPath, useCache=True, version=None):
+    def __reload(self, urlTarget, urlTargetFallback, atcDirPath, useCache=True, version=None):
         pyVersion = sys.version_info[0]
         atcFilePath = os.path.join(atcDirPath, "atc-py%s.pic" % str(pyVersion))
         #
@@ -54,16 +55,22 @@ class AtcProvider:
             logger.info("Fetch ATC term descriptions from source %s", fp)
             fileU = FileUtil(workPath=atcDirPath)
             fileU.mkdir(atcDirPath)
-            ok = fileU.get(urlTarget, fp)
-            logger.info("ATC fetch status is %r", ok)
-            atcL = self.__mU.doImport(fp, fmt="csv", rowFormat="dict", uncomment=False)
-            #
-            columnL = list(atcL[0].keys()) if atcL else []
-            nD = self.__extractNames(atcL)
-            pD = self.__extractHierarchy(atcL)
-            atcD = {"names": nD, "parents": pD}
-            ok = self.__mU.doExport(atcFilePath, atcD, fmt="pickle")
-            logger.info("ATC cache status %r data length %d columns %r names %d parents %d", ok, len(atcL), columnL, len(nD), len(pD))
+            try:
+                ok = fileU.get(urlTarget, fp)
+                logger.info("ATC fetch status is %r", ok)
+                if not ok:
+                    ok = fileU.get(urlTargetFallback, fp)
+                    logger.info("ATC fallback fetch status is %r", ok)
+                atcL = self.__mU.doImport(fp, fmt="csv", rowFormat="dict", uncomment=False)
+                #
+                columnL = list(atcL[0].keys()) if atcL else []
+                nD = self.__extractNames(atcL)
+                pD = self.__extractHierarchy(atcL)
+                atcD = {"names": nD, "parents": pD}
+                ok = self.__mU.doExport(atcFilePath, atcD, fmt="pickle")
+                logger.info("ATC cache status %r data length %d columns %r names %d parents %d", ok, len(atcL), columnL, len(nD), len(pD))
+            except Exception as e:
+                logger.exception("Failing for %r with %s", fp, str(e))
             #
         return atcD
 
