@@ -115,7 +115,8 @@ class DrugBankReader(object):
             ],
         }
         aliases = {
-            elem.text.strip().encode("ascii", "xmlcharrefreplace").decode("utf-8")
+            # elem.text.strip().encode("ascii", "xmlcharrefreplace").decode("utf-8")
+            elem.text.strip()
             for elem in itt.chain(drugElement.findall("{ns}synonyms/{ns}synonym".format(ns=self.__ns)), drugElement.findall("{ns}salts/{ns}salt/{ns}name".format(ns=self.__ns)))
             if elem.text.strip()
         }
@@ -123,7 +124,8 @@ class DrugBankReader(object):
         doc["aliases"] = aliases
 
         products = {
-            elem.text.strip().encode("ascii", "xmlcharrefreplace").decode("utf-8")
+            # elem.text.strip().encode("ascii", "xmlcharrefreplace").decode("utf-8")
+            elem.text.strip()
             for elem in itt.chain(
                 drugElement.findall("{ns}international-brands/{ns}international-brand".format(ns=self.__ns)),
                 drugElement.findall("{ns}products/{ns}product/{ns}name".format(ns=self.__ns)),

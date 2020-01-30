@@ -150,7 +150,7 @@ class DrugBankProvider(object):
             logger.info("Completed xml parse (%d) at %s (%.4f seconds)", len(dbObjL), time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
 
             dbMapD = self.__buildMapping(dbObjL)
-            ok = mU.doExport(mappingFilePath, dbMapD, fmt="json", indent=3)
+            ok = mU.doExport(mappingFilePath, dbMapD, fmt="json", indent=3, enforceAscii=False)
             ok = mU.doExport(docListFilePath, dbObjL, fmt="pickle")
             endTime = time.time()
             logger.info(
