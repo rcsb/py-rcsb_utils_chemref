@@ -22,3 +22,4 @@
  17-Dec-2019  - V0.30 Prefer http to ftp protocol for default download targets.
  24-Jan-2020  - V0.31 Add fallback resource for ATC
  29-Jan-2020  - V0.32 Skip escaping non-ascii characters.
+  3-Feb-2020  - V0.33 Update dependencies
