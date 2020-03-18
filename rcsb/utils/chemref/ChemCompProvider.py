@@ -1,5 +1,5 @@
 ##
-# File:    ChemComplProvider.py
+# File:    ChemCompProvider.py
 # Author:  J. Westbrook
 # Date:    22-Nov-2019
 #
