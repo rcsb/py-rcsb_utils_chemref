@@ -39,7 +39,9 @@ class AtcProviderTests(unittest.TestCase):
         pass
 
     def testReadAtcInfo(self):
-        atcP = AtcProvider(dirPath=os.path.join(self.__cachePath, "atc"), useCache=False)
+        atcP = AtcProvider(cachePath=self.__cachePath, useCache=False)
+        version = atcP.getVersion()
+        self.assertTrue(version is not None)
         tnL = atcP.getTreeNodeList()
         logger.info("length of tree list %d", len(tnL))
         # for tn in tnL:

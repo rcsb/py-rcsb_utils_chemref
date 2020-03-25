@@ -40,9 +40,11 @@ class ResidProviderTests(unittest.TestCase):
         pass
 
     def testReadResidData(self):
-        residP = ResidProvider(dirPath=os.path.join(self.__workPath, "chem_ref"), useCache=False)
+        residP = ResidProvider(cachePath=self.__workPath, useCache=False)
         ok = residP.testCache()
         self.assertTrue(ok)
+        version = residP.getVersion()
+        self.assertTrue(version is not None)
         #
 
 

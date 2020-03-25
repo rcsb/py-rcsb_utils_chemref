@@ -32,9 +32,11 @@ class DrugBankReader(object):
 
     def read(self, xTree):
         rL = []
-        for drugElement in xTree.getroot():
+        xRoot = xTree.getroot()
+        version = xRoot.attrib.get("version", None)
+        for drugElement in xRoot:
             rL.append(self.__processDrugElement(drugElement))
-        return rL
+        return version, rL
 
     def __processDrugElement(self, drugElement):
         """

@@ -38,8 +38,8 @@ class ChemCompProviderTests(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def testReadChemComplRef(self):
-        ccP = ChemCompProvider(dirPath=os.path.join(self.__workPath, "chem_ref"), useCache=False)
+    def testReadChemCompRef(self):
+        ccP = ChemCompProvider(cachePath=self.__workPath, useCache=False)
         ok = ccP.testCache()
         self.assertTrue(ok)
         #
@@ -54,7 +54,7 @@ class ChemCompProviderTests(unittest.TestCase):
         logger.info("nsL %r", len(nsL))
         self.assertGreaterEqual(len(nsL), 1550)
         #
-        ccP = ChemCompProvider(dirPath=os.path.join(self.__workPath, "chem_ref"), useCache=True)
+        ccP = ChemCompProvider(cachePath=self.__workPath, useCache=True)
         ok = ccP.testCache()
         self.assertTrue(ok)
 

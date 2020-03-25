@@ -24,10 +24,13 @@ class ResidReader(object):
 
     def read(self, xTree):
         rL = []
-        for el in xTree.getroot():
+        xRoot = xTree.getroot()
+        # <Database id="RESID" release="76.00" date="31-May-2018">
+        version = xRoot.attrib.get("release", None)
+        for el in xRoot:
             if el.tag == "Entry":
                 rL.append(self.__processEntryElement(el))
-        return rL
+        return version, rL
 
     def __processEntryElement(self, entryElement):
         """

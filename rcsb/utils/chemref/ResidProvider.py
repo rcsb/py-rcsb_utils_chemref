@@ -34,15 +34,14 @@ class ResidProvider(object):
         #
         urlTarget = kwargs.get("residUrlTarget", "ftp://ftp.pir.georgetown.edu/pir_databases/other_databases/resid/RESIDUES.XML")
         #
-        self.__dirPath = kwargs.get("dirPath", ".")
         useCache = kwargs.get("useCache", True)
         #
-        dirPath = kwargs.get("dirPath", ".")
+        dirPath = os.path.join(kwargs.get("cachePath", "."), "resid")
         useCache = kwargs.get("useCache", True)
         residFileName = kwargs.get("residFileName", "resid_correspondences_definitions.json")
         #
         self.__mU = MarshalUtil(workPath=dirPath)
-        self.__residD = self.__reload(urlTarget, dirPath, residFileName, useCache=useCache)
+        self.__version, self.__residD = self.__reload(urlTarget, dirPath, residFileName, useCache=useCache)
 
     def testCache(self):
         logger.info("RESID map length %d", len(self.__residD))
@@ -59,6 +58,12 @@ class ResidProvider(object):
 
     def getMapping(self):
         return self.__residD
+
+    def getVersion(self):
+        return self.__version
+
+    def isChemCompMapped(self, ccId):
+        return self.__residD and ccId.upper() in self.__residD
 
     def __reload(self, urlTarget, dirPath, residFileName, useCache=True):
         """Reload input mmCIF model mapping resource file and return a container list.
@@ -88,7 +93,9 @@ class ResidProvider(object):
                     pass
         #
         if useCache and fU.exists(residFilePath):
-            mD = self.__mU.doImport(residFilePath, fmt="json")
+            rD = self.__mU.doImport(residFilePath, fmt="json")
+            mD = rD["mapD"]
+            version = rD["version"]
         else:
             ok = True
             if not (useCache and fU.exists(filePath)):
@@ -98,11 +105,13 @@ class ResidProvider(object):
                 logger.info("Reading %r", filePath)
                 xTree = self.__mU.doImport(filePath, fmt="xml")
                 rr = ResidReader()
-                dbObjL = rr.read(xTree)
+                version, dbObjL = rr.read(xTree)
                 mD = self.__buildResidMapping(dbObjL)
-                ok = self.__mU.doExport(residFilePath, mD, fmt="json", indent=3)
+                rD = {"mapD": mD, "version": version}
+                ok = self.__mU.doExport(residFilePath, rD, fmt="json", indent=3)
+
         #
-        return mD
+        return version, mD
 
     def __getPdbCrossRef(self, xRefList):
         ccId = None
@@ -114,6 +123,7 @@ class ResidProvider(object):
 
     def __buildResidMapping(self, dbObjL):
         """Return a dictionary of RESID to chemical component mapping.
+
         doc = {
             "residCode": entryElement.findtext("{ns}Header/{ns}Code".format(ns=self.__ns)),
             "names": [name.text for name in entryElement.findall("{ns}Names/{ns}Name".format(ns=self.__ns))],
@@ -144,10 +154,10 @@ class ResidProvider(object):
             modResL = []
             for feature in dbObj["features"]:
                 if feature.startswith("MOD_RES"):
-                    modResL.append(feature[len("MOD_RES") :])
+                    modResL.append(feature[len("MOD_RES") :].strip())
             genEnzymes = dbObj["genEnzymes"]
             #
-            ontRefs = dbObj["ontRefs"]
+            ontRefs = [t[4:] for t in dbObj["ontRefs"] if t.startswith("PSI-")]
             retD.setdefault(ccId, []).append(
                 {"residCode": residCode, "residName": residName, "relatedResource": related, "modRes": modResL, "genEnzymes": genEnzymes, "ontRefs": ontRefs}
             )

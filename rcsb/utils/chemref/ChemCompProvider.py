@@ -31,10 +31,7 @@ class ChemCompProvider(object):
         urlTarget = kwargs.get("ccUrlTarget", "http://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz")
         # self.__birdUrlTarget = kwargs.get("birdUrlTarget", "ftp://ftp.wwpdb.org/pub/pdb/data/bird/prd/prdcc-all.cif.gz")
         #
-        self.__dirPath = kwargs.get("dirPath", ".")
-        useCache = kwargs.get("useCache", True)
-        #
-        dirPath = kwargs.get("dirPath", ".")
+        dirPath = os.path.join(kwargs.get("cachePath", "."), "chem_comp")
         useCache = kwargs.get("useCache", True)
         ccdFileName = kwargs.get("ccdFileName", "ccd_abbridged_definitions.json")
         #

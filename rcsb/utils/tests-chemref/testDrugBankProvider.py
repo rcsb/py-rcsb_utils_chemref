@@ -40,8 +40,7 @@ class DrugBankProviderTests(unittest.TestCase):
         cfgOb = ConfigUtil(configPath=configPath, defaultSectionName=configName)
         self.__user = cfgOb.get("_DRUGBANK_AUTH_USERNAME", sectionName=configName)
         self.__pw = cfgOb.get("_DRUGBANK_AUTH_PASSWORD", sectionName=configName)
-        self.__cacheDir = cfgOb.get("DRUGBANK_CACHE_DIR", sectionName=configName)
-        self.__cachePath = os.path.join(HERE, "test-output", self.__cacheDir)
+        self.__cachePath = os.path.join(HERE, "test-output")
         #
         self.__startTime = time.time()
         logger.info("Starting %s at %s", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()))
@@ -51,16 +50,17 @@ class DrugBankProviderTests(unittest.TestCase):
         logger.info("Completed %s at %s (%.4f seconds)\n", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - self.__startTime)
 
     def testReadDrugBankInfo(self):
-        dbu = DrugBankProvider(dirPath=self.__cachePath, useCache=False, username=self.__user, password=self.__pw)
+        dbu = DrugBankProvider(cachePath=self.__cachePath, useCache=False, username=self.__user, password=self.__pw)
         dbMapD = dbu.getMapping()
-        logger.info("Mapping length %d", len(dbMapD))
+        version = dbu.getVersion()
+        logger.info("Drugbank %r mapping length %d", version, len(dbMapD))
         self.assertGreaterEqual(len(dbMapD["id_map"]), 5850)
         dbDocL = dbu.getDocuments()
         self.assertGreaterEqual(len(dbDocL), 5850)
 
     @unittest.skip("Long test")
     def testReReadDrugBankInfo(self):
-        dbu = DrugBankProvider(dirPath=self.__cachePath, useCache=False, username=self.__user, password=self.__pw)
+        dbu = DrugBankProvider(cachePath=self.__cachePath, useCache=False, username=self.__user, password=self.__pw)
         dbMapD = dbu.getMapping()
         logger.info("Mapping length %d", len(dbMapD))
         self.assertGreaterEqual(len(dbMapD["id_map"]), 5850)
@@ -71,7 +71,7 @@ class DrugBankProviderTests(unittest.TestCase):
         self.assertGreaterEqual(len(atcD), 3100)
         logger.info("atcD %r", atcD)
         #
-        dbu = DrugBankProvider(dirPath=self.__cachePath, useCache=True)
+        dbu = DrugBankProvider(cachePath=self.__cachePath, useCache=True)
         dbMapD = dbu.getMapping()
         logger.info("Mapping length %d", len(dbMapD))
         self.assertGreaterEqual(len(dbMapD["id_map"]), 5850)

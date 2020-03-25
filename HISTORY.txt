@@ -24,3 +24,5 @@
  29-Jan-2020  - V0.32 Skip escaping non-ascii characters.
   3-Feb-2020  - V0.33 Update dependencies
  18-Mar-2020  - V0.34 Add ResidProvider() and related modules.
+ 19-Mar-2020  - V0.35 Simplify API and eliminate configuration cache directory items
+ 19-Mar-2020  - V0.36 Add PsiModProvider module

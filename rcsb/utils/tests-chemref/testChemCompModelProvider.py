@@ -39,7 +39,7 @@ class ChemCompModelProviderTests(unittest.TestCase):
         pass
 
     def testReadChemCompModelRef(self):
-        ccm = ChemCompModelProvider(dirPath=os.path.join(self.__workPath, "chem_comp_models"), useCache=False)
+        ccm = ChemCompModelProvider(cachePath=self.__workPath, useCache=False)
         rD = ccm.getMapping()
         #
         logger.info("Model match length %d", len(rD))

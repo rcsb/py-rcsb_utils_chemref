@@ -30,13 +30,16 @@ class AtcProvider:
         #
         urlTarget = "http://data.bioontology.org/ontologies/ATC/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb&download_format=csv"
         urlTargetFallback = "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/ATC-2018.csv.gz"
-        atcDirPath = kwargs.get("dirPath", ".")
+        atcDirPath = os.path.join(kwargs.get("cachePath", "."), "atc")
         useCache = kwargs.get("useCache", True)
         self.__version = kwargs.get("AtcVersion", "2018")
         #
         self.__mU = MarshalUtil(workPath=atcDirPath)
         self.__atcD = self.__reload(urlTarget, urlTargetFallback, atcDirPath, useCache=useCache, version=self.__version)
         #
+
+    def getVersion(self):
+        return self.__version
 
     def __reload(self, urlTarget, urlTargetFallback, atcDirPath, useCache=True, version=None):
         pyVersion = sys.version_info[0]

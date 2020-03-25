@@ -34,6 +34,7 @@ class DrugBankProvider(object):
     def __init__(self, **kwargs):
         #
         self.__dbMapD, self.__dbObjL = self.__reload(**kwargs)
+        self.__version = None
         #
 
     def testCache(self):
@@ -48,6 +49,9 @@ class DrugBankProvider(object):
 
     def getMapping(self):
         return self.__dbMapD
+
+    def getVersion(self):
+        return self.__dbMapD["version"] if self.__dbMapD and "version" in self.__dbMapD else None
 
     def getDocuments(self, mapD=None):
         """[summary]
@@ -77,6 +81,7 @@ class DrugBankProvider(object):
             mappingFileName (str): mapping file name
             docListFileName (str): document list file name
             useCache (bool, optional): flag to use cached files. Defaults to True.
+            useDownload (bool, optional): flag to use a downloaded DrugBank resource file. Default to True.
 
         Returns:
             (dict, list): identifiers mapping dictionary (pdb_ccId -> DrugBank details), DrugBank object list
@@ -85,8 +90,9 @@ class DrugBankProvider(object):
         logger.info("Starting db reload at %s", time.strftime("%Y %m %d %H:%M:%S", time.localtime()))
         #
         urlTarget = kwargs.get("urlTarget", "https://www.drugbank.ca/releases/latest/downloads/all-full-database")
-        dirPath = kwargs.get("dirPath", ".")
+        dirPath = os.path.join(kwargs.get("cachePath", "."), "DrugBank")
         useCache = kwargs.get("useCache", True)
+        useDownload = kwargs.get("useDownload", True)
         username = kwargs.get("username", None)
         password = kwargs.get("password", None)
         mappingFileName = kwargs.get("mappingFileName", "drugbank_pdb_mapping.json")
@@ -127,12 +133,15 @@ class DrugBankProvider(object):
         if not ok:
             if not username or not password:
                 logger.warning("Missing credentials for DrugBank file download...")
-            logger.info("Fetching url %s to resource file %s", urlTarget, filePath)
             zipFilePath = os.path.join(dirPath, "full_database.zip")
-            ok = fU.get(urlTarget, zipFilePath, username=username, password=password)
-            endTime = time.time()
-            logger.info("Completed db fetch at %s (%.4f seconds)", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
-
+            if useDownload and fU.exists(zipFilePath):
+                logger.info("Using existing downloaded file %r", zipFilePath)
+            else:
+                logger.info("Fetching url %s to resource file %s", urlTarget, filePath)
+                ok = fU.get(urlTarget, zipFilePath, username=username, password=password)
+                endTime = time.time()
+                logger.info("Completed db fetch at %s (%.4f seconds)", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
+            #
             fp = fU.uncompress(zipFilePath, outputDir=dirPath)
             ok = fp.endswith("full database.xml")
             endTime = time.time()
@@ -143,13 +152,13 @@ class DrugBankProvider(object):
             xTree = mU.doImport(filePath, fmt="xml")
             endTime = time.time()
             logger.info("Completed xml read at %s (%.4f seconds)", time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
-
             dbr = DrugBankReader()
-            dbObjL = dbr.read(xTree)
+            version, dbObjL = dbr.read(xTree)
             endTime = time.time()
-            logger.info("Completed xml parse (%d) at %s (%.4f seconds)", len(dbObjL), time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
+            logger.info("Completed parsing (%d) (%r) at %s (%.4f seconds)", len(dbObjL), version, time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime)
 
             dbMapD = self.__buildMapping(dbObjL)
+            dbMapD["version"] = version
             ok = mU.doExport(mappingFilePath, dbMapD, fmt="json", indent=3, enforceAscii=False)
             ok = mU.doExport(docListFilePath, dbObjL, fmt="pickle")
             endTime = time.time()
