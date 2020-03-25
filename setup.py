@@ -41,7 +41,7 @@ setup(
     ),
     entry_points={"console_scripts": []},
     #
-    install_requires=["mmcif >= 0.50", "rcsb.utils.io >= 0.53", "rcsb.utils.config >= 0.33"],
+    install_requires=["mmcif >= 0.51", "rcsb.utils.io >= 0.57", "rcsb.utils.config >= 0.33", "obonet >= 0.2.5", "networkx >= 2.4"],
     packages=find_packages(exclude=["rcsb.mock-data", "rcsb.utils.tests-chemref", "rcsb.utils.tests-*", "tests.*"]),
     package_data={
         # If any package contains *.md or *.rst ...  files, include them:
