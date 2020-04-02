@@ -90,7 +90,7 @@ class PubChemUtils(object):
                 endPoint = "/".join(["rest", "pug", domain, nameSpace, searchType, "RegistryID,RN", outputType])
                 pD = {nameSpace: identifier}
                 ret, retCode = ureq.post(baseUrl, endPoint, pD, headers=hL)
-            elif nameSpace in ["smiles", "inchi",] and searchType in ["fastidentity", "fastsimilarity_2d"]:
+            elif nameSpace in ["smiles", "inchi"] and searchType in ["fastidentity", "fastsimilarity_2d"]:
                 endPoint = "/".join(["rest", "pug", domain, searchType, nameSpace, outputType])
                 pD = {nameSpace: identifier}
                 ret, retCode = ureq.post(baseUrl, endPoint, pD, headers=hL)
@@ -118,7 +118,7 @@ class PubChemUtils(object):
                 uId = quote(identifier.encode("utf8"))
                 endPoint = "/".join(["rest", "pug_view", "data", domain, uId, outputType])
                 ret, retCode = ureq.get(baseUrl, endPoint, pD, headers=hL)
-            elif nameSpace in ["cid",] and requestType == "POST":
+            elif nameSpace in ["cid"] and requestType == "POST":
                 endPoint = "/".join(["rest", "pug_view", "data", domain, outputType])
                 pD = {nameSpace: identifier}
                 ret, retCode = ureq.post(baseUrl, endPoint, pD, headers=hL)
