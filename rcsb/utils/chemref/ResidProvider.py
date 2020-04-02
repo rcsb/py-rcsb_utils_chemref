@@ -155,9 +155,9 @@ class ResidProvider(object):
             for feature in dbObj["features"]:
                 if feature.startswith("MOD_RES"):
                     modResL.append(feature[len("MOD_RES") :].strip())
-            genEnzymes = dbObj["genEnzymes"]
+            genEnzymes = sorted(set(dbObj["genEnzymes"]))
             #
-            ontRefs = [t[4:] for t in dbObj["ontRefs"] if t.startswith("PSI-")]
+            ontRefs = [t[4:] for t in sorted(set(dbObj["ontRefs"])) if t.startswith("PSI-")]
             retD.setdefault(ccId, []).append(
                 {"residCode": residCode, "residName": residName, "relatedResource": related, "modRes": modResL, "genEnzymes": genEnzymes, "ontRefs": ontRefs}
             )

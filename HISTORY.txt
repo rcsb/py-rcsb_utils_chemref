@@ -27,3 +27,4 @@
  19-Mar-2020  - V0.35 Simplify API and eliminate configuration cache directory items
  19-Mar-2020  - V0.36 Add PsiModProvider module
  24-Mar-2020  - V0.37 Update dependencies.
+  1-Apr-2020  - V0.38 New module PubChemUtils()
