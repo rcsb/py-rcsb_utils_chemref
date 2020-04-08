@@ -301,7 +301,7 @@ class PubChemUtils(object):
             "Experimental Properties": "properties",
         }
         mainSectionNameD = {
-            "Names and Identifiers": {"Computed Descriptors": True, "Other Identifiers": True, "Synonyns": True,},
+            "Names and Identifiers": {"Computed Descriptors": True, "Other Identifiers": True, "Synonyns": True},
             "Chemical and Physical Properties": {"Computed Properties": True, "Experimental Properties": True},
         }
         #
