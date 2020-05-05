@@ -1,7 +1,7 @@
 ##
 # File:    PubChemUtilsTests.py
 # Author:  J. Westbrook
-# Date:    30-Mar-2020
+# Date:    1-May-2020
 # Version: 0.001
 #
 # Update:
@@ -23,7 +23,6 @@ import os
 import unittest
 
 from rcsb.utils.chemref.PubChemUtils import PubChemUtils, ChemicalIdentifier
-from rcsb.utils.io.MarshalUtil import MarshalUtil
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 TOPDIR = os.path.dirname(os.path.dirname(HERE))
@@ -34,90 +33,115 @@ logger = logging.getLogger()
 
 class PubChemUtilsTests(unittest.TestCase):
     def setUp(self):
-        self.__workPath = os.path.join(HERE, "test-output")
+        self.__workPath = os.path.join(HERE, "test-output", "PubChem")
 
     def tearDown(self):
         pass
 
-    def testFetchCompound(self):
+    def testFetchCompoundRecord(self):
+        cId = "2244"
+        cName = "2-acetyloxybenzoic acid"
+        #
         pcU = PubChemUtils()
-        chemId = ChemicalIdentifier(idCode="aspirin|test", identifier="2244", identifierType="cid")
-        retStatus, jD = pcU.fetch(chemId, returnType="record")
+        chemId = ChemicalIdentifier(idCode="aspirin|test", identifier=cId, identifierType="cid")
+        rawPath = os.path.join(self.__workPath, "%s-pubchem-record-raw.json" % cId)
+        extractedPath = os.path.join(self.__workPath, "%s-pubchem-record-extracted.json" % cId)
+        retStatus, rDL = pcU.fetch(chemId, returnType="record", storeRawResponsePath=rawPath, storeResponsePath=extractedPath)
         self.assertTrue(retStatus)
-        logger.debug("jD = %r", jD)
-        chemId = ChemicalIdentifier(idCode="aspirin|test", identifier="2-acetyloxybenzoic acid", identifierType="name")
-        retStatus, jD = pcU.fetch(chemId, returnType="record")
+        ok = self.__containsCid(rDL, cId)
+        self.assertTrue(ok)
+        #
+        chemId = ChemicalIdentifier(idCode="aspirin|test", identifier=cName, identifierType="name")
+        retStatus, rDL = pcU.fetch(chemId, returnType="record")
         self.assertTrue(retStatus)
-        logger.debug("jD = %r", jD)
+        ok = self.__containsCid(rDL, cId)
+        self.assertTrue(ok)
         #
 
-    def testFetchDrugCompound(self):
-        pcU = PubChemUtils()
-        chemId = ChemicalIdentifier(idCode="test", identifierType="cid", identifier="123631")
-        retStatus, vD = pcU.fetch(chemId, returnType="view")
-        self.assertTrue(retStatus)
-        mU = MarshalUtil()
-        ok = mU.doExport(os.path.join(self.__workPath, "123631-pubchem-view.json"), vD, fmt="json", indent=3)
-        # ok = pcU.traversePubChemCompoundView(vD)
-        self.assertTrue(ok)
-        pcD = pcU.parsePubChemCompoundView(vD)
-        logger.debug("pcD %r", pcD)
-
-    def __containsCid(self, jD, cid):
+    def __containsCid(self, rDL, cid):
         try:
-            if "PC_Compounds" in jD:
-                for rD in jD["PC_Compounds"]:
-                    ok = rD["id"]["id"]["cid"] = cid
-                    if ok:
-                        return ok
+            for rD in rDL:
+                if "cid" in rD and rD["cid"] == cid:
+                    return True
             return False
         except Exception:
             pass
         return False
 
-    def testSearchCompound(self):
+    def testSearchCompoundRecord(self):
         pcU = PubChemUtils()
-        cId = 2244
+        cId = "2244"
         chemId = ChemicalIdentifier(idCode="aspirin|test", identifier="CC(=O)OC1=CC=CC=C1C(=O)O", identifierType="smiles", identifierSource="3d-model")
-        retStatus, jD = pcU.fetch(chemId, searchType="fastidentity", returnType="record")
+        retStatus, rDL = pcU.fetch(chemId, searchType="fastidentity", returnType="record")
         self.assertTrue(retStatus)
-        logger.debug("jD = %r", jD)
-        ok = self.__containsCid(jD, cId)
+        ok = self.__containsCid(rDL, cId)
         self.assertTrue(ok)
-
         #
         chemId = ChemicalIdentifier(
             idCode="aspirin|test", identifier="InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)", identifierType="inchi", identifierSource="3d-model"
         )
-        retStatus, jD = pcU.fetch(chemId, searchType="fastidentity")
+        retStatus, rDL = pcU.fetch(chemId, searchType="fastidentity")
         self.assertTrue(retStatus)
-        logger.debug("jD = %r", jD)
-        ok = self.__containsCid(jD, cId)
+        ok = self.__containsCid(rDL, cId)
         self.assertTrue(ok)
         #
         chemId = ChemicalIdentifier(idCode="aspirin|test", identifier="BSYNRYMUTXBXSQ-UHFFFAOYSA-N", identifierType="inchikey", identifierSource="3d-model")
-        retStatus, jD = pcU.fetch(chemId, searchType="lookup", returnType="record")
+        retStatus, rDL = pcU.fetch(chemId, searchType="lookup", returnType="record")
         self.assertTrue(retStatus)
-        logger.debug("jD = %r", jD)
-        ok = self.__containsCid(jD, cId)
+        ok = self.__containsCid(rDL, cId)
         self.assertTrue(ok)
+        #
+        chemId = ChemicalIdentifier(idCode="Dummy", identifier="BSYNRYMUTXBXSQ-UHFFFAOYSA-Q", identifierType="inchikey", identifierSource="3d-model")
+        retStatus, rDL = pcU.fetch(chemId, searchType="lookup", returnType="record")
+        self.assertFalse(retStatus)
+        self.assertFalse(rDL)
 
-    def testFetchCompoundOtherReturnTypes(self):
+    def testFetchCompoundAltReturnTypes(self):
         pcU = PubChemUtils()
-        chemId = ChemicalIdentifier(idCode="aspirin|test", identifier="2244", identifierType="cid")
-        for returnType, kys in [("classification", "Hierarchies"), ("property", "PropertyTable"), ("xrefs", "InformationList"), ("synonyms", "InformationList")]:
-            retStatus, jD = pcU.fetch(chemId, returnType=returnType)
-            logger.debug("returnType %r keys %s\n", returnType, jD.keys())
-            logger.debug(">>> jD = %r\n", jD)
-            self.assertTrue(retStatus)
-            self.assertEqual(kys, list(jD.keys())[0])
+        cIdList = ["123631", "2244"]
+        for cId in cIdList:
+            chemId = ChemicalIdentifier(idCode=cId, identifier=cId, identifierType="cid")
+            for returnType, _ in [("classification", "Hierarchies"), ("property", "PropertyTable"), ("xrefs", "InformationList"), ("synonyms", "InformationList")]:
+                # for returnType, _ in [("classification", "Hierarchies")]:
+                rawResponsePath = os.path.join(self.__workPath, "%s-pubchem-%s-raw.json" % (cId, returnType))
+                extractedResponsePath = os.path.join(self.__workPath, "%s-pubchem-%s-extract.json" % (cId, returnType))
+                retStatus, rDL = pcU.fetch(chemId, returnType=returnType, storeRawResponsePath=rawResponsePath, storeResponsePath=extractedResponsePath)
+                self.assertTrue(retStatus)
+                ok = self.__containsCid(rDL, cId)
+                self.assertTrue(ok)
 
     def testFetchCompoundView(self):
-        pcU = PubChemUtils()
-        chemId = ChemicalIdentifier(idCode="aspirin|test", identifier="2244", identifierType="cid")
-        retStatus, jD = pcU.fetch(chemId, returnType="view")
-        self.assertTrue(retStatus)
-        logger.debug("jD = %r", jD)
+        cIdList = ["2244", "123631"]
+        for cId in cIdList:
+            pcU = PubChemUtils()
+            chemId = ChemicalIdentifier(idCode="test", identifierType="cid", identifier=cId)
+            rawResponsePath = os.path.join(self.__workPath, "%s-pubchem-view-raw.json" % cId)
+            extractedResponsePath = os.path.join(self.__workPath, "%s-pubchem-view-extracted.json" % cId)
+            retStatus, vL = pcU.fetch(chemId, returnType="view", storeRawResponsePath=rawResponsePath, storeResponsePath=extractedResponsePath)
+            self.assertTrue(retStatus)
+            self.assertGreaterEqual(len(vL), 1)
+
+    def testFetchCompoundExtTable(self):
+        cIdList = ["2244", "123631"]
+        for cId in cIdList:
+            pcU = PubChemUtils()
+            chemId = ChemicalIdentifier(idCode="test", identifierType="cid", identifier=cId)
+            for extTable in ["dgidb", "pathway", "fdaorangebook", "clinicaltrials", "bioactivity"]:
+                rawResponsePath = os.path.join(self.__workPath, "%s-pubchem-%s-raw.json" % (cId, extTable))
+                extractedResponsePath = os.path.join(self.__workPath, "%s-pubchem-%s-extracted.json" % (cId, extTable))
+                retStatus, vL = pcU.fetch(chemId, returnType=extTable, storeRawResponsePath=rawResponsePath, storeResponsePath=extractedResponsePath)
+                self.assertTrue(retStatus)
+                self.assertGreater(len(vL), 1)
+
+    def testAssemble(self):
+        cIdList = ["2244", "123631"]
+        for cId in cIdList:
+            pcU = PubChemUtils()
+            chemId = ChemicalIdentifier(idCode=cId, identifierType="cid", identifier=cId)
+            retStatus, retDL = pcU.assemble(chemId, exportPath=os.path.join(self.__workPath, "PubChem"))
+            self.assertTrue(retStatus)
+            self.assertTrue("record" in retDL[0]["data"])
+            self.assertTrue("dgidb" in retDL[0]["data"])
 
 
 def fetchPubChemData():
@@ -125,7 +149,7 @@ def fetchPubChemData():
     suiteSelect.addTest(PubChemUtilsTests("testFetchCompound"))
     suiteSelect.addTest(PubChemUtilsTests("testFetchDrugCompound"))
     suiteSelect.addTest(PubChemUtilsTests("testFetchCompoundView"))
-    suiteSelect.addTest(PubChemUtilsTests("testFetchCompoundOtherReturnTypes"))
+    suiteSelect.addTest(PubChemUtilsTests("testFetchCompoundAltReturnTypes"))
     suiteSelect.addTest(PubChemUtilsTests("testSearchCompound"))
     return suiteSelect
 

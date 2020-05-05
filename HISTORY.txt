@@ -29,3 +29,4 @@
  24-Mar-2020  - V0.37 Update dependencies.
   1-Apr-2020  - V0.38 New module PubChemUtils()
   8-Apr-2020  - V0.39 Extensions for PubChemUtils() with additional tests using namedtuple input
+  1-May-2020  - V0.40 Extensions for full PubChem data extraction
