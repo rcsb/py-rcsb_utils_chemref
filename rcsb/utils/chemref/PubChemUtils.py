@@ -527,7 +527,7 @@ class PubChemUtils(object):
                 "Computed Properties": {"ky": "properties", "subSections": []},
                 "Experimental Properties": {"ky": "properties", "subSections": []},
             },
-            "Drug and Medication Information": {"Drug Indication": {"ky": "drugInfo", "subSections": []}, "Drug Classes": {"ky": "drugInfo", "subSections": []},},
+            "Drug and Medication Information": {"Drug Indication": {"ky": "drugInfo", "subSections": []}, "Drug Classes": {"ky": "drugInfo", "subSections": []}},
             "Pharmacology and Biochemistry": {
                 "Pharmacology": {"ky": "pharmaInfo", "subSections": []},
                 "MeSH Pharmacological Classification": {"ky": "pharmaInfo", "subSections": []},
