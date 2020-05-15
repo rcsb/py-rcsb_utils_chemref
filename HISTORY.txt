@@ -31,3 +31,4 @@
   8-Apr-2020  - V0.39 Extensions for PubChemUtils() with additional tests using namedtuple input
   1-May-2020  - V0.40 Extensions for full PubChem data extraction
   5-May-2020  - V0.41 PubChemUtils.assemble() api adjustments and object content adjustments
+ 15-May-2020  - V0.42 Reduce DrugBank test memory footprint.
