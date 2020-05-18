@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 ExternalAnnotationFields = ("featureType", "name", "value", "description", "dataType", "units", "provReferenceId", "provSourceName")
 ExternalAnnotation = namedtuple("ExternalAnnotation", ExternalAnnotationFields, defaults=(None,) * len(ExternalAnnotationFields))
 
-ChemicalIdentifierFields = ("idCode", "identifierSource", "identifierType", "identifier")
+ChemicalIdentifierFields = ("idCode", "identifierSource", "identifierType", "identifier", "indexName")
 ChemicalIdentifier = namedtuple("ChemicalIdentifier", ChemicalIdentifierFields, defaults=(None,) * len(ChemicalIdentifierFields))
 
 
