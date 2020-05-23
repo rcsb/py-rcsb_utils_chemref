@@ -33,3 +33,4 @@
   5-May-2020  - V0.41 PubChemUtils.assemble() api adjustments and object content adjustments
  15-May-2020  - V0.42 Reduce DrugBank test memory footprint.
  17-May-2020  - V0.43 Extend ChemicalIdentifier
+ 23-May-2020  - V0.44 Update logging

@@ -74,7 +74,15 @@ class PubChemUtils(object):
                 cidList.append(cid)
                 retD.setdefault(cid, {}).update({"record": rD})
         #
-        logger.info("%s searchType %r idType %r finds PubChem compound identifiers (%d) %r", chemId.idCode, searchType, chemId.identifierType, len(cidList), cidList)
+        logger.info(
+            "%s searchType %r idType %r idSource %r finds PubChem compounds (%d) %r",
+            chemId.idCode,
+            searchType,
+            chemId.identifierType,
+            chemId.identifierSource,
+            len(cidList),
+            cidList,
+        )
         if not cidList:
             return retStatus, assemDL
         #
@@ -117,8 +125,8 @@ class PubChemUtils(object):
             (bool, list): status, return object list (selected items extracted from each returned record type)
 
         """
-        logger.debug(
-            "identifier %r nameSpace %r searchType %r returnType %r delay %r",
+        logger.info(
+            "   >>> fetching identifier %r nameSpace %r searchType %r returnType %r delay %r",
             chemicalIdentifier.identifier,
             chemicalIdentifier.identifierType,
             searchType,
