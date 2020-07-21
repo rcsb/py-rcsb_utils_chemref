@@ -41,33 +41,49 @@ class PubChemUtils(object):
     """
 
     def __init__(self, **kwargs):
+        self.__verbose = kwargs.get("verbose", False)
+        self.__delaySeconds = float(kwargs.get("delaySeconds", "0.15"))
         self.__urlPrimary = kwargs.get("urlPrimary", "https://pubchem.ncbi.nlm.nih.gov")
         #
 
-    def assemble(self, chemId, exportPath=None, exportIntermediates=False):
-        """Build a complete PubChem exchange data object.
+    def assemble(self, chemicalIdentifier, **kwargs):
+        """Build a PubChem exchange data object.
+
         Args:
-            chemId (namedtuple): ChemicalIdentifier(identifierSouce, identifierType, identifier)
+            chemicalIdentifier (namedtuple): ChemicalIdentifier(identifierSource, identifierType, identifier)
+            exportPath (str, optional): path to export intermediate fetch results (default: None)
+            exportIntermediates (bool, optional): flag controlling export of intermediate results (default: False)
+            matchIdOnly (bool, optional): flag to stop after performing record lookup to obtain matching identifiers
+            contentTypes (list): PubChem content types to fetch (default: ["view", "classification", "property", "xrefs", \
+                                                                           "synonyms", "dgidb", "pathway", \
+                                                                           "fdaorangebook", "clinicaltrials", "bioactivity"])
+
 
         Return:
              (bool, dict): status, PubChem exchange data object
 
         """
+        exportPath = kwargs.get("exportPath", None)
+        exportIntermediates = kwargs.get("exportIntermediates", False)
+        matchIdOnly = kwargs.get("matchIdOnly", False)
+        contentTypes = kwargs.get("contentTypes", ["view", "classification", "property", "xrefs", "synonyms", "dgidb", "pathway", "fdaorangebook", "clinicaltrials", "bioactivity"])
+
         retStatus = False
         retD = {}
         assemDL = []
         # -- First identifier the PubChem compound CID for the input chemical identifier.
-        if chemId.identifierType in ["smiles", "inchi"]:
+        if chemicalIdentifier.identifierType in ["smiles", "inchi"]:
             searchType = "fastidentity"
-        elif chemId.identifierType in ["cid", "name", "inchikey"]:
+        elif chemicalIdentifier.identifierType in ["cid", "name", "inchikey"]:
             searchType = "lookup"
         else:
             pass
         #
-        retStatus, rDL = self.fetch(chemId, searchType=searchType, returnType="record")
+        retStatus, rDL = self.fetch(chemicalIdentifier, searchType=searchType, returnType="record", delaySeconds=self.__delaySeconds)
         if not retStatus:
             return retStatus, assemDL
         #
+        # PubChem compound CIDs
         cidList = []
         for rD in rDL:
             cid = rD["cid"] if "cid" in rD else None
@@ -77,26 +93,33 @@ class PubChemUtils(object):
         #
         logger.info(
             "%s searchType %r idType %r idSource %r finds PubChem compounds (%d) %r",
-            chemId.idCode,
+            chemicalIdentifier.idCode,
             searchType,
-            chemId.identifierType,
-            chemId.identifierSource,
+            chemicalIdentifier.identifierType,
+            chemicalIdentifier.identifierSource,
             len(cidList),
             cidList,
         )
         if not cidList:
             return retStatus, assemDL
+
+        if matchIdOnly:
+            for cid in retD:
+                assemDL.append({"cid": cid, "data": retD[cid]})
+            return retStatus, assemDL
         #
-        # --  Build data object for this CID
+        # --  Build data object for each CID
         #
         for cid in cidList:
             chemId = ChemicalIdentifier(idCode=cid, identifier=cid, identifierType="cid")
-            for returnType in ["view", "classification", "property", "xrefs", "synonyms", "dgidb", "pathway", "fdaorangebook", "clinicaltrials", "bioactivity"]:
+            for returnType in contentTypes:
                 rawResponsePath, extractedResponsePath = None, None
                 if exportPath and exportIntermediates:
                     rawResponsePath = os.path.join(exportPath, "%s-pubchem-%s-raw.json" % (cid, returnType))
                     extractedResponsePath = os.path.join(exportPath, "%s-pubchem-%s-extract.json" % (cid, returnType))
-                tStatus, rDL = self.fetch(chemId, returnType=returnType, storeRawResponsePath=rawResponsePath, storeResponsePath=extractedResponsePath)
+                tStatus, rDL = self.fetch(
+                    chemId, returnType=returnType, storeRawResponsePath=rawResponsePath, storeResponsePath=extractedResponsePath, delaySeconds=self.__delaySeconds
+                )
                 # retStatus = tStatus and retStatus
                 if tStatus and rDL:
                     if returnType in ["view", "classification", "property", "xrefs", "synonyms"] and len(rDL[0]) > 1:
@@ -126,14 +149,15 @@ class PubChemUtils(object):
             (bool, list): status, return object list (selected items extracted from each returned record type)
 
         """
-        logger.info(
-            "   >>> fetching identifier %r nameSpace %r searchType %r returnType %r delay %r",
-            chemicalIdentifier.identifier,
-            chemicalIdentifier.identifierType,
-            searchType,
-            returnType,
-            delaySeconds,
-        )
+        if self.__verbose:
+            logger.info(
+                "fetching identifier %r nameSpace %r searchType %r returnType %r delay %r",
+                chemicalIdentifier.identifier,
+                chemicalIdentifier.identifierType,
+                searchType,
+                returnType,
+                delaySeconds,
+            )
         #
         if delaySeconds:
             time.sleep(delaySeconds)
@@ -165,7 +189,7 @@ class PubChemUtils(object):
         elif ok and returnType == "synonyms":
             retL = self.__parsePubChemSynonyms(response)
         elif ok and returnType == "view":
-            retL = [self.parsePubChemCompoundView(response)]
+            retL = [self.__parsePubChemCompoundView(response)]
         elif ok and returnType in ["dgidb", "pathway", "fdaorangebook", "clinicaltrials", "bioactivity"]:
             retL = self.__parseSdqResponse(returnType, response)
         #
@@ -198,7 +222,6 @@ class PubChemUtils(object):
             with “cid=1,2,3,4,5” in the POST body, and  “Content-Type: application/x-www-form-urlencoded”
 
         """
-
         #
         httpCodesCatch = [404]
         requestType = "POST"
@@ -271,7 +294,7 @@ class PubChemUtils(object):
             #
 
         except Exception as e:
-            logger.exception("Failing with (%r) %s", retCode, str(e))
+            logger.error("Failing identifier %r returnType %r nameSpace %r with (retCode %r) %s", identifier, returnType, nameSpace, retCode, str(e))
 
         return ret, retCode
 
@@ -300,7 +323,8 @@ class PubChemUtils(object):
                 pD = {nameSpace: identifier}
                 ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON")
         except Exception as e:
-            logger.exception("Failing with %s", str(e))
+            logger.error("Failing for identifier %r returnType view with (retCode %r) %s", identifier, retCode, str(e))
+        #
         return ret, retCode
 
     def __doSgdRequest(self, identifier, returnType="dgidb"):
@@ -328,7 +352,7 @@ class PubChemUtils(object):
                 pD = {"infmt": "json", "outfmt": "json", "query": '{"select":"*","collection":"%s","where":{"ands":{"cid":"%s"}}}' % (returnType, identifier)}
                 ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON")
         except Exception as e:
-            logger.exception("Failing with %s", str(e))
+            logger.error("Failing identifier %r return type %r with (retCode %r) %s", identifier, returnType, retCode, str(e))
         #
         logger.debug("identifier %s returnType %r [%r] result not empty %r", identifier, returnType, retCode, ret is not None)
         #  Display the column names returned from the various SDQ collections -
@@ -441,7 +465,7 @@ class PubChemUtils(object):
         #
         return rL
 
-    def traversePubChemCompoundView(self, vD):
+    def __traversePubChemCompoundView(self, vD):
         """
             "Record": {
                     "RecordType": "CID",
@@ -492,7 +516,7 @@ class PubChemUtils(object):
 
         return False
 
-    def parsePubChemCompoundView(self, vD):
+    def __parsePubChemCompoundView(self, vD):
         """
             "Record": {
                     "RecordType": "CID",

@@ -35,3 +35,5 @@
  17-May-2020  - V0.43 Extend ChemicalIdentifier
  23-May-2020  - V0.44 Update logging
  28-May-2020  - V0.45 Hookup alternative URL fetch library.
+ 16-Jul-2020  - V0.46 Extend the API for PubChemUtils.assemble()
+ 20-Jul-2020  - V0.47 Adjust error handling and reporting.
