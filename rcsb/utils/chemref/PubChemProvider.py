@@ -6,7 +6,7 @@
 #
 ##
 """
-Accessors for PubChem extracted annotations.
+Accessors for PubChem mapped annotations.
 
 """
 
@@ -17,12 +17,11 @@ import time
 from rcsb.utils.io.MarshalUtil import MarshalUtil
 from rcsb.utils.io.StashUtil import StashUtil
 
-
 logger = logging.getLogger(__name__)
 
 
 class PubChemProvider:
-    """ Accessors for PubChem extracted annotations.
+    """ Accessors for PubChem managed annotations.
 
         dirPath -> CACHE/PubChem/
 
@@ -44,16 +43,6 @@ class PubChemProvider:
         #    Local target directory name to be stashed.  (subdir of dirPath)
         self.__stashDir = "mapped_annotations"
         #
-        #    Remote path to the directory containing the bundle file -
-        # self.__stashRemoteDirPath = kwargs.get("stashRemoteDirPath", None)
-        #
-        #  Optional configuration for stash services -
-        #
-        # self.__stashUrl = kwargs.get("stashUrl", None)
-        # self.__stashUserName = kwargs.get("stashUserName", None)
-        # self.__stashPassword = kwargs.get("stashPassword", None)
-        # self.__stashRemotePrefix = kwargs.get("stashRemotePrefix", None)
-        #
         self.__mU = MarshalUtil(workPath=self.__dirPath)
         self.__pcD = self.__reload(fmt="json", useCache=useCache)
         #
@@ -64,6 +53,11 @@ class PubChemProvider:
         return False
 
     def getIdentifiers(self):
+        """Return a dictionary of related identifiers organized by chemical component/BIRD id.
+
+        Returns:
+            (dict): {ccId: {'idtype1': ids, 'idtype1': ids}, ... }
+        """
         try:
             return self.__pcD["identifiers"]
         except Exception as e:
@@ -77,7 +71,7 @@ class PubChemProvider:
         return fp
 
     def load(self, pcObj, contentType, fmt="json", indent=0):
-        """Load the input object into the PubChem provider cache.
+        """Load the input object of type contentType into the PubChem provider cache.
 
         Args:
             pcObj (dict): PubChem annotation object.
@@ -111,6 +105,18 @@ class PubChemProvider:
         return pcD
 
     def toStash(self, url, stashRemoteDirPath, userName=None, password=None, remoteStashPrefix=None):
+        """Copy tar and gzipped bundled cache data to remote server/location.
+
+        Args:
+            url (str): server URL (e.g. sftp://hostname.domain) None for local host
+            stashRemoteDirPath (str): path to target directory on remote server
+            userName (str, optional): server username. Defaults to None.
+            password (str, optional): server password. Defaults to None.
+            remoteStashPrefix (str, optional): channel prefix. Defaults to None.
+
+        Returns:
+            (bool): True for success or False otherwise
+        """
         ok = False
         try:
             stU = StashUtil(os.path.join(self.__dirPath, "stash"), "pubchem_mapped_annotations")
@@ -122,6 +128,18 @@ class PubChemProvider:
         return ok
 
     def fromStash(self, url, stashRemoteDirPath, userName=None, password=None, remoteStashPrefix=None):
+        """Restore local cache from a tar and gzipped bundle to fetched from a remote server/location.
+
+        Args:
+            url (str): server URL (e.g. sftp://hostname.domain) None for local host
+            stashRemoteDirPath (str): path to target directory on remote server
+            userName (str, optional): server username. Defaults to None.
+            password (str, optional): server password. Defaults to None.
+            remoteStashPrefix (str, optional): channel prefix. Defaults to None.
+
+        Returns:
+            (bool): True for success or False otherwise
+        """
         try:
             stU = StashUtil(os.path.join(self.__dirPath, "stash"), "pubchem_mapped_annotations")
             ok = stU.fetchBundle(self.__dirPath, url, stashRemoteDirPath, remoteStashPrefix=remoteStashPrefix, userName=userName, password=password)

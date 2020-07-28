@@ -8,7 +8,7 @@
 #
 ##
 """
-Tests for accessors for PubChem extracted annotations.
+Tests for accessors for managing PubChem extracted annotations.
 
 """
 
