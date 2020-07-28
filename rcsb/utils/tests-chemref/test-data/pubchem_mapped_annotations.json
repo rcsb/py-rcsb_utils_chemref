@@ -1,0 +1,240 @@
+{
+"version": "0.50",
+"created": "2020 07 28 10:38:28",
+"identifiers": {
+"000": [
+{
+"pcId": "78579",
+"inchiKey": "CXHHBNMLPJOKQD-UHFFFAOYSA-N"
+}
+],
+"001": [
+{
+"pcId": "446414",
+"inchiKey": "NBYCDVVSYOMFMS-VMPREFPWSA-N",
+"cid": "446414",
+"ChEBI": [
+"CHEBI:39485"
+]
+}
+],
+"002": [
+{
+"pcId": "5487524",
+"inchiKey": "MWZOULASPWUGJJ-NFBUACBFSA-N"
+}
+],
+"003": [
+{
+"pcId": "16069302",
+"inchiKey": "NNZDBCPMOOEFTE-UHFFFAOYSA-N",
+"cid": "16069302",
+"ChEBI": [
+"CHEBI:39506"
+],
+"ChEMBL": [
+"CHEMBL401874"
+]
+}
+],
+"004": [
+{
+"pcId": "99291",
+"inchiKey": "ZGUNAGUHMKGQNY-ZETCQYMHSA-N",
+"cid": "99291",
+"CAS": [
+"2935-35-5"
+],
+"ChEBI": [
+"CHEBI:439819"
+],
+"ChEMBL": [
+"CHEMBL378605"
+]
+},
+{
+"pcId": "6931074",
+"inchiKey": "ZGUNAGUHMKGQNY-ZETCQYMHSA-N",
+"cid": "6931074",
+"ChEBI": [
+"CHEBI:136765"
+]
+}
+],
+"0K3": [
+{
+"pcId": "56928049",
+"inchiKey": "KVTNIWHEHVWGJC-DLTKSLTJSA-N"
+}
+],
+"GLC": [
+{
+"pcId": "79025",
+"inchiKey": "WQZGKKKJIJFFOK-DVKNGEFBSA-N",
+"cid": "79025",
+"CAS": [
+"26655-34-5"
+],
+"ChEBI": [
+"CHEBI:15444",
+"CHEBI:17925",
+"CHEBI:18269",
+"CHEBI:18398",
+"CHEBI:28100",
+"CHEBI:28102"
+],
+"ChEMBL": [
+"CHEMBL423707"
+],
+"HMDB": [
+"HMDB0003345"
+]
+}
+],
+"MAN": [
+{
+"pcId": "185698",
+"inchiKey": "WQZGKKKJIJFFOK-PQMKYFCFSA-N",
+"cid": "185698",
+"ChEBI": [
+"CHEBI:28729"
+],
+"ChEMBL": [
+"CHEMBL365590"
+]
+}
+],
+"NTP": [
+{
+"pcId": "444410",
+"inchiKey": "MQLWHPBUPXUQHM-XAYBSJBFSA-N"
+}
+],
+"PRD_000001": [
+{
+"pcId": "457193",
+"inchiKey": "RJURFGZVJUQBHK-IIXSONLDSA-N",
+"cid": "457193",
+"CAS": [
+"50-76-0"
+],
+"ChEBI": [
+"CHEBI:27666"
+],
+"ChEMBL": [
+"CHEMBL1554"
+],
+"HMDB": [
+"HMDB0015105"
+]
+}
+],
+"PRD_000007": [
+{
+"pcId": "10486576",
+"inchiKey": "GQZJMUMSSGCVFS-IRFLANFNSA-N",
+"cid": "10486576",
+"CAS": [
+"18865-48-0"
+],
+"ChEMBL": [
+"CHEMBL4287110"
+]
+}
+],
+"PRD_000009": [
+{
+"pcId": "21603439",
+"inchiKey": "PLQQUUFBVCDPMY-VFSNQXKDSA-N"
+}
+],
+"PRD_000011": [
+{
+"pcId": "5288128",
+"inchiKey": "DVAQENANCBGZCP-DKRVMSHNSA-N"
+}
+],
+"PRD_000102": [
+{
+"pcId": "656997",
+"inchiKey": "VMVLYRBEXXAOKW-WGXSSYHUSA-Q"
+}
+],
+"PRD_000103": [
+{
+"pcId": "656995",
+"inchiKey": "NXBWHNNNTWLVBW-KHVQSSSXSA-Q"
+}
+],
+"PRD_000104": [
+{
+"pcId": "656993",
+"inchiKey": "ANSXQQYWAJZHSN-NGTAMTFRSA-Q"
+}
+],
+"PRD_000105": [
+{
+"pcId": "448204",
+"inchiKey": "NUAFTYKKXYBVNB-UNHORJANSA-Q"
+}
+],
+"PRD_000108": [
+{
+"pcId": "448495",
+"inchiKey": "HTFTYEBBIOFICB-FTTHONBCSA-N"
+}
+],
+"PRD_000117": [
+{
+"pcId": "9988024",
+"inchiKey": "YFSXYWAZCKMYJN-JBBOGOJTSA-N",
+"cid": "9988024",
+"ChEMBL": [
+"CHEMBL1231055"
+]
+}
+],
+"PRD_000142": [
+{
+"pcId": "5284373",
+"inchiKey": "PMATZTZNYRCHOR-CGLBZJNRSA-N",
+"cid": "5284373",
+"CAS": [
+"59865-13-3"
+],
+"ChEBI": [
+"CHEBI:4031",
+"CHEBI:92233"
+],
+"ChEMBL": [
+"CHEMBL160"
+]
+}
+],
+"PRD_000143": [
+{
+"pcId": "102586578",
+"inchiKey": "GWSIJRDFKMKYOP-KZTZMRGGSA-N"
+}
+],
+"PRD_000144": [
+{
+"pcId": "5287817",
+"inchiKey": "JTOKYIBTLUQVQV-QRVTZXGZSA-N",
+"cid": "5287817",
+"CAS": [
+"59787-61-0"
+],
+"ChEMBL": [
+"CHEMBL2370014"
+]
+}
+],
+"X12": [
+{
+"pcId": "42609679",
+"inchiKey": "GFRBISAVUSZQEP-GABXEQJVSA-N"
+}
+]
+}
+}
