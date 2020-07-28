@@ -68,7 +68,7 @@ class PubChemProviderTests(unittest.TestCase):
         cfgOb = ConfigUtil(configPath=configPath, defaultSectionName=configName)
         userName = cfgOb.get("_STASH_AUTH_USERNAME", sectionName=configName)
         password = cfgOb.get("_STASH_AUTH_PASSWORD", sectionName=configName)
-        basePath = cfgOb.get("_STASH_BASE_PATH", sectionName=configName)
+        basePath = cfgOb.get("_STASH_SERVER_BASE_PATH", sectionName=configName)
         url = cfgOb.get("STASH_SERVER_URL", sectionName=configName)
         urlFallBack = cfgOb.get("STASH_SERVER_FALLBACK_URL", sectionName=configName)
         #

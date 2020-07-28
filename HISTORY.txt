@@ -39,3 +39,4 @@
  20-Jul-2020  - V0.47 Adjust error handling and reporting.
  28-Jul-2020  - V0.48 Add PubChemProvider() to manage access to PubChem mapped annotations
  28-Jul-2020  - V0.49 Upversion and update dependencies
+ 28-Jul-2020  - V0.50 Tweaking stash configuration options in test cases.
