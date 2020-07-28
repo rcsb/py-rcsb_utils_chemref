@@ -38,3 +38,4 @@
  16-Jul-2020  - V0.46 Extend the API for PubChemUtils.assemble()
  20-Jul-2020  - V0.47 Adjust error handling and reporting.
  28-Jul-2020  - V0.48 Add PubChemProvider() to manage access to PubChem mapped annotations
+ 28-Jul-2020  - V0.49 Upversion and update dependencies
