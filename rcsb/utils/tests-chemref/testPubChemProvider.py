@@ -56,6 +56,10 @@ class PubChemProviderTests(unittest.TestCase):
         self.assertTrue(ok)
         ok = pcP.fromStash(self.__stashUrl, self.__stashRemotePath)
         self.assertTrue(ok)
+        ok = pcP.reload()
+        self.assertTrue(ok)
+        ok = pcP.testCache(minCount=23)
+        self.assertTrue(ok)
         #
         pcP = PubChemProvider(cachePath=self.__cachePath, useCache=True)
         ok = pcP.testCache(minCount=23)
@@ -83,6 +87,8 @@ class PubChemProviderTests(unittest.TestCase):
         ok = pcP.fromStash(url, basePath, userName=userName, password=password)
         self.assertTrue(ok)
         ok = pcP.fromStash(urlFallBack, basePath, userName=userName, password=password)
+        self.assertTrue(ok)
+        ok = pcP.reload()
         self.assertTrue(ok)
         #
 
