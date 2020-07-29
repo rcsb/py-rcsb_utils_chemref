@@ -94,6 +94,17 @@ class PubChemProvider:
             logger.exception("Failing with %s", str(e))
         return ok
 
+    def reload(self):
+        """ Reload from the current cache file.
+        """
+        ok = False
+        try:
+            self.__pcD = self.__reload(fmt="json", useCache=True)
+            ok = self.__pcD is not None
+        except Exception as e:
+            logger.exception("Failing with %s", str(e))
+        return ok
+
     def __reload(self, fmt="json", useCache=True):
         annotFilePath = self.__getAnnotFilePath(fmt=fmt)
         #
