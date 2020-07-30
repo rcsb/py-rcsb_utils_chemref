@@ -47,7 +47,9 @@ class PubChemProvider:
         self.__pcD = self.__reload(fmt="json", useCache=useCache)
         #
 
-    def testCache(self, minCount=1):
+    def testCache(self, minCount=0):
+        if minCount == 0:
+            return True
         if self.__pcD and minCount and ("identifiers" in self.__pcD) and len(self.__pcD["identifiers"]) >= minCount:
             return True
         return False
@@ -59,10 +61,10 @@ class PubChemProvider:
             (dict): {ccId: {'idtype1': ids, 'idtype1': ids}, ... }
         """
         try:
-            return self.__pcD["identifiers"]
+            return self.__pcD["identifiers"] if self.__pcD["identifiers"] else {}
         except Exception as e:
-            logger.info("Failing with %r", str(e))
-        return None
+            logger.error("Failing with %r", str(e))
+        return {}
 
     def __getAnnotFilePath(self, fmt="json"):
         stashBaseFileName = "pubchem_mapped_annotations"
@@ -109,7 +111,7 @@ class PubChemProvider:
         annotFilePath = self.__getAnnotFilePath(fmt=fmt)
         #
         tS = time.strftime("%Y %m %d %H:%M:%S", time.localtime())
-        pcD = {"version": self.__version, "created": tS, "identifiers": None}
+        pcD = {"version": self.__version, "created": tS, "identifiers": {}}
         logger.info("useCache %r annotFilePath %r", useCache, annotFilePath)
         if useCache and self.__mU.exists(annotFilePath):
             pcD = self.__mU.doImport(annotFilePath, fmt=fmt)
@@ -135,7 +137,7 @@ class PubChemProvider:
             if ok:
                 ok = stU.storeBundle(url, stashRemoteDirPath, remoteStashPrefix=remoteStashPrefix, userName=userName, password=password)
         except Exception as e:
-            logger.exception("Failing with url %r stashDirPath %r: %s", url, stashRemoteDirPath, str(e))
+            logger.error("Failing with url %r stashDirPath %r: %s", url, stashRemoteDirPath, str(e))
         return ok
 
     def fromStash(self, url, stashRemoteDirPath, userName=None, password=None, remoteStashPrefix=None):
@@ -155,5 +157,5 @@ class PubChemProvider:
             stU = StashUtil(os.path.join(self.__dirPath, "stash"), "pubchem_mapped_annotations")
             ok = stU.fetchBundle(self.__dirPath, url, stashRemoteDirPath, remoteStashPrefix=remoteStashPrefix, userName=userName, password=password)
         except Exception as e:
-            logger.exception("Failing with url %r stashDirPath %r: %s", url, stashRemoteDirPath, str(e))
+            logger.error("Failing with url %r stashDirPath %r: %s", url, stashRemoteDirPath, str(e))
         return ok

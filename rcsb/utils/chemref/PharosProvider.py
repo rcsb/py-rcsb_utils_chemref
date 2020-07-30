@@ -40,7 +40,9 @@ class PharosProvider:
         self.__phD = self.__reload(fmt="json", useCache=useCache)
         #
 
-    def testCache(self, minCount=100):
+    def testCache(self, minCount=0):
+        if minCount == 0:
+            return True
         if self.__phD and minCount and ("identifiers" in self.__phD) and len(self.__phD["identifiers"]) >= minCount:
             return True
         return False
@@ -52,10 +54,10 @@ class PharosProvider:
             (dict): {phId: True}
         """
         try:
-            return self.__phD["identifiers"]
+            return self.__phD["identifiers"] if self.__phD["identifiers"] else {}
         except Exception as e:
-            logger.info("Failing with %r", str(e))
-        return None
+            logger.error("Failing with %r", str(e))
+        return {}
 
     def __getAnnotFilePath(self, fmt="json"):
         stashBaseFileName = "pharos_mapped_annotations"
@@ -103,7 +105,7 @@ class PharosProvider:
         annotFilePath = self.__getAnnotFilePath(fmt=fmt)
         #
         tS = time.strftime("%Y %m %d %H:%M:%S", time.localtime())
-        pcD = {"version": self.__version, "created": tS, "identifiers": None}
+        pcD = {"version": self.__version, "created": tS, "identifiers": {}}
         logger.info("useCache %r annotFilePath %r", useCache, annotFilePath)
         if useCache and self.__mU.exists(annotFilePath):
             pcD = self.__mU.doImport(annotFilePath, fmt=fmt)
@@ -129,7 +131,7 @@ class PharosProvider:
             if ok:
                 ok = stU.storeBundle(url, stashRemoteDirPath, remoteStashPrefix=remoteStashPrefix, userName=userName, password=password)
         except Exception as e:
-            logger.exception("Failing with url %r stashDirPath %r: %s", url, stashRemoteDirPath, str(e))
+            logger.error("Failing with url %r stashDirPath %r: %s", url, stashRemoteDirPath, str(e))
         return ok
 
     def fromStash(self, url, stashRemoteDirPath, userName=None, password=None, remoteStashPrefix=None):
@@ -149,5 +151,5 @@ class PharosProvider:
             stU = StashUtil(os.path.join(self.__dirPath, "stash"), "pharos_mapped_annotations")
             ok = stU.fetchBundle(self.__dirPath, url, stashRemoteDirPath, remoteStashPrefix=remoteStashPrefix, userName=userName, password=password)
         except Exception as e:
-            logger.exception("Failing with url %r stashDirPath %r: %s", url, stashRemoteDirPath, str(e))
+            logger.error("Failing with url %r stashDirPath %r: %s", url, stashRemoteDirPath, str(e))
         return ok

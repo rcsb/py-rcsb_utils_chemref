@@ -42,3 +42,4 @@
  28-Jul-2020  - V0.50 Tweaking stash configuration options in test cases.
  29-Jul-2020  - V0.51 Add public reload() method to PubChemProvider().
  30-Jul-2020  - V0.52 Add PharosProvider() module, supporting tests, and ad hoc tools.
+ 30-Jul-2020  - V0.53 Provide bypass for PubChem and PharosProvider testCache() methods.
