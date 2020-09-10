@@ -121,6 +121,7 @@ class PubChemUtilsTests(unittest.TestCase):
             self.assertTrue(retStatus)
             self.assertGreaterEqual(len(vL), 1)
 
+    @unittest.skip("Skipping until api is more reliable")
     def testFetchCompoundExtTable(self):
         try:
             cIdList = ["2244", "123631"]
@@ -128,8 +129,7 @@ class PubChemUtilsTests(unittest.TestCase):
             for cId in cIdList:
                 pcU = PubChemUtils()
                 chemId = ChemicalIdentifier(idCode="test", identifierType="cid", identifier=cId)
-                # removing pathway for the moment - for extTable in ["dgidb", "pathway", "fdaorangebook", "clinicaltrials", "bioactivity"]:
-                for extTable in ["dgidb", "fdaorangebook", "clinicaltrials", "bioactivity"]:
+                for extTable in ["dgidb", "pathway", "fdaorangebook", "clinicaltrials", "bioactivity"]:
                     rawResponsePath = os.path.join(self.__workPath, "%s-pubchem-%s-raw.json" % (cId, extTable))
                     extractedResponsePath = os.path.join(self.__workPath, "%s-pubchem-%s-extracted.json" % (cId, extTable))
                     retStatus, vL = pcU.fetch(chemId, returnType=extTable, storeRawResponsePath=rawResponsePath, storeResponsePath=extractedResponsePath)
