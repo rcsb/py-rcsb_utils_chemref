@@ -21,8 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class PharosProvider:
-    """ Accessors for Pharos comound assignments.
-    """
+    """Accessors for Pharos comound assignments."""
 
     def __init__(self, **kwargs):
         #
@@ -91,8 +90,7 @@ class PharosProvider:
         return ok
 
     def reload(self):
-        """ Reload from the current cache file.
-        """
+        """Reload from the current cache file."""
         ok = False
         try:
             self.__phD = self.__reload(fmt="json", useCache=True)
