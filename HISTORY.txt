@@ -45,3 +45,4 @@
  30-Jul-2020  - V0.53 Provide bypass for PubChem and PharosProvider testCache() methods.
  10-Sep-2020  - V0.54 Disable NCBI pathway tests owing to data availibility
  10-Sep-2020  - V0.55 Disable further tests for now
+ 19-Sep-2020  - V0.56 Use a version specific Drugbank URL

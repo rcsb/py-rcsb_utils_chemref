@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class DrugBankProvider(object):
-    """ Utilities to read the DrugBank resource file and build loadable documents and identifier
+    """Utilities to read the DrugBank resource file and build loadable documents and identifier
     correspondences.
     """
 
@@ -73,7 +73,7 @@ class DrugBankProvider(object):
             return self.__buildDocuments(self.__dbObjL, dbIdD)
 
     def __reload(self, **kwargs):
-        """ Reload DrugBank mapping data and optionally supporting repository data file.
+        """Reload DrugBank mapping data and optionally supporting repository data file.
 
         Args:
             urlTarget (str): target url for resource file
@@ -88,8 +88,9 @@ class DrugBankProvider(object):
         """
         startTime = time.time()
         logger.info("Starting db reload at %s", time.strftime("%Y %m %d %H:%M:%S", time.localtime()))
-        #
-        urlTarget = kwargs.get("urlTarget", "https://www.drugbank.ca/releases/latest/downloads/all-full-database")
+        # Latest url seems to broken on ~ Sep 19, 2020
+        # urlTarget = kwargs.get("urlTarget", "https://www.drugbank.ca/releases/latest/downloads/all-full-database")
+        urlTarget = kwargs.get("urlTarget", "https://go.drugbank.com/releases/5-1-7/downloads/all-full-database")
         dirPath = os.path.join(kwargs.get("cachePath", "."), "DrugBank")
         useCache = kwargs.get("useCache", True)
         useDownload = kwargs.get("useDownload", True)
