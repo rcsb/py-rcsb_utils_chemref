@@ -89,8 +89,8 @@ class DrugBankProvider(object):
         startTime = time.time()
         logger.info("Starting db reload at %s", time.strftime("%Y %m %d %H:%M:%S", time.localtime()))
         # Latest url seems to broken on ~ Sep 19, 2020
-        # urlTarget = kwargs.get("urlTarget", "https://www.drugbank.ca/releases/latest/downloads/all-full-database")
-        urlTarget = kwargs.get("urlTarget", "https://go.drugbank.com/releases/5-1-7/downloads/all-full-database")
+        urlTarget = kwargs.get("urlTarget", "https://go.drugbank.com/releases/latest/downloads/all-full-database")
+        # urlTarget = kwargs.get("urlTarget", "https://go.drugbank.com/releases/5-1-7/downloads/all-full-database")
         dirPath = os.path.join(kwargs.get("cachePath", "."), "DrugBank")
         useCache = kwargs.get("useCache", True)
         useDownload = kwargs.get("useDownload", True)
