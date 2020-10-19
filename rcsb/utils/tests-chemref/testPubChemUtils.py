@@ -96,6 +96,7 @@ class PubChemUtilsTests(unittest.TestCase):
         self.assertFalse(retStatus)
         self.assertFalse(rDL)
 
+    @unittest.skip("Skipping until api is more reliable")
     def testFetchCompoundAltReturnTypes(self):
         pcU = PubChemUtils()
         cIdList = ["123631", "2244"]
