@@ -309,7 +309,10 @@ class DrugBankProvider(object):
                         #
                         if "atc_codes" in dD and dD["atc_codes"]:
                             mD[exD["identifier"]]["atc_codes"] = dD["atc_codes"]
-
+                        #
+                        if "products" in dD and dD["products"]:
+                            mD[exD["identifier"]]["brand_names"] = dD["products"]
+                        #
                         if "target_interactions" in dD:
                             for tid in dD["target_interactions"]:
                                 tD = {}

@@ -47,3 +47,4 @@
  10-Sep-2020  - V0.55 Disable further tests for now
  19-Sep-2020  - V0.56 Use a version specific Drugbank URL
  24-Sep-2020  - V0.57 Use new Drugbank URL
+ 21-Oct-2020  - V0.58 Add brand names to Drugbank mapping file
