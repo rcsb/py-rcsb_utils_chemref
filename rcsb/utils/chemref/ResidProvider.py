@@ -78,6 +78,7 @@ class ResidProvider(object):
             (dict): mapping dictionary (pdb_ccId -> RESID details)
         """
         mD = {}
+        version = None
         #
         fU = FileUtil()
         fn = fU.getFileName(urlTarget)
