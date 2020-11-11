@@ -49,3 +49,4 @@
  24-Sep-2020  - V0.57 Use new Drugbank URL
  21-Oct-2020  - V0.58 Add brand names to Drugbank mapping file
  10-Nov-2020  - V0.59 Add ChEMBLProvider module and tests
+ 11-Nov-2020  - V0.60 Add DrugCentralProvider module and tests
