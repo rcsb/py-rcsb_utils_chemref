@@ -4,3 +4,4 @@ rcsb.utils.config >= 0.35
 configparser; python_version < "3.0"
 obonet >= 0.2.5
 networkx >= 2.4
+chembl-webresource-client >= 0.10.2
