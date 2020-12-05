@@ -235,32 +235,24 @@ class PubChemUtils(object):
                 if nameSpace in ["cid", "name", "inchikey"] and returnType in ["record"] and searchType in ["lookup"] and requestType == "GET":
                     uId = quote(identifier.encode("utf8"))
                     endPoint = "/".join(["rest", "pug", domain, nameSpace, uId, outputType])
-                    ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds)
+                    ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOut=timeOutSeconds)
                 elif nameSpace in ["cid", "name", "inchikey"] and returnType in ["record"] and searchType in ["lookup"] and requestType == "POST":
                     endPoint = "/".join(["rest", "pug", domain, nameSpace, outputType])
                     pD = {nameSpace: identifier}
-                    ret, retCode = ureq.postUnWrapped(
-                        baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds
-                    )
+                    ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOut=timeOutSeconds)
                 #
                 elif nameSpace in ["cid", "name", "inchikey"] and returnType in ["xrefs"] and searchType in ["lookup"] and requestType == "POST":
                     endPoint = "/".join(["rest", "pug", domain, nameSpace, returnType, "RegistryID,RN", outputType])
                     pD = {nameSpace: identifier}
-                    ret, retCode = ureq.postUnWrapped(
-                        baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds
-                    )
+                    ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOut=timeOutSeconds)
                 elif nameSpace in ["cid", "name", "inchikey"] and returnType in ["property"] and searchType in ["lookup"] and requestType == "POST":
                     endPoint = "/".join(["rest", "pug", domain, nameSpace, returnType, "MolecularFormula,XLogP,TPSA,Volume3D", outputType])
                     pD = {nameSpace: identifier}
-                    ret, retCode = ureq.postUnWrapped(
-                        baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds
-                    )
+                    ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOut=timeOutSeconds)
                 elif nameSpace in ["cid", "name", "inchikey"] and returnType in ["synonyms"] and searchType in ["lookup"] and requestType == "POST":
                     endPoint = "/".join(["rest", "pug", domain, nameSpace, returnType, outputType])
                     pD = {nameSpace: identifier}
-                    ret, retCode = ureq.postUnWrapped(
-                        baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds
-                    )
+                    ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOut=timeOutSeconds)
                 #
                 elif nameSpace in ["cid"] and returnType in ["classification"] and searchType in ["lookup"]:
                     # Needs to be specifically targeted on a particular compound ...
@@ -268,7 +260,7 @@ class PubChemUtils(object):
                     endPoint = "/".join(["rest", "pug", domain, nameSpace, uId, returnType, outputType])
                     # pD = {"classification_type": "simple"}
                     pD = {}
-                    ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds)
+                    ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOut=timeOutSeconds)
                 #
                 elif nameSpace in ["cid"] and returnType in ["classification"] and searchType in ["lookup"] and requestType == "POST":
                     # Needs to be specifically targeted on a particular compound ...
@@ -276,9 +268,7 @@ class PubChemUtils(object):
                     # This is a long request return server codes may be observed 500
                     # pD = {nameSpace: identifier, "classification_type": "simple"}
                     pD = {nameSpace: identifier}
-                    ret, retCode = ureq.postUnWrapped(
-                        baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds
-                    )
+                    ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOut=timeOutSeconds)
                 #
                 elif nameSpace in ["smiles", "inchi"] and returnType == "record" and searchType in ["fastidentity", "fastsimilarity_2d"] and requestType == "POST":
                     endPoint = "/".join(["rest", "pug", domain, searchType, nameSpace, outputType])
@@ -298,9 +288,7 @@ class PubChemUtils(object):
                             pD = {nameSpace: identifier, "identity_type": identityType}
                         else:
                             pD = {nameSpace: identifier}
-                    ret, retCode = ureq.postUnWrapped(
-                        baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds
-                    )
+                    ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOut=timeOutSeconds)
             elif domain in ["substance", "assay"]:
                 logger.error("Fetch not implemented for domain %s", domain)
             #
@@ -331,11 +319,11 @@ class PubChemUtils(object):
             if nameSpace in ["cid"] and requestType == "GET":
                 uId = quote(identifier.encode("utf8"))
                 endPoint = "/".join(["rest", "pug_view", "data", domain, uId, outputType])
-                ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds)
+                ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOut=timeOutSeconds)
             elif nameSpace in ["cid"] and requestType == "POST":
                 endPoint = "/".join(["rest", "pug_view", "data", domain, outputType])
                 pD = {nameSpace: identifier}
-                ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds)
+                ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOut=timeOutSeconds)
         except Exception as e:
             logger.error("Failing for identifier %r returnType view with (retCode %r) %s", identifier, retCode, str(e))
         #
@@ -366,7 +354,7 @@ class PubChemUtils(object):
                 # uId = quote(identifier.encode("utf8"))
                 endPoint = "/".join(["sdq", "sdqagent.cgi"])
                 pD = {"infmt": "json", "outfmt": "json", "query": '{"select":"*","collection":"%s","where":{"ands":{"cid":"%s"}}}' % (returnType, identifier)}
-                ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds)
+                ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOut=timeOutSeconds)
         except Exception as e:
             logger.error("Failing identifier %r return type %r with (retCode %r) %s", identifier, returnType, retCode, str(e))
         #
