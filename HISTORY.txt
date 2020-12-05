@@ -52,3 +52,4 @@
  11-Nov-2020  - V0.60 Add DrugCentralProvider module and tests
  28-Nov-2020  - V0.61 Add CARDProvider module and tests
   2-Dec-2020  - V0.62 Add ChEMBL API methods to provide drug, moleule and id mapping data
+  5-Dec-2020  - V0.63 Require certificates for PubChem lookups, extend timeout

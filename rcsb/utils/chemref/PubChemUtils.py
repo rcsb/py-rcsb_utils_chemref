@@ -36,9 +36,7 @@ ChemicalIdentifier = namedtuple("ChemicalIdentifier", ChemicalIdentifierFields, 
 
 
 class PubChemUtils(object):
-    """ Manage search and fetch queries for PubChem compound, substance and assay data and related annotations.
-
-    """
+    """Manage search and fetch queries for PubChem compound, substance and assay data and related annotations."""
 
     def __init__(self, **kwargs):
         self.__verbose = kwargs.get("verbose", False)
@@ -200,7 +198,7 @@ class PubChemUtils(object):
         return ok, retL
 
     def __doPugRequest(self, identifier, nameSpace="cid", domain="compound", searchType="lookup", returnType="record"):
-        """ Wrapper for PubChem PUG API requests
+        """Wrapper for PubChem PUG API requests
 
         https://pubchem.ncbi.nlm.nih.gov/rest/pug/<input specification>/<operation specification>/[<output specification>][?<operation_options>]
 
@@ -226,6 +224,8 @@ class PubChemUtils(object):
         httpCodesCatch = [404]
         requestType = "POST"
         outputType = "JSON"
+        sslCert = "enabled"
+        timeOutSeconds = 10
         retCode, ret = None, None
         try:
             baseUrl = self.__urlPrimary
@@ -235,24 +235,32 @@ class PubChemUtils(object):
                 if nameSpace in ["cid", "name", "inchikey"] and returnType in ["record"] and searchType in ["lookup"] and requestType == "GET":
                     uId = quote(identifier.encode("utf8"))
                     endPoint = "/".join(["rest", "pug", domain, nameSpace, uId, outputType])
-                    ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON")
+                    ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds)
                 elif nameSpace in ["cid", "name", "inchikey"] and returnType in ["record"] and searchType in ["lookup"] and requestType == "POST":
                     endPoint = "/".join(["rest", "pug", domain, nameSpace, outputType])
                     pD = {nameSpace: identifier}
-                    ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON")
+                    ret, retCode = ureq.postUnWrapped(
+                        baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds
+                    )
                 #
                 elif nameSpace in ["cid", "name", "inchikey"] and returnType in ["xrefs"] and searchType in ["lookup"] and requestType == "POST":
                     endPoint = "/".join(["rest", "pug", domain, nameSpace, returnType, "RegistryID,RN", outputType])
                     pD = {nameSpace: identifier}
-                    ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON")
+                    ret, retCode = ureq.postUnWrapped(
+                        baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds
+                    )
                 elif nameSpace in ["cid", "name", "inchikey"] and returnType in ["property"] and searchType in ["lookup"] and requestType == "POST":
                     endPoint = "/".join(["rest", "pug", domain, nameSpace, returnType, "MolecularFormula,XLogP,TPSA,Volume3D", outputType])
                     pD = {nameSpace: identifier}
-                    ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON")
+                    ret, retCode = ureq.postUnWrapped(
+                        baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds
+                    )
                 elif nameSpace in ["cid", "name", "inchikey"] and returnType in ["synonyms"] and searchType in ["lookup"] and requestType == "POST":
                     endPoint = "/".join(["rest", "pug", domain, nameSpace, returnType, outputType])
                     pD = {nameSpace: identifier}
-                    ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON")
+                    ret, retCode = ureq.postUnWrapped(
+                        baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds
+                    )
                 #
                 elif nameSpace in ["cid"] and returnType in ["classification"] and searchType in ["lookup"]:
                     # Needs to be specifically targeted on a particular compound ...
@@ -260,7 +268,7 @@ class PubChemUtils(object):
                     endPoint = "/".join(["rest", "pug", domain, nameSpace, uId, returnType, outputType])
                     # pD = {"classification_type": "simple"}
                     pD = {}
-                    ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON")
+                    ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds)
                 #
                 elif nameSpace in ["cid"] and returnType in ["classification"] and searchType in ["lookup"] and requestType == "POST":
                     # Needs to be specifically targeted on a particular compound ...
@@ -268,7 +276,9 @@ class PubChemUtils(object):
                     # This is a long request return server codes may be observed 500
                     # pD = {nameSpace: identifier, "classification_type": "simple"}
                     pD = {nameSpace: identifier}
-                    ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON")
+                    ret, retCode = ureq.postUnWrapped(
+                        baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds
+                    )
                 #
                 elif nameSpace in ["smiles", "inchi"] and returnType == "record" and searchType in ["fastidentity", "fastsimilarity_2d"] and requestType == "POST":
                     endPoint = "/".join(["rest", "pug", domain, searchType, nameSpace, outputType])
@@ -288,7 +298,9 @@ class PubChemUtils(object):
                             pD = {nameSpace: identifier, "identity_type": identityType}
                         else:
                             pD = {nameSpace: identifier}
-                    ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON")
+                    ret, retCode = ureq.postUnWrapped(
+                        baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds
+                    )
             elif domain in ["substance", "assay"]:
                 logger.error("Fetch not implemented for domain %s", domain)
             #
@@ -299,16 +311,18 @@ class PubChemUtils(object):
         return ret, retCode
 
     def __doPugViewRequest(self, identifier, nameSpace="cid", domain="compound"):
-        """ Wrapper for PubChem PUG_VIEW API requests
+        """Wrapper for PubChem PUG_VIEW API requests
 
-            Example:
-                https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/1234/JSON
+        Example:
+            https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/1234/JSON
 
         """
         requestType = "GET"
         outputType = "JSON"
         retCode, ret = None, None
         httpCodesCatch = [404]
+        sslCert = "enabled"
+        timeOutSeconds = 10
         try:
             baseUrl = self.__urlPrimary
             #
@@ -317,18 +331,18 @@ class PubChemUtils(object):
             if nameSpace in ["cid"] and requestType == "GET":
                 uId = quote(identifier.encode("utf8"))
                 endPoint = "/".join(["rest", "pug_view", "data", domain, uId, outputType])
-                ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON")
+                ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds)
             elif nameSpace in ["cid"] and requestType == "POST":
                 endPoint = "/".join(["rest", "pug_view", "data", domain, outputType])
                 pD = {nameSpace: identifier}
-                ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON")
+                ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds)
         except Exception as e:
             logger.error("Failing for identifier %r returnType view with (retCode %r) %s", identifier, retCode, str(e))
         #
         return ret, retCode
 
     def __doSgdRequest(self, identifier, returnType="dgidb"):
-        """ Wrapper for PubChem SGD API requests
+        """Wrapper for PubChem SGD API requests
 
             Example:
 
@@ -342,6 +356,8 @@ class PubChemUtils(object):
         requestType = "GET"
         retCode, ret = None, None
         httpCodesCatch = [404]
+        sslCert = "enabled"
+        timeOutSeconds = 10
         try:
             baseUrl = self.__urlPrimary
             pD = {}
@@ -350,7 +366,7 @@ class PubChemUtils(object):
                 # uId = quote(identifier.encode("utf8"))
                 endPoint = "/".join(["sdq", "sdqagent.cgi"])
                 pD = {"infmt": "json", "outfmt": "json", "query": '{"select":"*","collection":"%s","where":{"ands":{"cid":"%s"}}}' % (returnType, identifier)}
-                ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON")
+                ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOutSeconds=timeOutSeconds)
         except Exception as e:
             logger.error("Failing identifier %r return type %r with (retCode %r) %s", identifier, returnType, retCode, str(e))
         #
@@ -467,11 +483,11 @@ class PubChemUtils(object):
 
     def __traversePubChemCompoundView(self, vD):
         """
-            "Record": {
-                    "RecordType": "CID",
-                    "RecordNumber": 123631,
-                    "RecordTitle": "Gefitinib",
-                    "Section": []
+        "Record": {
+                "RecordType": "CID",
+                "RecordNumber": 123631,
+                "RecordTitle": "Gefitinib",
+                "Section": []
 
         """
         try:
@@ -518,35 +534,35 @@ class PubChemUtils(object):
 
     def __parsePubChemCompoundView(self, vD):
         """
-            "Record": {
-                    "RecordType": "CID",
-                    "RecordNumber": 123631,
-                    "RecordTitle": "Gefitinib",
-                    "Section": []
+        "Record": {
+                "RecordType": "CID",
+                "RecordNumber": 123631,
+                "RecordTitle": "Gefitinib",
+                "Section": []
 
-                 "Information": [
-                           {
-                              "ReferenceNumber": 55,
-                              "Reference": [
-                                 "Computed by InChI 1.0.5 (PubChem release 2019.06.18)"
-                              ],
-                              "Value": {
-                                 "StringWithMarkup": [
-                                    {
-                                       "String": "InChI=1S/C22H24ClFN4O3/c1-29-20-13-19-16...",
-                'Refererence': [
-                    {
-                        "ReferenceNumber": 158,
-                        "SourceName": "The National Institute for Occupational Safety and Health (NIOSH)",
-                        "SourceID": "npgd0010",
-                        "Name": "Acetylsalicylic acid",
-                        "Description": "The NIOSH Pocket Guide to Chemical Hazards is intended as a chemicals/Read more: https://www.cdc.gov/niosh/npg/",
-                        "URL": "https://www.cdc.gov/niosh/npg/npgd0010.html",
-                        "LicenseNote": "The information provided using CDC Web site egulations.",
-                        "LicenseURL": "https://www.cdc.gov/Other/disclaimer.html",
-                        "ANID": 2266310
-                    },
-                    ]                                  }
+             "Information": [
+                       {
+                          "ReferenceNumber": 55,
+                          "Reference": [
+                             "Computed by InChI 1.0.5 (PubChem release 2019.06.18)"
+                          ],
+                          "Value": {
+                             "StringWithMarkup": [
+                                {
+                                   "String": "InChI=1S/C22H24ClFN4O3/c1-29-20-13-19-16...",
+            'Refererence': [
+                {
+                    "ReferenceNumber": 158,
+                    "SourceName": "The National Institute for Occupational Safety and Health (NIOSH)",
+                    "SourceID": "npgd0010",
+                    "Name": "Acetylsalicylic acid",
+                    "Description": "The NIOSH Pocket Guide to Chemical Hazards is intended as a chemicals/Read more: https://www.cdc.gov/niosh/npg/",
+                    "URL": "https://www.cdc.gov/niosh/npg/npgd0010.html",
+                    "LicenseNote": "The information provided using CDC Web site egulations.",
+                    "LicenseURL": "https://www.cdc.gov/Other/disclaimer.html",
+                    "ANID": 2266310
+                },
+                ]                                  }
         """
         pcD = {}
         refD = {}
@@ -1115,8 +1131,7 @@ class PubChemUtils(object):
         return tuple(rL)
 
     def __getKeyValue(self, dct, keyName):
-        """  Return the value of the corresponding key expressed in dot notation in the input dictionary object (nested).
-        """
+        """Return the value of the corresponding key expressed in dot notation in the input dictionary object (nested)."""
         try:
             kys = keyName.split(".")
             for key in kys:
