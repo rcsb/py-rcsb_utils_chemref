@@ -54,3 +54,4 @@
   2-Dec-2020  - V0.62 Add ChEMBL API methods to provide drug, moleule and id mapping data
   5-Dec-2020  - V0.63 Require certificates for PubChem lookups, extend timeout
   5-Dec-2020  - V0.64 Adjust timeOut argument
+  9-Dec-2020  - V0.65 Add fallback resource for PSIMOD ontology

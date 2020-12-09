@@ -29,14 +29,15 @@ logger = logging.getLogger(__name__)
 
 class PsiModProvider(object):
     """Various utilities for extracting data from the PSI-MOD OBO files
-        and returning lineage details.
+    and returning lineage details.
     """
 
     def __init__(self, **kwargs):
         urlTarget = kwargs.get("urlTarget", "http://data.bioontology.org/ontologies/PSIMOD/submissions/6/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb")
+        urlTargetFallback = "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/psimod.obo"
         dirPath = os.path.join(kwargs.get("cachePath", "."), "psimod")
         useCache = kwargs.get("useCache", True)
-        self.__modGraph = self.__reload(urlTarget, dirPath, useCache=useCache)
+        self.__modGraph = self.__reload(urlTarget, urlTargetFallback, dirPath, useCache=useCache)
 
     def testCache(self):
         if self.__modGraph:
@@ -141,7 +142,7 @@ class PsiModProvider(object):
         return linL
 
     def exportTreeNodeList(self, psimodIdL):
-        """ For the input node list export full tree node list including parent nodes
+        """For the input node list export full tree node list including parent nodes
 
         Args:
             psimodIdL (list): list of covered GO id lists
@@ -175,11 +176,11 @@ class PsiModProvider(object):
             logger.exception("Failing with %s", str(e))
         return trL
 
-    def __reload(self, urlTarget, dirPath, useCache=True):
-        """ Reload input GO OBO ontology file and return a nx graph object.
-'
-        Returns:
-            dictionary[psimodId] = {'name_list': ... , 'id_list': ... 'depth_list': ... }
+    def __reload(self, urlTarget, urlTargetFallback, dirPath, useCache=True):
+        """Reload input GO OBO ontology file and return a nx graph object.
+        '
+                Returns:
+                    dictionary[psimodId] = {'name_list': ... , 'id_list': ... 'depth_list': ... }
         """
         goGraph = None
         #
@@ -201,6 +202,10 @@ class PsiModProvider(object):
         else:
             logger.info("Fetching url %s to resource file %s", urlTarget, oboFilePath)
             ok = fU.get(urlTarget, oboFilePath)
+            logger.info("PSIMOD fetch status is %r", ok)
+            if not ok:
+                ok = fU.get(urlTargetFallback, oboFilePath)
+                logger.info("PSIMOD fallback fetch status is %r", ok)
             if ok:
                 goGraph = obonet.read_obo(oboFilePath)
         if goGraph:
