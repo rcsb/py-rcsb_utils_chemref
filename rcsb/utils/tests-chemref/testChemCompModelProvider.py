@@ -40,7 +40,13 @@ class ChemCompModelProviderTests(unittest.TestCase):
 
     def testReadChemCompModelRef(self):
         ccm = ChemCompModelProvider(cachePath=self.__workPath, useCache=False)
+        ok = ccm.testCache()
+        self.assertTrue(ok)
         rD = ccm.getMapping()
+        self.assertGreater(len(rD), 1000)
+        aD = ccm.getMapping()
+        self.assertGreater(len(aD), 1000)
+        #
         #
         logger.info("Model match length %d", len(rD))
         for ccId in rD:
