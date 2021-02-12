@@ -21,13 +21,13 @@ logger = logging.getLogger(__name__)
 
 
 class PubChemProvider:
-    """ Accessors for PubChem managed annotations.
+    """Accessors for PubChem managed annotations.
 
-        dirPath -> CACHE/PubChem/
+    dirPath -> CACHE/PubChem/
 
-                                 mapped_annotations/pubchem_mapped_annotations.json
+                             mapped_annotations/pubchem_mapped_annotations.json
 
-                                 stash/pubchem_mapped_annotations.tar.gz
+                             stash/pubchem_mapped_annotations.tar.gz
 
     """
 
@@ -97,8 +97,7 @@ class PubChemProvider:
         return ok
 
     def reload(self):
-        """ Reload from the current cache file.
-        """
+        """Reload from the current cache file."""
         ok = False
         try:
             self.__pcD = self.__reload(fmt="json", useCache=True)
@@ -153,6 +152,7 @@ class PubChemProvider:
         Returns:
             (bool): True for success or False otherwise
         """
+        ok = False
         try:
             stU = StashUtil(os.path.join(self.__dirPath, "stash"), "pubchem_mapped_annotations")
             ok = stU.fetchBundle(self.__dirPath, url, stashRemoteDirPath, remoteStashPrefix=remoteStashPrefix, userName=userName, password=password)

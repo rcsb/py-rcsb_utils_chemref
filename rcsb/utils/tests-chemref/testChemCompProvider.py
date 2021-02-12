@@ -57,6 +57,26 @@ class ChemCompProviderTests(unittest.TestCase):
         ccP = ChemCompProvider(cachePath=self.__workPath, useCache=True)
         ok = ccP.testCache()
         self.assertTrue(ok)
+        numAtoms = ccP.getAtomCount("ATP")
+        numChiralAtoms = ccP.getAtomCountChiral("ATP")
+        numHeavyAtoms = ccP.getAtomCountHeavy("ATP")
+        logger.debug("%r %r %r", numAtoms, numChiralAtoms, numHeavyAtoms)
+        self.assertEqual(numAtoms, 47)
+        self.assertEqual(numChiralAtoms, 6)
+        self.assertEqual(numHeavyAtoms, 31)
+
+        ccIdL = ccP.getComponentIds()
+        iCount = 0
+        fwCount = 0
+        for ccId in ccIdL:
+            if ccP.getAtomCountHeavy(ccId) < 1:
+                logger.info("%s has no heavy atoms", ccId)
+                iCount += 1
+            if not ccP.getFormulaWeight(ccId):
+                logger.info("%s has no formula weight", ccId)
+                fwCount += 1
+        self.assertGreaterEqual(3, iCount)
+        self.assertGreaterEqual(3, fwCount)
 
 
 def readChemCompInfo():

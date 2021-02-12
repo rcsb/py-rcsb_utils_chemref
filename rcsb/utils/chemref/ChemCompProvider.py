@@ -24,8 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class ChemCompProvider(object):
-    """Utilities to provide essential data items for chemical component definitions.
-    """
+    """Utilities to provide essential data items for chemical component definitions."""
 
     def __init__(self, **kwargs):
         urlTarget = kwargs.get("ccUrlTarget", "http://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz")
@@ -64,6 +63,34 @@ class ChemCompProvider(object):
         try:
             tS = self.__ccdD[ccId]["pdbx_subcomponent_list"]
             return tS if tS and tS not in [".", "?"] else None
+        except Exception:
+            pass
+        return None
+
+    def getAtomCountHeavy(self, ccId):
+        try:
+            return self.__ccdD[ccId]["atom_count_heavy"]
+        except Exception:
+            pass
+        return 0
+
+    def getAtomCount(self, ccId):
+        try:
+            return self.__ccdD[ccId]["atom_count"]
+        except Exception:
+            pass
+        return 0
+
+    def getAtomCountChiral(self, ccId):
+        try:
+            return self.__ccdD[ccId]["atom_count_chiral"]
+        except Exception:
+            pass
+        return 0
+
+    def getFormulaWeight(self, ccId):
+        try:
+            return float(self.__ccdD[ccId]["formula_weight"])
         except Exception:
             pass
         return None
@@ -120,8 +147,7 @@ class ChemCompProvider(object):
         return mD
 
     def __buildAbbridged(self, cL):
-        """Return a dictionary of abbridged CCD info.
-        """
+        """Return a dictionary of abbridged CCD info."""
         atNameList = [
             "id",
             "name",
@@ -149,5 +175,34 @@ class ChemCompProvider(object):
             ccId = cObj.getValue("id", 0)
             for atName in atNameList:
                 tD[atName] = cObj.getValueOrDefault(atName, 0, defaultValue=None)
+            tD["formula_weight"] = float(tD["formula_weight"]) if tD["formula_weight"] and "formula_weight" in tD else None
             retD[ccId] = tD
+            #
+            #  - add some counts -
+            #
+            numAtoms = 0
+            numAtomsHeavy = 0
+            numAtomsChiral = 0
+            try:
+                cObj = dataContainer.getObj("chem_comp_atom")
+                numAtoms = cObj.getRowCount()
+                numAtomsHeavy = 0
+                numAtomsChiral = 0
+                for ii in range(numAtoms):
+                    el = cObj.getValue("type_symbol", ii)
+                    if el != "H":
+                        numAtomsHeavy += 1
+                    chFlag = cObj.getValue("pdbx_stereo_config", ii)
+                    if chFlag != "N":
+                        numAtomsChiral += 1
+            except Exception:
+                logger.warning("Missing chem_comp_atom category for %s", ccId)
+                numAtoms = 0
+                numAtomsHeavy = 0
+                numAtomsChiral = 0
+            #
+            retD[ccId]["atom_count"] = numAtoms
+            retD[ccId]["atom_count_chiral"] = numAtomsChiral
+            retD[ccId]["atom_count_heavy"] = numAtomsHeavy
+            #
         return retD

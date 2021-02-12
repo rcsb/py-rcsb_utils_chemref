@@ -1,5 +1,5 @@
 ##
-#  File:           CARDTProvider.py
+#  File:           CARDProvider.py
 #  Date:           28-Nov-2020 jdw
 #
 #  Updated:
@@ -84,9 +84,9 @@ class CARDProvider:
 
                 Note: https://card.mcmaster.ca/aro/0000003
         """
+        oD = {}
+        version = None
         try:
-            oD = {}
-            version = None
             cardGraph = obonet.read_obo(filePath)
             logger.info("CARD graph nodes (%d) edges (%d) directed %r", len(cardGraph), cardGraph.number_of_edges(), networkx.is_directed_acyclic_graph(cardGraph))
             for ky, gD in cardGraph.nodes(data=True):

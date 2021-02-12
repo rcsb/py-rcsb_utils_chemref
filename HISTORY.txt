@@ -56,3 +56,6 @@
   5-Dec-2020  - V0.64 Adjust timeOut argument
   9-Dec-2020  - V0.65 Add fallback resource for PSIMOD ontology
   4-Feb-2021  - V0.66 Add export of audit details to ChemCompModelProvider()
+  9-Feb-2021  - V0.67 Add CODProvider() and related tests, add atom count method to ChemCompProvider()
+ 10-Feb-2021  - V0.68 Add RcsbLigandScoreProvider() and related tests
+
