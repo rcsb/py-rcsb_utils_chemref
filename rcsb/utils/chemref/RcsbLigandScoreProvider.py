@@ -58,7 +58,7 @@ class RcsbLigandScoreProvider:
         try:
             if not self.__fitScoreList:
                 self.__fitScoreList = sorted([float(tD["fit_pc1"]) for tD in self.__ligandScoreDL])
-                logger.info("Sorted model fit score (%d) range %.3f : %.3f", len(self.__fitScoreList), self.__fitScoreList[0], self.__fitScoreList[-1])
+                logger.debug("Sorted model fit score (%d) range %.3f : %.3f", len(self.__fitScoreList), self.__fitScoreList[0], self.__fitScoreList[-1])
                 logger.debug("Sorted model fit score (%d) range %.3f : %.3f", len(self.__fitScoreList), min(self.__fitScoreList), max(self.__fitScoreList))
             frac = bisect.bisect(self.__fitScoreList, score) / float(len(self.__fitScoreList) - 1)
             return 1.0 - frac
@@ -71,7 +71,7 @@ class RcsbLigandScoreProvider:
         try:
             if not self.__geoScoreList:
                 self.__geoScoreList = sorted([float(tD["geo_pc1"]) for tD in self.__ligandScoreDL])
-                logger.info("Sorted model geometry score (%d) range %.3f : %.3f", len(self.__geoScoreList), self.__geoScoreList[0], self.__geoScoreList[-1])
+                logger.debug("Sorted model geometry score (%d) range %.3f : %.3f", len(self.__geoScoreList), self.__geoScoreList[0], self.__geoScoreList[-1])
                 logger.debug("Sorted model geometry score (%d) range %.3f : %.3f", len(self.__geoScoreList), min(self.__geoScoreList), max(self.__geoScoreList))
             frac = bisect.bisect(self.__geoScoreList, score) / float(len(self.__geoScoreList) - 1)
             return 1.0 - frac
