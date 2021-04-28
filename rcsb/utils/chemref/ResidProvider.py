@@ -33,6 +33,7 @@ class ResidProvider(object):
     def __init__(self, **kwargs):
         #
         urlTarget = kwargs.get("residUrlTarget", "ftp://ftp.pir.georgetown.edu/pir_databases/other_databases/resid/RESIDUES.XML")
+        urlTargetFallback = "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/RESIDUES.XML"
         #
         useCache = kwargs.get("useCache", True)
         #
@@ -41,7 +42,7 @@ class ResidProvider(object):
         residFileName = kwargs.get("residFileName", "resid_correspondences_definitions.json")
         #
         self.__mU = MarshalUtil(workPath=dirPath)
-        self.__version, self.__residD = self.__reload(urlTarget, dirPath, residFileName, useCache=useCache)
+        self.__version, self.__residD = self.__reload(urlTarget, urlTargetFallback, dirPath, residFileName, useCache=useCache)
 
     def testCache(self):
         logger.info("RESID map length %d", len(self.__residD))
@@ -65,11 +66,12 @@ class ResidProvider(object):
     def isChemCompMapped(self, ccId):
         return self.__residD and ccId.upper() in self.__residD
 
-    def __reload(self, urlTarget, dirPath, residFileName, useCache=True):
+    def __reload(self, urlTarget, urlTargetFallback, dirPath, residFileName, useCache=True):
         """Reload input mmCIF model mapping resource file and return a container list.
 
         Args:
             urlTarget (str): target url for resource file
+            urlTargetFallback (str): fallback target url for the resource data
             dirPath (str): path to the directory containing cache files
             residFileName (str): mapping file name
             useCache (bool, optional): flag to use cached files. Defaults to True.
@@ -102,6 +104,10 @@ class ResidProvider(object):
             if not (useCache and fU.exists(filePath)):
                 logger.info("Fetching url %s for resource file %s", urlTarget, filePath)
                 ok = fU.get(urlTarget, filePath)
+                logger.info("RESID fetch status is %r", ok)
+                if not ok:
+                    ok = fU.get(urlTargetFallback, filePath)
+                    logger.info("RESID fallback fetch status is %r", ok)
             if ok:
                 logger.info("Reading %r", filePath)
                 xTree = self.__mU.doImport(filePath, fmt="xml")

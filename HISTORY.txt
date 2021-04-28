@@ -59,3 +59,4 @@
   9-Feb-2021  - V0.67 Add CODProvider() and related tests, add atom count method to ChemCompProvider()
  10-Feb-2021  - V0.68 Add RcsbLigandScoreProvider() and related tests
  23-Feb-2021  - V0.69 Adjust logging details in RcsbLigandScoreProvider()
+ 28-Apr-2021  - V0.70 Add fallback resource for RESID in ResidProvider()
