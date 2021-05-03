@@ -32,7 +32,8 @@ class ResidProvider(object):
 
     def __init__(self, **kwargs):
         #
-        urlTarget = kwargs.get("residUrlTarget", "ftp://ftp.pir.georgetown.edu/pir_databases/other_databases/resid/RESIDUES.XML")
+        # urlTarget = kwargs.get("residUrlTarget", "ftp://ftp.pir.georgetown.edu/pir_databases/other_databases/resid/RESIDUES.XML")
+        urlTarget = kwargs.get("residUrlTarget", "https://ftp.proteininformationresource.org/pir_databases/other_databases/resid/RESIDUES.XML")
         urlTargetFallback = "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/RESIDUES.XML"
         #
         useCache = kwargs.get("useCache", True)
