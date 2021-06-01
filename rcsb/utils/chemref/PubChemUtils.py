@@ -6,7 +6,7 @@
 #
 #   28-May-2020 jdw use alternative url fetch library.
 ##
-__docformat__ = "restructuredtext en"
+__docformat__ = "google.en"
 __author__ = "John Westbrook"
 __email__ = "jwest@rcsb.rutgers.edu"
 __license__ = "Apache 2.0"
@@ -115,9 +115,7 @@ class PubChemUtils(object):
                 if exportPath and exportIntermediates:
                     rawResponsePath = os.path.join(exportPath, "%s-pubchem-%s-raw.json" % (cid, returnType))
                     extractedResponsePath = os.path.join(exportPath, "%s-pubchem-%s-extract.json" % (cid, returnType))
-                tStatus, rDL = self.fetch(
-                    chemId, returnType=returnType, storeRawResponsePath=rawResponsePath, storeResponsePath=extractedResponsePath, delaySeconds=self.__delaySeconds
-                )
+                tStatus, rDL = self.fetch(chemId, returnType=returnType, storeRawResponsePath=rawResponsePath, storeResponsePath=extractedResponsePath, delaySeconds=self.__delaySeconds)
                 # retStatus = tStatus and retStatus
                 if tStatus and rDL:
                     if returnType in ["view", "classification", "property", "xrefs", "synonyms"] and len(rDL[0]) > 1:
@@ -660,9 +658,7 @@ class PubChemUtils(object):
                     elif "Number" in infD["Value"]:
                         units = infD["Value"]["Unit"] if "Unit" in infD["Value"] else ""
                         for nV in infD["Value"]["Number"]:
-                            tupV = ExternalAnnotation(
-                                name=name, value=nV, dataType="number", units=units, featureType=ky, provReferenceId=referenceNumber, provSourceName=reference
-                            )
+                            tupV = ExternalAnnotation(name=name, value=nV, dataType="number", units=units, featureType=ky, provReferenceId=referenceNumber, provSourceName=reference)
                             # tV = str(str(sV) + " " + units).strip()
                             pcD.setdefault(pcKy, {}).setdefault(ky, set()).update([tupV])
         except Exception as e:

@@ -6,7 +6,7 @@
 # Pharos relational database (TCRDv6.7).
 ##
 
-__docformat__ = "restructuredtext en"
+__docformat__ = "google.en"
 __author__ = "John Westbrook"
 __email__ = "jwest@rcsb.rutgers.edu"
 __license__ = "Apache 2.0"
@@ -26,7 +26,7 @@ TOPDIR = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
 
 class PharosReadSqlDump(object):
     """Adhoc class to extract and export a list ChEMBL identifers in selected tables from a dump of the
-       Pharos relational database (TCRDv6.7).
+    Pharos relational database (TCRDv6.7).
     """
 
     def __init__(self):

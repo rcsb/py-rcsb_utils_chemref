@@ -61,3 +61,4 @@
  23-Feb-2021  - V0.69 Adjust logging details in RcsbLigandScoreProvider()
  28-Apr-2021  - V0.70 Add fallback resource for RESID in ResidProvider()
   3-May-2021  - V0.71 Update PIR ftp site URL and path for RESID
+  1-Jun-2021  - V0.72 Add BirdProvider() module and tests, update __docformat__

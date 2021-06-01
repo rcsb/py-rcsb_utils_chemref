@@ -13,7 +13,7 @@ Tests for various utilities for extracting data from PSI-MOD obo export files
 
 """
 
-__docformat__ = "restructuredtext en"
+__docformat__ = "google.en"
 __author__ = "John Westbrook"
 __email__ = "jwest@rcsb.rutgers.edu"
 __license__ = "Apache 2.0"
@@ -39,8 +39,7 @@ class PsiModProviderTests(unittest.TestCase):
         pass
 
     def testReloadPsiMod(self):
-        """ Test load from source
-        """
+        """Test load from source"""
         try:
             psimodP = PsiModProvider(cachePath=self.__workPath, useCache=True)
             ok = psimodP.testCache()

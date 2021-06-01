@@ -1,5 +1,5 @@
-mmcif >= 0.54
-rcsb.utils.io >= 0.91
+mmcif >= 0.69
+rcsb.utils.io >= 1.12
 rcsb.utils.config >= 0.35
 configparser; python_version < "3.0"
 obonet >= 0.2.5
