@@ -14,7 +14,7 @@ Test utilities to read the RESID resource file and build loadable documents and 
 
 """
 
-__docformat__ = "google.en"
+__docformat__ = "google en"
 __author__ = "John Westbrook"
 __email__ = "jwest@rcsb.rutgers.edu"
 __license__ = "Apache 2.0"

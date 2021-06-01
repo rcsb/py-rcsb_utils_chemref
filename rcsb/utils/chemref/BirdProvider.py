@@ -9,7 +9,7 @@
 """
 Utilities to read and serialize portions of the dictionary of PDBx/mmCIF BIRD definitions.
 """
-__docformat__ = "google.en"
+__docformat__ = "google en"
 __author__ = "John Westbrook"
 __email__ = "john.westbrook@rcsb.org"
 __license__ = "Apache 2.0"

@@ -11,7 +11,7 @@ Tests for utilities to read and process BIRD dictionary definitions.
 
 """
 
-__docformat__ = "google.en"
+__docformat__ = "google en"
 __author__ = "John Westbrook"
 __email__ = "jwest@rcsb.rutgers.edu"
 __license__ = "Apache 2.0"
