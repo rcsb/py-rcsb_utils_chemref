@@ -9,7 +9,7 @@
 #
 ##
 """
-Various utilities for extracting data from the ATC hierchy.
+Various utilities for extracting data from the ATC hierarchy.
 
 """
 

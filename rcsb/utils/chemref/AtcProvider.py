@@ -3,7 +3,7 @@
 #  Date:           3-Apr-2019 jdw
 #
 #  Updated:
-#
+#  5-Jun-2021 jdw  Update ATC data source and fallback
 ##
 """
   Extract ATC term descriptions from NCBO ATC flat files.
@@ -23,16 +23,15 @@ logger = logging.getLogger(__name__)
 
 
 class AtcProvider:
-    """ Extract term descriptions and ATC classifications from ATC flat files.
-    """
+    """Extract term descriptions and ATC classifications from ATC flat files."""
 
     def __init__(self, **kwargs):
-        #
-        urlTarget = "http://data.bioontology.org/ontologies/ATC/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb&download_format=csv"
-        urlTargetFallback = "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/ATC-2018.csv.gz"
+        urlTarget = "https://data.bioontology.org/ontologies/ATC/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb&download_format=csv"
+        # urlTarget = "http://data.bioontology.org/ontologies/ATC/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb&download_format=csv"
+        urlTargetFallback = "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/ATC-2021.csv.gz"
         atcDirPath = os.path.join(kwargs.get("cachePath", "."), "atc")
         useCache = kwargs.get("useCache", True)
-        self.__version = kwargs.get("AtcVersion", "2018")
+        self.__version = kwargs.get("AtcVersion", "2021")
         #
         self.__mU = MarshalUtil(workPath=atcDirPath)
         self.__atcD = self.__reload(urlTarget, urlTargetFallback, atcDirPath, useCache=useCache, version=self.__version)
@@ -55,7 +54,7 @@ class AtcProvider:
         else:
             fn = "ATC-%s.csv.gz" % version
             fp = os.path.join(atcDirPath, fn)
-            logger.info("Fetch ATC term descriptions from source %s", fp)
+            logger.debug("Fetch ATC term descriptions from source %s", fp)
             fileU = FileUtil(workPath=atcDirPath)
             fileU.mkdir(atcDirPath)
             try:
@@ -140,8 +139,7 @@ class AtcProvider:
         return nD
 
     def __extractHierarchy(self, atcL):
-        """
-        """
+        """ """
         pD = {}
         ns = "http://purl.bioontology.org/ontology/UATC/"
         for rD in atcL:
@@ -158,9 +156,7 @@ class AtcProvider:
         return pD
 
     def __exportTreeNodeList(self, nD, pD, filterD=None):
-        """ Create node list from the ATC  parent and name/description dictionaries.
-
-        """
+        """Create node list from the ATC  parent and name/description dictionaries."""
         #
         # pL = [0]
         pL = []
