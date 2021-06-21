@@ -16,7 +16,7 @@
   9-Sep-2019  - V0.24 Add AtcProvider() module and extract ATC mapping from DrugBank
  17-Sep-2019  - V0.25 Schema adjustments to discard private collection keys
  16-Oct-2019  - V0.26 Enumerate all ATC parents in tree node list
- 17-Oct-2019  - V0.27 Ignore root node of the ATC heirarchy and reduce depth by 1.
+ 17-Oct-2019  - V0.27 Ignore root node of the ATC hierarchy and reduce depth by 1.
  23-Nov-2019  - V0.28 Add module ChemCompProvider() update to pipeline to py38
  14-Dec-2019  - V0.29 Adjust error reporting for DrugBankProvider.testCache()
  17-Dec-2019  - V0.30 Prefer http to ftp protocol for default download targets.
@@ -43,7 +43,7 @@
  29-Jul-2020  - V0.51 Add public reload() method to PubChemProvider().
  30-Jul-2020  - V0.52 Add PharosProvider() module, supporting tests, and ad hoc tools.
  30-Jul-2020  - V0.53 Provide bypass for PubChem and PharosProvider testCache() methods.
- 10-Sep-2020  - V0.54 Disable NCBI pathway tests owing to data availibility
+ 10-Sep-2020  - V0.54 Disable NCBI pathway tests owing to data availability
  10-Sep-2020  - V0.55 Disable further tests for now
  19-Sep-2020  - V0.56 Use a version specific Drugbank URL
  24-Sep-2020  - V0.57 Use new Drugbank URL
@@ -51,7 +51,7 @@
  10-Nov-2020  - V0.59 Add ChEMBLProvider module and tests
  11-Nov-2020  - V0.60 Add DrugCentralProvider module and tests
  28-Nov-2020  - V0.61 Add CARDProvider module and tests
-  2-Dec-2020  - V0.62 Add ChEMBL API methods to provide drug, moleule and id mapping data
+  2-Dec-2020  - V0.62 Add ChEMBL API methods to provide drug, molecule and id mapping data
   5-Dec-2020  - V0.63 Require certificates for PubChem lookups, extend timeout
   5-Dec-2020  - V0.64 Adjust timeOut argument
   9-Dec-2020  - V0.65 Add fallback resource for PSIMOD ontology
@@ -63,3 +63,4 @@
   3-May-2021  - V0.71 Update PIR ftp site URL and path for RESID
   1-Jun-2021  - V0.72 Add BirdProvider() module and tests, update __docformat__
   5-Jun-2021  - V0.73 Update ATC ontology source and fallback
+ 21-Jun-2021  - V0.74 Add getFeature() method to DrugBankProvider() module.

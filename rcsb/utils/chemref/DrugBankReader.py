@@ -24,8 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class DrugBankReader(object):
-    """ Reader for the DrugBank master repository data.
-    """
+    """Reader for the DrugBank master repository data."""
 
     def __init__(self):
         self.__ns = "{http://www.drugbank.ca}"
@@ -39,8 +38,7 @@ class DrugBankReader(object):
         return version, rL
 
     def __processDrugElement(self, drugElement):
-        """
-        """
+        """ """
         assert drugElement.tag == "{ns}drug".format(ns=self.__ns)
 
         doc = {
@@ -76,6 +74,7 @@ class DrugBankReader(object):
             "pdb_entries": [pdbId.text for pdbId in drugElement.findall("{ns}pdb-entries/{ns}pdb-entry".format(ns=self.__ns))],
             "inchi": drugElement.findtext("{ns}calculated-properties/{ns}property[{ns}kind='InChI']/{ns}value".format(ns=self.__ns)),
             "inchikey": drugElement.findtext("{ns}calculated-properties/{ns}property[{ns}kind='InChIKey']/{ns}value".format(ns=self.__ns)),
+            "smiles": drugElement.findtext("{ns}calculated-properties/{ns}property[{ns}kind='SMILES']/{ns}value".format(ns=self.__ns)),
             "exp_prop": [
                 {
                     "kind": el.findtext("{ns}kind".format(ns=self.__ns)),
@@ -158,14 +157,11 @@ class DrugBankReader(object):
             "name": target.findtext("{ns}name".format(ns=self.__ns)),
             "amino-acid-sequence": target.findtext('{ns}polypeptide/{ns}amino-acid-sequence[@format="FASTA"]'.format(ns=self.__ns)),
             "actions": [action.text for action in target.findall("{ns}actions/{ns}action".format(ns=self.__ns))],
-            "articles": [
-                pubmed_element.text for pubmed_element in target.findall("{ns}references/{ns}articles/{ns}article/{ns}pubmed-id".format(ns=self.__ns)) if pubmed_element.text
-            ],
+            "articles": [pubmed_element.text for pubmed_element in target.findall("{ns}references/{ns}articles/{ns}article/{ns}pubmed-id".format(ns=self.__ns)) if pubmed_element.text],
         }
 
         uniprotIds = [
-            polypep.text
-            for polypep in target.findall("{ns}polypeptide/{ns}external-identifiers/{ns}external-identifier[{ns}resource='UniProtKB']/{ns}identifier".format(ns=self.__ns))
+            polypep.text for polypep in target.findall("{ns}polypeptide/{ns}external-identifiers/{ns}external-identifier[{ns}resource='UniProtKB']/{ns}identifier".format(ns=self.__ns))
         ]
         if uniprotIds:
             doc["uniprot_ids"] = uniprotIds[0]

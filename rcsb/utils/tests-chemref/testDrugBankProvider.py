@@ -65,6 +65,19 @@ class DrugBankProviderTests(unittest.TestCase):
         dbDocL = dbu.getDocuments()
         self.assertGreaterEqual(len(dbDocL), 340)
 
+    def testReadAbbrevDrugBankFeature(self):
+        urlTarget = os.path.join(HERE, "test-data", "full_database.zip")
+        logger.info("Loading abbreviated Drugbank file %s", urlTarget)
+        dbu = DrugBankProvider(urlTarget=urlTarget, cachePath=self.__cachePath, useCache=False, username=self.__user, password=self.__pw)
+        dbId = "DB00114"
+        tS = dbu.getFeature(dbId, "smiles")
+        logger.debug("%s SMILES is %r", dbId, tS)
+        self.assertEqual(tS, "CC1=NC=C(COP(O)(O)=O)C(C=O)=C1O")
+        fnL = ["name", "description", "indication", "pharmacodynamics", "mechanism-of-action"]
+        for fn in fnL:
+            fS = dbu.getFeature("DB00114", fn)
+            logger.debug("%s %s is %r", dbId, fn, fS)
+
     @unittest.skip("Long test")
     def testReadDrugBankInfo(self):
         dbu = DrugBankProvider(cachePath=self.__cachePath, useCache=False, username=self.__user, password=self.__pw)

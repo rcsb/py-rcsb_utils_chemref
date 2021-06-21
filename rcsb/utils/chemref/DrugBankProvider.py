@@ -34,6 +34,7 @@ class DrugBankProvider(object):
     def __init__(self, **kwargs):
         #
         self.__dbMapD, self.__dbObjL = self.__reload(**kwargs)
+        self.__dbD = None
         self.__version = None
         #
 
@@ -54,7 +55,7 @@ class DrugBankProvider(object):
         return self.__dbMapD["version"] if self.__dbMapD and "version" in self.__dbMapD else None
 
     def getDocuments(self, mapD=None):
-        """[summary]
+        """Get documents subject to corresponding identifiers in the input mapping dictionary.
 
         Args:
             mapD ([type], optional): mapping dictionary {drugbank_id: ccId}. Defaults to None.
@@ -69,8 +70,30 @@ class DrugBankProvider(object):
             if "id_map" in self.__dbMapD:
                 for ccId, dD in self.__dbMapD["id_map"].items():
                     if "drugbank_id" in dD:
-                        dbIdD[dD["drugbank_id"]] = ccId
+                        dbIdD.setdefault(dD["drugbank_id"], []).append(ccId)
             return self.__buildDocuments(self.__dbObjL, dbIdD)
+
+    def getFeature(self, dbId, featureName):
+        """For the input DrugBank code return the value of the input feature.
+
+        Args:
+            dbId (str): DrugBank identifier code
+            featureName (str): DrugBank feature name
+
+        Returns:
+            any: feature value
+        """
+        try:
+            # --
+            if not self.__dbD:
+                self.__dbD = {}
+                for dD in self.__dbObjL:
+                    self.__dbD[dD["drugbank_id"]] = dD
+            # --
+            return self.__dbD[dbId][featureName]
+        except Exception as e:
+            logger.exception("Failing for %r %r with %s", dbId, featureName, str(e))
+        return None
 
     def __reload(self, **kwargs):
         """Reload DrugBank mapping data and optionally supporting repository data file.
