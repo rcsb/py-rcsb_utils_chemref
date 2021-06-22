@@ -77,6 +77,7 @@ class DrugBankProviderTests(unittest.TestCase):
         for fn in fnL:
             fS = dbu.getFeature("DB00114", fn)
             logger.debug("%s %s is %r", dbId, fn, fS)
+        # logger.info("%r %s", dbId, pprint.pformat(dbu.getD(dbId)))
 
     @unittest.skip("Long test")
     def testReadDrugBankInfo(self):

@@ -73,7 +73,7 @@ class DrugBankProvider(object):
                         dbIdD.setdefault(dD["drugbank_id"], []).append(ccId)
             return self.__buildDocuments(self.__dbObjL, dbIdD)
 
-    def getFeature(self, dbId, featureName):
+    def getFeature(self, drugbankId, featureName):
         """For the input DrugBank code return the value of the input feature.
 
         Args:
@@ -90,10 +90,36 @@ class DrugBankProvider(object):
                 for dD in self.__dbObjL:
                     self.__dbD[dD["drugbank_id"]] = dD
             # --
-            return self.__dbD[dbId][featureName]
+            return self.__dbD[drugbankId][featureName]
         except Exception as e:
-            logger.exception("Failing for %r %r with %s", dbId, featureName, str(e))
+            logger.error("Failing for %r %r with %s", drugbankId, featureName, str(e))
         return None
+
+    def getD(self, drugbankId):
+        try:
+            # --
+            if not self.__dbD:
+                self.__dbD = {}
+                for dD in self.__dbObjL:
+                    self.__dbD[dD["drugbank_id"]] = dD
+            # --
+            return self.__dbD[drugbankId]
+        except Exception as e:
+            logger.error("Failing for %r with %s", drugbankId, str(e))
+            return None
+
+    def getDrugbankIds(self):
+        try:
+            # --
+            if not self.__dbD:
+                self.__dbD = {}
+                for dD in self.__dbObjL:
+                    self.__dbD[dD["drugbank_id"]] = dD
+            # --
+            return list(self.__dbD.keys())
+        except Exception as e:
+            logger.error("Failing with %s", str(e))
+            return None
 
     def __reload(self, **kwargs):
         """Reload DrugBank mapping data and optionally supporting repository data file.

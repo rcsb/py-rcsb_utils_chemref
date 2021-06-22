@@ -64,3 +64,4 @@
   1-Jun-2021  - V0.72 Add BirdProvider() module and tests, update __docformat__
   5-Jun-2021  - V0.73 Update ATC ontology source and fallback
  21-Jun-2021  - V0.74 Add getFeature() method to DrugBankProvider() module.
+ 22-Jun-2021  - V0.75 Add getDrugbankIds() method to DrugBankProvider() module.
