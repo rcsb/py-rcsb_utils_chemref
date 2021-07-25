@@ -66,3 +66,4 @@
  21-Jun-2021  - V0.74 Add getFeature() method to DrugBankProvider() module.
  22-Jun-2021  - V0.75 Add getDrugbankIds() method to DrugBankProvider() module.
  24-Jul-2021  - V0.76 Make each provider a subclass of StashableBase, update install and pipeline
+ 25-Jul-2021  - V0.77 Adjust testCache() tests and logging for all providers

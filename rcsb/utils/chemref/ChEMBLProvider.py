@@ -40,7 +40,10 @@ class ChEMBLProvider:
         #
 
     def testCache(self):
-        return self.__retD and len(self.__retD) > 10000
+        if self.__retD and len(self.__retD) > 10000:
+            logger.info("ChEMBL mappings (%d)", len(self.__retD))
+            return True
+        return False
 
     def getInChIKey(self, chemblId):
         rVal = None

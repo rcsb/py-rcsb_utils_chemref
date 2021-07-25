@@ -43,8 +43,9 @@ class ChemCompProvider(StashableBase):
         self.__ccdD = self.__reload(urlTarget, dirPath, ccdFileName, useCache=useCache)
 
     def testCache(self):
-        logger.info("Lengths map %d", len(self.__ccdD))
+
         if len(self.__ccdD) > 30000:
+            logger.info("ChemComp map length (%d)", len(self.__ccdD))
             return True
         return False
 

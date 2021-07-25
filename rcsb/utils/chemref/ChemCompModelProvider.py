@@ -46,8 +46,8 @@ class ChemCompModelProvider(StashableBase):
         self.__mappingD, self.__auditD = self.__reload(urlTarget, dirPath, mappingFileName, auditFileName, useCache=useCache)
 
     def testCache(self):
-        logger.info("chem_comp_model map length %d", len(self.__mappingD))
         if len(self.__mappingD) > 1000 and len(self.__auditD) > 1000:
+            logger.info("chem_comp_model map length %d", len(self.__mappingD))
             return True
         return False
 

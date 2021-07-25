@@ -39,13 +39,12 @@ class DrugBankProvider(StashableBase):
         #
         self.__dbMapD, self.__dbObjL = self.__reload(**kwargs)
         self.__dbD = None
-        self.__version = None
         #
 
     def testCache(self):
         try:
-            logger.info("Lengths map %d dbObjL %d", len(self.__dbMapD["id_map"]), len(self.__dbObjL))
-            if (len(self.__dbMapD["id_map"]) > 340) and (len(self.__dbObjL) > 995):
+            if self.__dbMapD and self.__dbObjL and "id_map" in self.__dbMapD and (len(self.__dbMapD["id_map"]) > 340) and (len(self.__dbObjL) > 995):
+                logger.info("DrugBank lengths map %d dbObjL %d", len(self.__dbMapD["id_map"]), len(self.__dbObjL))
                 return True
         except Exception as e:
             logger.debug("Failing with %s", str(e))

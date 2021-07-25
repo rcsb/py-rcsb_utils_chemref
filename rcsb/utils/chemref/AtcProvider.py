@@ -85,8 +85,8 @@ class AtcProvider(StashableBase):
         return self.__version
 
     def testCache(self):
-        logger.info("ATC names %d parents %d", len(self.__atcD["names"]), len(self.__atcD["parents"]))
-        if (len(self.__atcD["names"]) > 6100) and (len(self.__atcD["parents"]) > 6100):
+        if self.__atcD and "names" in self.__atcD and "parents" in self.__atcD and (len(self.__atcD["names"]) > 6100) and (len(self.__atcD["parents"]) > 6100):
+            logger.info("ATC names %d parents %d", len(self.__atcD["names"]), len(self.__atcD["parents"]))
             return True
         return False
 
