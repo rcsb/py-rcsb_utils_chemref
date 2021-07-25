@@ -41,7 +41,7 @@ class PsiModProviderTests(unittest.TestCase):
     def testReloadPsiMod(self):
         """Test load from source"""
         try:
-            psimodP = PsiModProvider(cachePath=self.__workPath, useCache=True)
+            psimodP = PsiModProvider(cachePath=self.__workPath, useCache=False)
             ok = psimodP.testCache()
             self.assertTrue(ok)
             version = psimodP.getVersion()
