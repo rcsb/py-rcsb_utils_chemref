@@ -7,8 +7,7 @@
 # Version: 0.001
 #
 # Update:
-#
-#
+# 21-Jul-2021 jdw  Make this provider a subclass of StashableBase
 ##
 """
 Various utilities for extracting data from the PSI-MOD OBO files
@@ -23,19 +22,23 @@ import networkx
 import obonet
 
 from rcsb.utils.io.FileUtil import FileUtil
+from rcsb.utils.io.StashableBase import StashableBase
 
 logger = logging.getLogger(__name__)
 
 
-class PsiModProvider(object):
+class PsiModProvider(StashableBase):
     """Various utilities for extracting data from the PSI-MOD OBO files
     and returning lineage details.
     """
 
     def __init__(self, **kwargs):
+        dirName = "psimod"
+        cachePath = kwargs.get("cachePath", ".")
+        super(PsiModProvider, self).__init__(cachePath, [dirName])
         urlTarget = kwargs.get("urlTarget", "http://data.bioontology.org/ontologies/PSIMOD/submissions/6/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb")
         urlTargetFallback = "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/psimod.obo"
-        dirPath = os.path.join(kwargs.get("cachePath", "."), "psimod")
+        dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)
         self.__modGraph = self.__reload(urlTarget, urlTargetFallback, dirPath, useCache=useCache)
 
@@ -199,7 +202,7 @@ class PsiModProvider(object):
         #
         if useCache and fU.exists(oboFilePath):
             goGraph = obonet.read_obo(oboFilePath)
-        else:
+        elif not useCache:
             logger.info("Fetching url %s to resource file %s", urlTarget, oboFilePath)
             ok = fU.get(urlTarget, oboFilePath)
             logger.info("PSIMOD fetch status is %r", ok)
@@ -211,6 +214,6 @@ class PsiModProvider(object):
         if goGraph:
             logger.info("Reading %d nodes and %d edges", len(goGraph), goGraph.number_of_edges())
         else:
-            logger.info("Go graph construction failing")
+            logger.info("PSIMOD graph construction failing")
         #
         return goGraph

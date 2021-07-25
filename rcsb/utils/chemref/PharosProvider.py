@@ -3,10 +3,10 @@
 #  Date:           30-Jul-2020 jdw
 #
 #  Updated:
-#
+# 21-Jul-2021 jdw  Make this provider a subclass of StashableBase
 ##
 """
-Accessors for Pharos ChEMBL compound assignments.
+Accessors for Pharos ChEMBL compound assignments. (JDW: this class does not build assignments)
 
 """
 
@@ -15,31 +15,29 @@ import os.path
 import time
 
 from rcsb.utils.io.MarshalUtil import MarshalUtil
-from rcsb.utils.io.StashUtil import StashUtil
+from rcsb.utils.io.StashableBase import StashableBase
 
 logger = logging.getLogger(__name__)
 
 
-class PharosProvider:
-    """Accessors for Pharos comound assignments."""
+class PharosProvider(StashableBase):
+    """Accessors for Pharos compound assignments."""
 
     def __init__(self, **kwargs):
+        dirName = "Pharos-mapping"
+        cachePath = kwargs.get("cachePath", ".")
+        super(PharosProvider, self).__init__(cachePath, [dirName])
         #
-        self.__version = "0.50"
+        self.__version = "6.11"
         cachePath = kwargs.get("cachePath", ".")
         useCache = kwargs.get("useCache", True)
-        self.__dirPath = os.path.join(cachePath, "Pharos")
-        #
-        #  - Configuration for stash services -
-        #
-        #    Local target directory name to be stashed.  (subdir of dirPath)
-        self.__stashDir = "mapped_annotations"
+        self.__dirPath = os.path.join(cachePath, dirName)
         #
         self.__mU = MarshalUtil(workPath=self.__dirPath)
         self.__phD = self.__reload(fmt="json", useCache=useCache)
         #
 
-    def testCache(self, minCount=0):
+    def testCache(self, minCount=1):
         if minCount == 0:
             return True
         if self.__phD and minCount and ("identifiers" in self.__phD) and len(self.__phD["identifiers"]) >= minCount:
@@ -47,7 +45,7 @@ class PharosProvider:
         return False
 
     def getIdentifiers(self):
-        """Return a dictionary of related identifiers organized by chemical component/BIRD id.
+        """Return a dictionary of related identifiers organized by Pharos/ChEMBL id.
 
         Returns:
             (dict): {phId: True}
@@ -61,7 +59,7 @@ class PharosProvider:
     def __getAnnotFilePath(self, fmt="json"):
         stashBaseFileName = "pharos_mapped_annotations"
         fExt = ".json" if fmt == "json" else ".pic"
-        fp = os.path.join(self.__dirPath, self.__stashDir, stashBaseFileName + fExt)
+        fp = os.path.join(self.__dirPath, stashBaseFileName + fExt)
         return fp
 
     def load(self, chemblIdList, contentType, fmt="json", indent=0):
@@ -108,46 +106,3 @@ class PharosProvider:
         if useCache and self.__mU.exists(annotFilePath):
             pcD = self.__mU.doImport(annotFilePath, fmt=fmt)
         return pcD
-
-    def toStash(self, url, stashRemoteDirPath, userName=None, password=None, remoteStashPrefix=None):
-        """Copy tar and gzipped bundled cache data to remote server/location.
-
-        Args:
-            url (str): server URL (e.g. sftp://hostname.domain) None for local host
-            stashRemoteDirPath (str): path to target directory on remote server
-            userName (str, optional): server username. Defaults to None.
-            password (str, optional): server password. Defaults to None.
-            remoteStashPrefix (str, optional): channel prefix. Defaults to None.
-
-        Returns:
-            (bool): True for success or False otherwise
-        """
-        ok = False
-        try:
-            stU = StashUtil(os.path.join(self.__dirPath, "stash"), "pharos_mapped_annotations")
-            ok = stU.makeBundle(self.__dirPath, [self.__stashDir])
-            if ok:
-                ok = stU.storeBundle(url, stashRemoteDirPath, remoteStashPrefix=remoteStashPrefix, userName=userName, password=password)
-        except Exception as e:
-            logger.error("Failing with url %r stashDirPath %r: %s", url, stashRemoteDirPath, str(e))
-        return ok
-
-    def fromStash(self, url, stashRemoteDirPath, userName=None, password=None, remoteStashPrefix=None):
-        """Restore local cache from a tar and gzipped bundle to fetched from a remote server/location.
-
-        Args:
-            url (str): server URL (e.g. sftp://hostname.domain) None for local host
-            stashRemoteDirPath (str): path to target directory on remote server
-            userName (str, optional): server username. Defaults to None.
-            password (str, optional): server password. Defaults to None.
-            remoteStashPrefix (str, optional): channel prefix. Defaults to None.
-
-        Returns:
-            (bool): True for success or False otherwise
-        """
-        try:
-            stU = StashUtil(os.path.join(self.__dirPath, "stash"), "pharos_mapped_annotations")
-            ok = stU.fetchBundle(self.__dirPath, url, stashRemoteDirPath, remoteStashPrefix=remoteStashPrefix, userName=userName, password=password)
-        except Exception as e:
-            logger.error("Failing with url %r stashDirPath %r: %s", url, stashRemoteDirPath, str(e))
-        return ok

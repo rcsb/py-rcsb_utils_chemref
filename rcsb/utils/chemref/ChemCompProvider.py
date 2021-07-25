@@ -19,18 +19,23 @@ import os
 
 from rcsb.utils.io.FileUtil import FileUtil
 from rcsb.utils.io.MarshalUtil import MarshalUtil
+from rcsb.utils.io.StashableBase import StashableBase
 
 logger = logging.getLogger(__name__)
 
 
-class ChemCompProvider(object):
+class ChemCompProvider(StashableBase):
     """Utilities to provide essential data items for chemical component definitions."""
 
     def __init__(self, **kwargs):
+        dirName = "chem_comp"
+        cachePath = kwargs.get("cachePath", ".")
+        super(ChemCompProvider, self).__init__(cachePath, [dirName])
+        #
         urlTarget = kwargs.get("ccUrlTarget", "http://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz")
         # self.__birdUrlTarget = kwargs.get("birdUrlTarget", "ftp://ftp.wwpdb.org/pub/pdb/data/bird/prd/prdcc-all.cif.gz")
         #
-        dirPath = os.path.join(kwargs.get("cachePath", "."), "chem_comp")
+        dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)
         ccdFileName = kwargs.get("ccdFileName", "ccd_abbridged_definitions.json")
         #
@@ -134,7 +139,7 @@ class ChemCompProvider(object):
         #
         if useCache and fU.exists(ccdFilePath):
             mD = self.__mU.doImport(ccdFilePath, fmt="json")
-        else:
+        elif not useCache:
             ok = True
             if not (useCache and fU.exists(filePath)):
                 logger.info("Fetching url %s for resource file %s", urlTarget, filePath)

@@ -21,24 +21,27 @@ import os
 from rcsb.utils.chemref.ResidReader import ResidReader
 from rcsb.utils.io.FileUtil import FileUtil
 from rcsb.utils.io.MarshalUtil import MarshalUtil
+from rcsb.utils.io.StashableBase import StashableBase
 
 logger = logging.getLogger(__name__)
 
 
-class ResidProvider(object):
+class ResidProvider(StashableBase):
     """Utilities to read the RESID resource file and build loadable documents and identifier
     correspondences.
     """
 
     def __init__(self, **kwargs):
-        #
-        # urlTarget = kwargs.get("residUrlTarget", "ftp://ftp.pir.georgetown.edu/pir_databases/other_databases/resid/RESIDUES.XML")
+        dirName = "resid"
+        cachePath = kwargs.get("cachePath", ".")
+        super(ResidProvider, self).__init__(cachePath, [dirName])
+
         urlTarget = kwargs.get("residUrlTarget", "https://ftp.proteininformationresource.org/pir_databases/other_databases/resid/RESIDUES.XML")
         urlTargetFallback = "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/RESIDUES.XML"
         #
         useCache = kwargs.get("useCache", True)
         #
-        dirPath = os.path.join(kwargs.get("cachePath", "."), "resid")
+        dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)
         residFileName = kwargs.get("residFileName", "resid_correspondences_definitions.json")
         #
@@ -100,7 +103,7 @@ class ResidProvider(object):
             rD = self.__mU.doImport(residFilePath, fmt="json")
             mD = rD["mapD"]
             version = rD["version"]
-        else:
+        elif not useCache:
             ok = True
             if not (useCache and fU.exists(filePath)):
                 logger.info("Fetching url %s for resource file %s", urlTarget, filePath)
