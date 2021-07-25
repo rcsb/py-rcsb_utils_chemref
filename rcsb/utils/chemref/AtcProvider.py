@@ -4,6 +4,7 @@
 #
 #  Updated:
 #  5-Jun-2021 jdw  Update ATC data source and fallback
+# 20-Jul-2021 jdw  Make this provider a subclass of StashableBase
 ##
 """
   Extract ATC term descriptions from NCBO ATC flat files.
@@ -17,20 +18,24 @@ import sys
 
 from rcsb.utils.io.FileUtil import FileUtil
 from rcsb.utils.io.MarshalUtil import MarshalUtil
+from rcsb.utils.io.StashableBase import StashableBase
 
 
 logger = logging.getLogger(__name__)
 
 
-class AtcProvider:
+class AtcProvider(StashableBase):
     """Extract term descriptions and ATC classifications from ATC flat files."""
 
     def __init__(self, **kwargs):
-        urlTarget = "https://data.bioontology.org/ontologies/ATC/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb&download_format=csv"
-        # urlTarget = "http://data.bioontology.org/ontologies/ATC/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb&download_format=csv"
-        urlTargetFallback = "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/ATC-2021.csv.gz"
-        atcDirPath = os.path.join(kwargs.get("cachePath", "."), "atc")
+        self.__dirName = "atc"
+        self.__cachePath = kwargs.get("cachePath", ".")
+        super(AtcProvider, self).__init__(self.__cachePath, [self.__dirName])
+        atcDirPath = os.path.join(self.__cachePath, self.__dirName)
         useCache = kwargs.get("useCache", True)
+
+        urlTarget = "https://data.bioontology.org/ontologies/ATC/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb&download_format=csv"
+        urlTargetFallback = "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/ATC-2021.csv.gz"
         self.__version = kwargs.get("AtcVersion", "2021")
         #
         self.__mU = MarshalUtil(workPath=atcDirPath)
@@ -51,7 +56,7 @@ class AtcProvider:
             # nD = atcD["names"]
             # pD = atcD["parents"]
 
-        else:
+        elif not useCache:
             fn = "ATC-%s.csv.gz" % version
             fp = os.path.join(atcDirPath, fn)
             logger.debug("Fetch ATC term descriptions from source %s", fp)

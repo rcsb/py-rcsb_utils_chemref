@@ -4,7 +4,7 @@
 # Date:    1-Nov-2018
 #
 # Updates:
-# http://ftp.wwpdb.org/pub/pdb/data/component-models/complete/chem_comp_model.cif.gz
+# 21-Jul-2021 jdw  Make this provider a subclass of StashableBase
 ##
 """
 Utilities to read resource file containing compilation of CCDC models correspondences
@@ -21,18 +21,23 @@ import os
 
 from rcsb.utils.io.FileUtil import FileUtil
 from rcsb.utils.io.MarshalUtil import MarshalUtil
+from rcsb.utils.io.StashableBase import StashableBase
 
 logger = logging.getLogger(__name__)
 
 
-class ChemCompModelProvider(object):
+class ChemCompModelProvider(StashableBase):
     """Utilities to read the resource file containing with a compilation of CCDC models correspondences
     for PDB chemical components.
     """
 
     def __init__(self, **kwargs):
+        dirName = "chem_comp_model"
+        cachePath = kwargs.get("cachePath", ".")
+        super(ChemCompModelProvider, self).__init__(cachePath, [dirName])
+
         urlTarget = kwargs.get("urlTarget", "http://ftp.wwpdb.org/pub/pdb/data/component-models/complete/chem_comp_model.cif.gz")
-        dirPath = os.path.join(kwargs.get("cachePath", "."), "chem_comp")
+        dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)
         mappingFileName = kwargs.get("mappingFileName", "ccdc_pdb_mapping.json")
         auditFileName = kwargs.get("mappingFileName", "ccdc_model_audit.json")
@@ -41,7 +46,7 @@ class ChemCompModelProvider(object):
         self.__mappingD, self.__auditD = self.__reload(urlTarget, dirPath, mappingFileName, auditFileName, useCache=useCache)
 
     def testCache(self):
-        logger.info("Lengths map %d", len(self.__mappingD))
+        logger.info("chem_comp_model map length %d", len(self.__mappingD))
         if len(self.__mappingD) > 1000 and len(self.__auditD) > 1000:
             return True
         return False
@@ -85,7 +90,7 @@ class ChemCompModelProvider(object):
         if useCache and fU.exists(mappingFilePath) and fU.exists(auditFilePath):
             mD = self.__mU.doImport(mappingFilePath, fmt="json")
             aD = self.__mU.doImport(auditFilePath, fmt="json")
-        else:
+        elif not useCache:
             ok = True
             if not (useCache and fU.exists(filePath)):
                 logger.info("Fetching url %s for resource file %s", urlTarget, filePath)

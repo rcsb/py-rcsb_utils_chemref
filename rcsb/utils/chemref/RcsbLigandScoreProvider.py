@@ -19,22 +19,23 @@ import time
 
 from rcsb.utils.io.FileUtil import FileUtil
 from rcsb.utils.io.MarshalUtil import MarshalUtil
+from rcsb.utils.io.StashableBase import StashableBase
 
 logger = logging.getLogger(__name__)
 
 
-class RcsbLigandScoreProvider:
+class RcsbLigandScoreProvider(StashableBase):
     """Accessors for RCSB Ligand quality score supporting data."""
 
     def __init__(self, **kwargs):
-        #
+        dirName = "rcsb-ligand-score"
         self.__cachePath = kwargs.get("cachePath", ".")
-        self.__dirPath = os.path.join(self.__cachePath, "rcsb-ligand-score")
+        super(RcsbLigandScoreProvider, self).__init__(self.__cachePath, [dirName])
+        #
+        self.__dirPath = os.path.join(self.__cachePath, dirName)
         self.__useCache = kwargs.get("useCache", True)
         rcsbLigandScoreUrl = kwargs.get("rcsbLigandScoreUrl", "https://github.com/rcsb/py-rcsb_exdb_assets/raw/development/fall_back/rcsb_ligand_score/ligand_score_reference.csv")
-        rcsbLigandExcludeUrl = kwargs.get(
-            "rcsbLigandExcludeUrl", "https://github.com/rcsb/py-rcsb_exdb_assets/raw/development/fall_back/rcsb_ligand_score/ligand_score_exclude.list"
-        )
+        rcsbLigandExcludeUrl = kwargs.get("rcsbLigandExcludeUrl", "https://github.com/rcsb/py-rcsb_exdb_assets/raw/development/fall_back/rcsb_ligand_score/ligand_score_exclude.list")
         #
         self.__mU = MarshalUtil(workPath=self.__dirPath)
         self.__ligandScoreDL, self.__ligandExcludeD = self.__reload(self.__dirPath, rcsbLigandScoreUrl, rcsbLigandExcludeUrl, self.__useCache)
@@ -95,7 +96,7 @@ class RcsbLigandScoreProvider:
         #
         if useCache and fU.exists(ligandScoreFilePath) and fU.exists(ligandExcludeFilePath):
             ok = True
-        else:
+        elif not useCache:
             logger.info("Fetching url %s path %s", rcsbLigandScoreUrl, ligandScoreFilePath)
             ok = fU.get(rcsbLigandScoreUrl, ligandScoreFilePath)
             logger.info("Fetching url %s path %s", rcsbLigandExcludeUrl, ligandExcludeFilePath)

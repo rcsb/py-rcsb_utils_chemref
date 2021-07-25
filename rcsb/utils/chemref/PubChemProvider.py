@@ -3,6 +3,7 @@
 #  Date:           27-Jul-2020 jdw
 #
 #  Updated:
+# 21-Jul-2021 jdw  Make this provider a subclass of StashableBase
 #
 ##
 """
@@ -10,17 +11,18 @@ Accessors for PubChem mapped annotations.
 
 """
 
+import datetime
 import logging
 import os.path
 import time
 
 from rcsb.utils.io.MarshalUtil import MarshalUtil
-from rcsb.utils.io.StashUtil import StashUtil
+from rcsb.utils.io.StashableBase import StashableBase
 
 logger = logging.getLogger(__name__)
 
 
-class PubChemProvider:
+class PubChemProvider(StashableBase):
     """Accessors for PubChem managed annotations.
 
     dirPath -> CACHE/PubChem/
@@ -32,22 +34,19 @@ class PubChemProvider:
     """
 
     def __init__(self, **kwargs):
-        #
-        self.__version = "0.50"
+        dirName = "PubChem-mapping"
         cachePath = kwargs.get("cachePath", ".")
+        super(PubChemProvider, self).__init__(cachePath, [dirName])
+        self.__dirPath = os.path.join(cachePath, dirName)
+        #
+        self.__version = datetime.datetime.now().strftime("%Y-%m-%d")
         useCache = kwargs.get("useCache", True)
-        self.__dirPath = os.path.join(cachePath, "PubChem")
-        #
-        #  - Configuration for stash services -
-        #
-        #    Local target directory name to be stashed.  (subdir of dirPath)
-        self.__stashDir = "mapped_annotations"
         #
         self.__mU = MarshalUtil(workPath=self.__dirPath)
         self.__pcD = self.__reload(fmt="json", useCache=useCache)
         #
 
-    def testCache(self, minCount=0):
+    def testCache(self, minCount=1):
         if minCount == 0:
             return True
         if self.__pcD and minCount and ("identifiers" in self.__pcD) and len(self.__pcD["identifiers"]) >= minCount:
@@ -69,7 +68,7 @@ class PubChemProvider:
     def __getAnnotFilePath(self, fmt="json"):
         stashBaseFileName = "pubchem_mapped_annotations"
         fExt = ".json" if fmt == "json" else ".pic"
-        fp = os.path.join(self.__dirPath, self.__stashDir, stashBaseFileName + fExt)
+        fp = os.path.join(self.__dirPath, stashBaseFileName + fExt)
         return fp
 
     def load(self, pcObj, contentType, fmt="json", indent=0):
@@ -115,47 +114,3 @@ class PubChemProvider:
         if useCache and self.__mU.exists(annotFilePath):
             pcD = self.__mU.doImport(annotFilePath, fmt=fmt)
         return pcD
-
-    def toStash(self, url, stashRemoteDirPath, userName=None, password=None, remoteStashPrefix=None):
-        """Copy tar and gzipped bundled cache data to remote server/location.
-
-        Args:
-            url (str): server URL (e.g. sftp://hostname.domain) None for local host
-            stashRemoteDirPath (str): path to target directory on remote server
-            userName (str, optional): server username. Defaults to None.
-            password (str, optional): server password. Defaults to None.
-            remoteStashPrefix (str, optional): channel prefix. Defaults to None.
-
-        Returns:
-            (bool): True for success or False otherwise
-        """
-        ok = False
-        try:
-            stU = StashUtil(os.path.join(self.__dirPath, "stash"), "pubchem_mapped_annotations")
-            ok = stU.makeBundle(self.__dirPath, [self.__stashDir])
-            if ok:
-                ok = stU.storeBundle(url, stashRemoteDirPath, remoteStashPrefix=remoteStashPrefix, userName=userName, password=password)
-        except Exception as e:
-            logger.error("Failing with url %r stashDirPath %r: %s", url, stashRemoteDirPath, str(e))
-        return ok
-
-    def fromStash(self, url, stashRemoteDirPath, userName=None, password=None, remoteStashPrefix=None):
-        """Restore local cache from a tar and gzipped bundle to fetched from a remote server/location.
-
-        Args:
-            url (str): server URL (e.g. sftp://hostname.domain) None for local host
-            stashRemoteDirPath (str): path to target directory on remote server
-            userName (str, optional): server username. Defaults to None.
-            password (str, optional): server password. Defaults to None.
-            remoteStashPrefix (str, optional): channel prefix. Defaults to None.
-
-        Returns:
-            (bool): True for success or False otherwise
-        """
-        ok = False
-        try:
-            stU = StashUtil(os.path.join(self.__dirPath, "stash"), "pubchem_mapped_annotations")
-            ok = stU.fetchBundle(self.__dirPath, url, stashRemoteDirPath, remoteStashPrefix=remoteStashPrefix, userName=userName, password=password)
-        except Exception as e:
-            logger.error("Failing with url %r stashDirPath %r: %s", url, stashRemoteDirPath, str(e))
-        return ok

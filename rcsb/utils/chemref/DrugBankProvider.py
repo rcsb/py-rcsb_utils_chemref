@@ -6,7 +6,7 @@
 # Build loadable correspondence data from DrugBank.
 #
 # Update:
-#
+# 20-Jul-2021 jdw Make this provider a subclass of StashableBase
 ##
 
 __docformat__ = "google en"
@@ -22,16 +22,20 @@ import time
 from rcsb.utils.chemref.DrugBankReader import DrugBankReader
 from rcsb.utils.io.FileUtil import FileUtil
 from rcsb.utils.io.MarshalUtil import MarshalUtil
+from rcsb.utils.io.StashableBase import StashableBase
 
 logger = logging.getLogger(__name__)
 
 
-class DrugBankProvider(object):
+class DrugBankProvider(StashableBase):
     """Utilities to read the DrugBank resource file and build loadable documents and identifier
     correspondences.
     """
 
     def __init__(self, **kwargs):
+        self.__dirName = "DrugBank"
+        self.__cachePath = kwargs.get("cachePath")
+        super(DrugBankProvider, self).__init__(self.__cachePath, [self.__dirName])
         #
         self.__dbMapD, self.__dbObjL = self.__reload(**kwargs)
         self.__dbD = None
@@ -40,7 +44,7 @@ class DrugBankProvider(object):
 
     def testCache(self):
         try:
-            logger.info("Lengths map %d objl %d", len(self.__dbMapD["id_map"]), len(self.__dbObjL))
+            logger.info("Lengths map %d dbObjL %d", len(self.__dbMapD["id_map"]), len(self.__dbObjL))
             if (len(self.__dbMapD["id_map"]) > 340) and (len(self.__dbObjL) > 995):
                 return True
         except Exception as e:
@@ -127,8 +131,6 @@ class DrugBankProvider(object):
         Args:
             urlTarget (str): target url for resource file
             dirPath (str): path to the directory containing cache files
-            mappingFileName (str): mapping file name
-            docListFileName (str): document list file name
             useCache (bool, optional): flag to use cached files. Defaults to True.
             useDownload (bool, optional): flag to use a downloaded DrugBank resource file. Default to True.
 
@@ -137,32 +139,16 @@ class DrugBankProvider(object):
         """
         startTime = time.time()
         logger.info("Starting db reload at %s", time.strftime("%Y %m %d %H:%M:%S", time.localtime()))
-        # Latest url seems to broken on ~ Sep 19, 2020
-        urlTarget = kwargs.get("urlTarget", "https://go.drugbank.com/releases/latest/downloads/all-full-database")
-        # urlTarget = kwargs.get("urlTarget", "https://go.drugbank.com/releases/5-1-7/downloads/all-full-database")
-        dirPath = os.path.join(kwargs.get("cachePath", "."), "DrugBank")
+        dirPath = os.path.join(self.__cachePath, self.__dirName)
         useCache = kwargs.get("useCache", True)
-        useDownload = kwargs.get("useDownload", True)
-        username = kwargs.get("username", None)
-        password = kwargs.get("password", None)
-        mappingFileName = kwargs.get("mappingFileName", "drugbank_pdb_mapping.json")
-        docListFileName = kwargs.get("docListFileName", "drugbank_documents.pic")
-        mU = MarshalUtil(workPath=dirPath)
+        mappingFilePath = os.path.join(dirPath, "drugbank_pdb_mapping.json")
+        docListFilePath = os.path.join(dirPath, "drugbank_documents.pic")
         #
         dbMapD = {}
         dbObjL = []
         fU = FileUtil()
-        mappingFilePath = os.path.join(dirPath, mappingFileName)
-        docListFilePath = os.path.join(dirPath, docListFileName)
-        filePath = os.path.join(dirPath, "full database.xml")
+        mU = MarshalUtil(workPath=dirPath)
         mU.mkdir(dirPath)
-        #
-        if not useCache:
-            for fp in [filePath, mappingFilePath, docListFilePath]:
-                try:
-                    os.remove(fp)
-                except Exception:
-                    pass
         #
         if useCache and fU.exists(mappingFilePath) and fU.exists(docListFilePath):
             logger.debug("Using cached %r", mappingFilePath)
@@ -179,6 +165,20 @@ class DrugBankProvider(object):
             )
             return dbMapD, dbObjL
         #
+        elif useCache:
+            return dbMapD, dbObjL
+        #
+        # Rebuild cache file from source
+        urlTarget = kwargs.get("urlTarget", "https://go.drugbank.com/releases/latest/downloads/all-full-database")
+        filePath = os.path.join(dirPath, "full database.xml")
+        useDownload = kwargs.get("useDownload", True)
+        username = kwargs.get("username", None)
+        password = kwargs.get("password", None)
+        for fp in [filePath, mappingFilePath, docListFilePath]:
+            try:
+                os.remove(fp)
+            except Exception:
+                pass
         ok = fU.exists(filePath)
         if not ok:
             if not username or not password:
@@ -211,6 +211,9 @@ class DrugBankProvider(object):
             dbMapD["version"] = version
             ok = mU.doExport(mappingFilePath, dbMapD, fmt="json", indent=3, enforceAscii=False)
             ok = mU.doExport(docListFilePath, dbObjL, fmt="pickle")
+            if ok:
+                fU.remove(zipFilePath)
+                fU.remove(filePath)
             endTime = time.time()
             logger.info(
                 "Completed db %d/%d processing at %s (%.4f seconds)", len(dbObjL), len(dbMapD["id_map"]), time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime

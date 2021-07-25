@@ -16,8 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class ResidReader(object):
-    """ Reader for the RESID repository data (RESIDUES.xml).
-    """
+    """Reader for the RESID repository data (RESIDUES.xml)."""
 
     def __init__(self):
         self.__ns = ""
@@ -33,8 +32,7 @@ class ResidReader(object):
         return version, rL
 
     def __processEntryElement(self, entryElement):
-        """
-        """
+        """ """
         assert entryElement.tag == "{ns}Entry".format(ns=self.__ns)
         #
         doc = {

@@ -4,7 +4,7 @@
 # Date:    1-Jun-2021
 #
 # Updates:
-#
+# 21-Jul-2021 jdw  Make this provider a subclass of StashableBase
 ##
 """
 Utilities to read and serialize portions of the dictionary of PDBx/mmCIF BIRD definitions.
@@ -21,22 +21,24 @@ import time
 from rcsb.utils.io.FileUtil import FileUtil
 from rcsb.utils.io.IoUtil import getObjSize
 from rcsb.utils.io.MarshalUtil import MarshalUtil
-
-# from rcsb.utils.io.SingletonClass import SingletonClass
+from rcsb.utils.io.StashableBase import StashableBase
 
 logger = logging.getLogger(__name__)
 
 
-class BirdProvider(object):
+class BirdProvider(StashableBase):
     """Utilities to read and serialize portions of the dictionary of PDBx/mmCIF BIRD definitions."""
 
     def __init__(self, **kwargs):
+        dirName = "bird"
+        cachePath = kwargs.get("cachePath", ".")
+        super(BirdProvider, self).__init__(cachePath, [dirName])
+
         # Default source target locators
         self.__birdUrlTarget = kwargs.get("birdUrlTarget", None)
         self.__birdUrlTarget = self.__birdUrlTarget if self.__birdUrlTarget else "http://ftp.wwpdb.org/pub/pdb/data/bird/prd/prd-all.cif.gz"
         #
-        cachePath = kwargs.get("cachePath", ".")
-        dirPath = os.path.join(cachePath, "bird")
+        dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)
         molLimit = kwargs.get("molLimit", 0)
         #
@@ -93,6 +95,7 @@ class BirdProvider(object):
             (list): list of bird data containers
         """
         #
+        birdObjD = {}
         startTime = time.time()
         birdDataFilePath = os.path.join(dirPath, "bird-definitions.json")
         _, fExt = os.path.splitext(birdDataFilePath)
@@ -100,7 +103,7 @@ class BirdProvider(object):
         #
         if useCache and self.__mU.exists(birdDataFilePath):
             birdObjD = self.__mU.doImport(birdDataFilePath, fmt=birdDataFormat)
-        else:
+        elif not useCache:
             # Source component data files ...
             birdFilePath = self.__fetchUrl(birdUrlTarget, dirPath, useCache=useCache)
             birdObjD = self.__readBirdDefinitions(birdFilePath, molLimit=molLimit)
