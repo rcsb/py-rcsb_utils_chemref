@@ -47,7 +47,10 @@ class RcsbLigandScoreProvider(StashableBase):
         self.__fitScoreList = None
 
     def testCache(self):
-        return self.__ligandScoreDL and self.__ligandExcludeD
+        if self.__ligandScoreDL and self.__ligandExcludeD:
+            logger.info("Ligand score (%d) exclude (%d)", len(self.__ligandScoreDL), len(self.__ligandExcludeD))
+            return True
+        return False
 
     def getLigandExcludeList(self):
         return list(self.__ligandExcludeD.keys())

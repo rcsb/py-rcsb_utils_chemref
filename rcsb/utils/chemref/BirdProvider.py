@@ -19,7 +19,6 @@ import os
 import time
 
 from rcsb.utils.io.FileUtil import FileUtil
-from rcsb.utils.io.IoUtil import getObjSize
 from rcsb.utils.io.MarshalUtil import MarshalUtil
 from rcsb.utils.io.StashableBase import StashableBase
 
@@ -45,11 +44,11 @@ class BirdProvider(StashableBase):
         self.__mU = MarshalUtil(workPath=dirPath)
         self.__birdD = self.__reload(self.__birdUrlTarget, dirPath, useCache=useCache, molLimit=molLimit)
 
-    def testCache(self, minCount=None, logSizes=False):
-        if logSizes and self.__birdD:
-            logger.info("birdMolD object size %.2f MB", getObjSize(self.__birdD) / 1000000.0)
-        ok = self.__birdD and len(self.__birdD) >= minCount if minCount else self.__birdD is not None
-        return ok
+    def testCache(self, minCount=1):
+        if self.__birdD and len(self.__birdD) >= minCount:
+            logger.info("BIRD definitions (%d)", len(self.__birdD))
+            return True
+        return False
 
     def getBirdD(self):
         return self.__birdD

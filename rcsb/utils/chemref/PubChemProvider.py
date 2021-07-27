@@ -47,9 +47,10 @@ class PubChemProvider(StashableBase):
         #
 
     def testCache(self, minCount=1):
-        if minCount == 0:
+        if minCount == 0 or minCount is None:
             return True
-        if self.__pcD and minCount and ("identifiers" in self.__pcD) and len(self.__pcD["identifiers"]) >= minCount:
+        if self.__pcD and ("identifiers" in self.__pcD) and len(self.__pcD["identifiers"]) >= minCount:
+            logger.info("PubChem identifiers (%d)", len(self.__pcD["identifiers"]))
             return True
         return False
 

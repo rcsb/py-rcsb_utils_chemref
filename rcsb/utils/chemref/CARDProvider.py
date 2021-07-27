@@ -36,7 +36,7 @@ class CARDProvider:
         #
 
     def testCache(self, minCount=350):
-        if self.__oD and len(self.__oD) > minCount:
+        if self.__oD and len(self.__oD) >= minCount:
             logger.info("CARD mapping length (%d)", len(self.__oD))
             return True
         else:

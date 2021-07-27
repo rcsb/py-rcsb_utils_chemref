@@ -38,7 +38,7 @@
  16-Jul-2020  - V0.46 Extend the API for PubChemUtils.assemble()
  20-Jul-2020  - V0.47 Adjust error handling and reporting.
  28-Jul-2020  - V0.48 Add PubChemProvider() to manage access to PubChem mapped annotations
- 28-Jul-2020  - V0.49 Upversion and update dependencies
+ 28-Jul-2020  - V0.49 Up-version and update dependencies
  28-Jul-2020  - V0.50 Tweaking stash configuration options in test cases.
  29-Jul-2020  - V0.51 Add public reload() method to PubChemProvider().
  30-Jul-2020  - V0.52 Add PharosProvider() module, supporting tests, and ad hoc tools.
@@ -67,3 +67,4 @@
  22-Jun-2021  - V0.75 Add getDrugbankIds() method to DrugBankProvider() module.
  24-Jul-2021  - V0.76 Make each provider a subclass of StashableBase, update install and pipeline
  25-Jul-2021  - V0.77 Adjust testCache() tests and logging for all providers
+ 27-Jul-2021  - V0.78 Further adjustments to standardize testCache() provider logic
