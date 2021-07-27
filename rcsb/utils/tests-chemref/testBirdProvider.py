@@ -53,7 +53,7 @@ class BirdProviderTests(unittest.TestCase):
     def testBuildBirdCache(self):
         """Test build Bird definition cache"""
         bP = BirdProvider(cachePath=self.__cachePath, useCache=False, molLimit=None)
-        ok = bP.testCache(minCount=1000, logSizes=True)
+        ok = bP.testCache(minCount=1000)
         self.assertTrue(ok)
         bD = bP.getBirdD()
         for ky in ["releaseStatus", "representAs", "chemCompId", "class"]:
@@ -63,7 +63,7 @@ class BirdProviderTests(unittest.TestCase):
         self.assertEqual(bP.getChemCompId("PRD_000288"), "0GJ")
         self.assertEqual(bP.getClassType("PRD_000288"), "Inhibitor")
         bP = BirdProvider(cachePath=self.__cachePath, useCache=True, molLimit=None)
-        ok = bP.testCache(minCount=1000, logSizes=True)
+        ok = bP.testCache(minCount=1000)
         self.assertTrue(ok)
 
 
