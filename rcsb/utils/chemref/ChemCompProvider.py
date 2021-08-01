@@ -40,12 +40,17 @@ class ChemCompProvider(StashableBase):
         ccdFileName = kwargs.get("ccdFileName", "ccd_abbridged_definitions.json")
         #
         self.__mU = MarshalUtil(workPath=dirPath)
+        #
+        relDataUrlTarget = kwargs.get("relDataUrlTarget", "https://github.com/rcsb/py-rcsb_exdb_assets/raw/development/fall_back/chem-comp-release-data-summary.json")
+        self.__ccdRelD = self.__reloadRelData(relDataUrlTarget, dirPath, useCache=useCache)
+        #
         self.__ccdD = self.__reload(urlTarget, dirPath, ccdFileName, useCache=useCache)
+        #
 
-    def testCache(self):
+    def testCache(self, minCount=30000):
 
-        if len(self.__ccdD) > 30000:
-            logger.info("ChemComp map length (%d)", len(self.__ccdD))
+        if self.__ccdD and self.__ccdRelD and len(self.__ccdD) > minCount and len(self.__ccdRelD) > minCount:
+            logger.info("ChemComp details map length (%d) release data (%d)", len(self.__ccdD), len(self.__ccdRelD))
             return True
         return False
 
@@ -111,8 +116,22 @@ class ChemCompProvider(StashableBase):
     def getAbbridged(self):
         return self.__ccdD
 
+    def getReleaseDate(self, ccId):
+        try:
+            return self.__ccdRelD[ccId.upper()][1]
+        except Exception:
+            pass
+        return None
+
+    def getEntryOfFirstRelease(self, ccId):
+        try:
+            return self.__ccdRelD[ccId.upper()][0].lower()
+        except Exception:
+            pass
+        return None
+
     def __reload(self, urlTarget, dirPath, ccdFileName, useCache=True):
-        """Reload input mmCIF model mapping resource file and return a container list.
+        """Reload abbreviated chemical component details resource file.
 
         Args:
             urlTarget (str): target url for resource file
@@ -151,6 +170,44 @@ class ChemCompProvider(StashableBase):
                 ok = self.__mU.doExport(ccdFilePath, mD, fmt="json", indent=3)
         #
         return mD
+
+    def __reloadRelData(self, urlTarget, dirPath, useCache=True):
+        """Reload chemical component release data details.
+
+        Args:
+            urlTarget (str): target url for resource file
+            dirPath (str): path to the directory containing cache files
+            ccdFileName (str): mapping file name
+            useCache (bool, optional): flag to use cached files. Defaults to True.
+
+        Returns:
+            (dict): mapping dictionary (pdb_ccId -> CCDC details)
+        """
+        cD = {}
+        #
+        fU = FileUtil()
+        fn = fU.getFileName(urlTarget)
+        filePath = os.path.join(dirPath, fn)
+        self.__mU.mkdir(dirPath)
+        #
+        if not useCache:
+            for fp in [filePath]:
+                try:
+                    os.remove(fp)
+                except Exception:
+                    pass
+        #
+        if useCache and fU.exists(filePath):
+            cD = self.__mU.doImport(filePath, fmt="json")
+        elif not useCache:
+            ok = True
+            if not (useCache and fU.exists(filePath)):
+                logger.info("Fetching url %s for resource file %s", urlTarget, filePath)
+                ok = fU.get(urlTarget, filePath)
+            if ok:
+                cD = self.__mU.doImport(filePath, fmt="json")
+        #
+        return cD["release_data"] if "release_data" in cD else {}
 
     def __buildAbbridged(self, cL):
         """Return a dictionary of abbridged CCD info."""

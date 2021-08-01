@@ -18,11 +18,15 @@ __author__ = "John Westbrook"
 __email__ = "jwest@rcsb.rutgers.edu"
 __license__ = "Apache 2.0"
 
+import datetime
 import logging
 import os
 import unittest
 
 from rcsb.utils.chemref.ChemCompProvider import ChemCompProvider
+from rcsb.utils.io.MarshalUtil import MarshalUtil
+from rcsb.utils.io.TimeUtil import TimeUtil
+
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 TOPDIR = os.path.dirname(os.path.dirname(HERE))
@@ -34,9 +38,45 @@ logger = logging.getLogger()
 class ChemCompProviderTests(unittest.TestCase):
     def setUp(self):
         self.__workPath = os.path.join(HERE, "test-output")
+        self.__dataPath = os.path.join(HERE, "test-data")
 
     def tearDown(self):
         pass
+
+    @unittest.skip("maintenance test")
+    def testProcessReleaseData(self):
+        """Test process raw chemical component release data extracted from released and obsolete entries"""
+        try:
+            fpOut = os.path.join(self.__workPath, "chem-comp-release-data-summary.json")
+            fpRel = os.path.join(self.__dataPath, "chem-comp-release-data.json.gz")
+            fpObs = os.path.join(self.__dataPath, "pdbx_obsolete-chem-comp-release-data.json")
+            tU = TimeUtil()
+            mU = MarshalUtil(workPath=self.__workPath)
+            relTupL = mU.doImport(fpRel, fmt="json")
+            obsTupL = mU.doImport(fpObs, fmt="json")
+            logger.info("rel length (%d) obs length (%d)", len(relTupL), len(obsTupL))
+            cD = {}
+            for entryId, tS, ccIdL in obsTupL + relTupL:
+                if len(tS) < 4:
+                    continue
+                dtObj = tU.getDateTimeObj(tS)
+                for ccId in ccIdL:
+                    if ccId not in cD:
+                        cD[ccId] = (entryId, dtObj)
+                    elif dtObj < cD[ccId][1]:
+                        cD[ccId] = (entryId, dtObj)
+            #
+            logger.info("ALA %r %s", cD["ALA"][0], cD["ALA"][1])
+            logger.info("cD (%d)", len(cD))
+            for ccId in cD:
+                cD[ccId] = (cD[ccId][0], cD[ccId][1].strftime("%Y-%m-%d"))
+
+            tS = datetime.datetime.now().isoformat()
+            vS = datetime.datetime.now().strftime("%Y-%m-%d")
+            ok = mU.doExport(fpOut, {"version": vS, "created": tS, "release_data": cD}, fmt="json", indent=3)
+            self.assertTrue(ok)
+        except Exception as e:
+            logger.exception("Failing with %s", str(e))
 
     def testReadChemCompRef(self):
         ccP = ChemCompProvider(cachePath=self.__workPath, useCache=False)
@@ -77,6 +117,11 @@ class ChemCompProviderTests(unittest.TestCase):
                 fwCount += 1
         self.assertGreaterEqual(3, iCount)
         self.assertGreaterEqual(3, fwCount)
+        #
+        tS = ccP.getReleaseDate("ALA")
+        self.assertEqual(tS, "1973-05-03")
+        fEntryId = ccP.getEntryOfFirstRelease("ALA")
+        self.assertEqual(fEntryId, "2pti")
 
 
 def readChemCompInfo():

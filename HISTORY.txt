@@ -68,3 +68,4 @@
  24-Jul-2021  - V0.76 Make each provider a subclass of StashableBase, update install and pipeline
  25-Jul-2021  - V0.77 Adjust testCache() tests and logging for all providers
  27-Jul-2021  - V0.78 Further adjustments to standardize testCache() provider logic
+  1-Aug-2021  - V0.79 Add release date data and methods to the ChemCompProvider module
