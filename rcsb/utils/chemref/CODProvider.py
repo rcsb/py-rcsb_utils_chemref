@@ -83,7 +83,7 @@ class CODProvider:
         sCount = 0
         try:
             nl = "\n"
-            with open(inpFilePath, "r") as ifh, open(outFilePath, "w") as ofh:
+            with open(inpFilePath, "r", encoding="utf-8") as ifh, open(outFilePath, "w", encoding="utf-8") as ofh:
                 for line in ifh.readlines():
                     ff = line[:-1].split("\t")
                     ff.reverse()
@@ -99,7 +99,7 @@ class CODProvider:
         smiTupL = []
         inpFilePath = self.getSmilesPath()
         try:
-            with open(inpFilePath, "r") as ifh:
+            with open(inpFilePath, "r", encoding="utf-8") as ifh:
                 for line in ifh.readlines():
                     ff = line[:-1].split("\t")
                     smiTupL.append((ff[0], ff[1]))
