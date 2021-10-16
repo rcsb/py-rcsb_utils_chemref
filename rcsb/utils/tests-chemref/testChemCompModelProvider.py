@@ -51,7 +51,7 @@ class ChemCompModelProviderTests(unittest.TestCase):
         logger.info("Model match length %d", len(rD))
         for ccId in rD:
             if len(rD[ccId]) > 1:
-                logger.info("Match length for %r %d", ccId, len(rD[ccId]))
+                logger.debug("Match length for %r %d", ccId, len(rD[ccId]))
 
 
 def readChemCompModelInfo():

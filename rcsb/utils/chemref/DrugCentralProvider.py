@@ -29,7 +29,8 @@ class DrugCentralProvider:
         cachePath = kwargs.get("cachePath", ".")
         useCache = kwargs.get("useCache", True)
         self.__dirPath = os.path.join(cachePath, "CACHE", "DrugCentral")
-        drugCentralUrl = "http://unmtid-shinyapps.net/download/structures.smiles.tsv"
+        drugCentralUrl = "https://unmtid-shinyapps.net/download/DrugCentral/20200516/structures.smiles.tsv"
+        # drugCentralUrl = "http://unmtid-shinyapps.net/download/structures.smiles.tsv"
         #
         self.__mU = MarshalUtil(workPath=self.__dirPath)
         self.__retD = self.__reload(drugCentralUrl, self.__dirPath, useCache=useCache)
@@ -72,6 +73,7 @@ class DrugCentralProvider:
         return rVal
 
     def __reload(self, drugCentralUrl, dirPath, useCache=True, fmt="json"):
+        retD = {}
         startTime = time.time()
         ok = False
         fU = FileUtil()
