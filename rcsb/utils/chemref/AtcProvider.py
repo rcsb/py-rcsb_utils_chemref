@@ -2,9 +2,10 @@
 #  File:           AtcProvider.py
 #  Date:           3-Apr-2019 jdw
 #
-#  Updated:
-#  5-Jun-2021 jdw  Update ATC data source and fallback
-# 20-Jul-2021 jdw  Make this provider a subclass of StashableBase
+#  Updates:
+#   5-Jun-2021 jdw  Update ATC data source and fallback
+#  20-Jul-2021 jdw  Make this provider a subclass of StashableBase
+#   3-Jan-2022 dwp  Update data loading methods to address recent changes in source NCBO ATC files
 ##
 """
   Extract ATC term descriptions from NCBO ATC flat files.
@@ -130,7 +131,7 @@ class AtcProvider(StashableBase):
         http://purl.bioontology.org/ontology/UATC/J01DB07,cefatrizine,,,false,C0007545,http://purl.bioontology.org/ontology/STY/T195|http://purl.bioontology.org/ontology/STY/T109,http://purl.bioontology.org/ontology/UATC/J01DB,5,,http://purl.bioontology.org/ontology/STY/T195|http://purl.bioontology.org/ontology/STY/T109
         """
         nD = {}
-        ns = "http://purl.bioontology.org/ontology/UATC/"
+        ns = "http://purl.bioontology.org/ontology/ATC/"
         for rD in atcL:
             if ns not in rD["Class ID"]:
                 continue
@@ -146,7 +147,7 @@ class AtcProvider(StashableBase):
     def __extractHierarchy(self, atcL):
         """ """
         pD = {}
-        ns = "http://purl.bioontology.org/ontology/UATC/"
+        ns = "http://purl.bioontology.org/ontology/ATC/"
         for rD in atcL:
             if ns not in rD["Class ID"]:
                 continue
