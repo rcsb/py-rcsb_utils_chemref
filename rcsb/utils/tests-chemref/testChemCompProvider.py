@@ -71,8 +71,7 @@ class ChemCompProviderTests(unittest.TestCase):
             logger.info("cD (%d)", len(cD))
             cDTemp = copy.deepcopy(cD)
             for ccId in cDTemp:
-                cDTemp[ccId] = (cDTemp[ccId][0], cDTemp[ccId][1].strftime("%Y-%m-%d"))
-            cD = copy.deepcopy(cDTemp)
+                cD[ccId] = (cDTemp[ccId][0], cDTemp[ccId][1].strftime("%Y-%m-%d"))
 
             tS = datetime.datetime.now().isoformat()
             vS = datetime.datetime.now().strftime("%Y-%m-%d")
