@@ -4,8 +4,8 @@
 # Date:    1-Nov-2018
 # Version: 0.001
 #
-# Update:
-#
+# Updates:
+# 28-Mar-2022 bv Fix pylint issue with "Iterated dict modified inside for loop body" in testChemCompProvider
 #
 ##
 """
@@ -22,6 +22,7 @@ import datetime
 import logging
 import os
 import unittest
+import copy
 
 from rcsb.utils.chemref.ChemCompProvider import ChemCompProvider
 from rcsb.utils.io.MarshalUtil import MarshalUtil
@@ -68,8 +69,9 @@ class ChemCompProviderTests(unittest.TestCase):
             #
             logger.info("ALA %r %s", cD["ALA"][0], cD["ALA"][1])
             logger.info("cD (%d)", len(cD))
-            for ccId in cD:
-                cD[ccId] = (cD[ccId][0], cD[ccId][1].strftime("%Y-%m-%d"))
+            cloneD = copy.deepcopy(cD)
+            for ccId in cloneD:
+                cD[ccId] = (cloneD[ccId][0], cloneD[ccId][1].strftime("%Y-%m-%d"))
 
             tS = datetime.datetime.now().isoformat()
             vS = datetime.datetime.now().strftime("%Y-%m-%d")
