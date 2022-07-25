@@ -72,3 +72,4 @@
  16-Oct-2021  - V0.80 Update DrugCentral download url, update base version of ChEMBL data
   3-Jan-2022  - V0.81 Update AtcProvider data loading methods to address recent changes in source NCBO ATC files
  28-Mar-2022  - V0.82 Fix pylint issue with "Iterated dict modified inside for loop body" in testChemCompProvider
+ 25-Jul-2022  - V0.83 Revert last change to AtcProvider - source NCBO ATC files were updated again to restore previous format

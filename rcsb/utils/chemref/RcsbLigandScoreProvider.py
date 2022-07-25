@@ -2,8 +2,8 @@
 #  File:           RcsbLigandScoreProvider.py
 #  Date:           10-Feb-2021 jdw
 #
-#  Updated:
-#
+#  Update2:
+#  25-Jul-2022 dwp  Change location of fall back files to point to master (not development) branch on py-rcsb_exdb_assets
 ##
 """
 Accessors for RCSB Ligand quality score supporting data.
@@ -34,8 +34,8 @@ class RcsbLigandScoreProvider(StashableBase):
         #
         self.__dirPath = os.path.join(self.__cachePath, dirName)
         self.__useCache = kwargs.get("useCache", True)
-        rcsbLigandScoreUrl = kwargs.get("rcsbLigandScoreUrl", "https://github.com/rcsb/py-rcsb_exdb_assets/raw/development/fall_back/rcsb_ligand_score/ligand_score_reference.csv")
-        rcsbLigandExcludeUrl = kwargs.get("rcsbLigandExcludeUrl", "https://github.com/rcsb/py-rcsb_exdb_assets/raw/development/fall_back/rcsb_ligand_score/ligand_score_exclude.list")
+        rcsbLigandScoreUrl = kwargs.get("rcsbLigandScoreUrl", "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/rcsb_ligand_score/ligand_score_reference.csv")
+        rcsbLigandExcludeUrl = kwargs.get("rcsbLigandExcludeUrl", "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/rcsb_ligand_score/ligand_score_exclude.list")
         #
         self.__mU = MarshalUtil(workPath=self.__dirPath)
         self.__ligandScoreDL, self.__ligandExcludeD = self.__reload(self.__dirPath, rcsbLigandScoreUrl, rcsbLigandExcludeUrl, self.__useCache)
