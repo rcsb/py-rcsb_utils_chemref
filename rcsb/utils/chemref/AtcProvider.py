@@ -6,6 +6,7 @@
 #   5-Jun-2021 jdw  Update ATC data source and fallback
 #  20-Jul-2021 jdw  Make this provider a subclass of StashableBase
 #   3-Jan-2022 dwp  Update data loading methods to address recent changes in source NCBO ATC files
+#  25-Jul-2022 dwp  Revert last change - source NCBO ATC files were updated again to restore previous format
 ##
 """
   Extract ATC term descriptions from NCBO ATC flat files.
@@ -127,11 +128,11 @@ class AtcProvider(StashableBase):
         Example public data set from BioPortal -
         Class ID,Preferred Label,Synonyms,Definitions,Obsolete,CUI,Semantic Types,Parents,ATC LEVEL,Is Drug Class,Semantic type UMLS property
 
-        http://purl.bioontology.org/ontology/ATC/A03AX13,silicones,,,false,C0037114,http://purl.bioontology.org/ontology/STY/T109|http://purl.bioontology.org/ontology/STY/T122,http://purl.bioontology.org/ontology/UATC/A03AX,5,,http://purl.bioontology.org/ontology/STY/T109|http://purl.bioontology.org/ontology/STY/T122
-        http://purl.bioontology.org/ontology/ATC/J01DB07,cefatrizine,,,false,C0007545,http://purl.bioontology.org/ontology/STY/T195|http://purl.bioontology.org/ontology/STY/T109,http://purl.bioontology.org/ontology/UATC/J01DB,5,,http://purl.bioontology.org/ontology/STY/T195|http://purl.bioontology.org/ontology/STY/T109
+        http://purl.bioontology.org/ontology/UATC/A03AX13,silicones,,,false,C0037114,http://purl.bioontology.org/ontology/STY/T109|http://purl.bioontology.org/ontology/STY/T122,http://purl.bioontology.org/ontology/UATC/A03AX,5,,http://purl.bioontology.org/ontology/STY/T109|http://purl.bioontology.org/ontology/STY/T122
+        http://purl.bioontology.org/ontology/UATC/J01DB07,cefatrizine,,,false,C0007545,http://purl.bioontology.org/ontology/STY/T195|http://purl.bioontology.org/ontology/STY/T109,http://purl.bioontology.org/ontology/UATC/J01DB,5,,http://purl.bioontology.org/ontology/STY/T195|http://purl.bioontology.org/ontology/STY/T109
         """
         nD = {}
-        ns = "http://purl.bioontology.org/ontology/ATC/"
+        ns = "http://purl.bioontology.org/ontology/UATC/"
         for rD in atcL:
             if ns not in rD["Class ID"]:
                 continue
@@ -147,7 +148,7 @@ class AtcProvider(StashableBase):
     def __extractHierarchy(self, atcL):
         """ """
         pD = {}
-        ns = "http://purl.bioontology.org/ontology/ATC/"
+        ns = "http://purl.bioontology.org/ontology/UATC/"
         for rD in atcL:
             if ns not in rD["Class ID"]:
                 continue
