@@ -41,7 +41,7 @@ class ChemCompProvider(StashableBase):
         #
         self.__mU = MarshalUtil(workPath=dirPath)
         #
-        relDataUrlTarget = kwargs.get("relDataUrlTarget", "https://github.com/rcsb/py-rcsb_exdb_assets/raw/development/fall_back/chem-comp-release-data-summary.json")
+        relDataUrlTarget = kwargs.get("relDataUrlTarget", "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/chem-comp-release-data-summary.json")
         self.__ccdRelD = self.__reloadRelData(relDataUrlTarget, dirPath, useCache=useCache)
         #
         self.__ccdD = self.__reload(urlTarget, dirPath, ccdFileName, useCache=useCache)

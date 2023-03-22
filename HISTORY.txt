@@ -75,3 +75,4 @@
  25-Jul-2022  - V0.83 Revert last change to AtcProvider - source NCBO ATC files were updated again to restore previous format
  27-Jul-2022  - V0.84 Adapt to multiple possible naming schemes for ATC class IDs
   9-Jan-2023  - V0.85 Configuration changes to support tox 4
+ 22-Mar-2023  - V0.86 Update references to py-rcsb_exdb_assets master branch
