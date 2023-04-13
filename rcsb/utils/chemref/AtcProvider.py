@@ -38,7 +38,7 @@ class AtcProvider(StashableBase):
         useCache = kwargs.get("useCache", True)
 
         urlTarget = "https://data.bioontology.org/ontologies/ATC/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb&download_format=csv"
-        urlTargetFallback = "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/ATC-2021.csv.gz"
+        urlTargetFallback = "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/ATC.csv.gz"
         self.__version = kwargs.get("AtcVersion", "2021")
         #
         self.__mU = MarshalUtil(workPath=atcDirPath)
