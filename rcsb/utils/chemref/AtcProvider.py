@@ -42,13 +42,13 @@ class AtcProvider(StashableBase):
         self.__version = kwargs.get("AtcVersion", "2023")
         #
         self.__mU = MarshalUtil(workPath=atcDirPath)
-        self.__atcD = self.__reload(urlTarget, urlTargetFallback, atcDirPath, useCache=useCache, version=self.__version)
+        self.__atcD = self.__reload(urlTarget, urlTargetFallback, atcDirPath, useCache=useCache)
         #
 
     def getVersion(self):
         return self.__version
 
-    def __reload(self, urlTarget, urlTargetFallback, atcDirPath, useCache=True, version=None):
+    def __reload(self, urlTarget, urlTargetFallback, atcDirPath, useCache=True):
         pyVersion = sys.version_info[0]
         atcFilePath = os.path.join(atcDirPath, "atc-py%s.pic" % str(pyVersion))
         #
