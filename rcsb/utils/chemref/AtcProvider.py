@@ -39,7 +39,7 @@ class AtcProvider(StashableBase):
 
         urlTarget = "https://data.bioontology.org/ontologies/ATC/download?apikey=8b5b7825-538d-40e0-9e9e-5ab9274a9aeb&download_format=csv"
         urlTargetFallback = "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/ATC.csv.gz"
-        self.__version = kwargs.get("AtcVersion", "2021")
+        self.__version = kwargs.get("AtcVersion", "2023")
         #
         self.__mU = MarshalUtil(workPath=atcDirPath)
         self.__atcD = self.__reload(urlTarget, urlTargetFallback, atcDirPath, useCache=useCache, version=self.__version)
@@ -60,7 +60,7 @@ class AtcProvider(StashableBase):
             # pD = atcD["parents"]
 
         elif not useCache:
-            fn = "ATC-%s.csv.gz" % version
+            fn = "ATC.csv.gz"
             fp = os.path.join(atcDirPath, fn)
             logger.debug("Fetch ATC term descriptions from source %s", fp)
             fileU = FileUtil(workPath=atcDirPath)
