@@ -36,7 +36,7 @@ class ChemCompModelProvider(StashableBase):
         cachePath = kwargs.get("cachePath", ".")
         super(ChemCompModelProvider, self).__init__(cachePath, [dirName])
 
-        urlTarget = kwargs.get("urlTarget", "http://ftp.wwpdb.org/pub/pdb/data/component-models/complete/chem_comp_model.cif.gz")
+        urlTarget = kwargs.get("urlTarget", "http://files.wwpdb.org/pub/pdb/data/component-models/complete/chem_comp_model.cif.gz")
         dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)
         mappingFileName = kwargs.get("mappingFileName", "ccdc_pdb_mapping.json")
