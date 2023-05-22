@@ -77,3 +77,4 @@
   9-Jan-2023  - V0.85 Configuration changes to support tox 4
  22-Mar-2023  - V0.86 Update references to py-rcsb_exdb_assets master branch
  19-Apr-2023  - V0.87 Update file path in ATCProvider
+ 19-May-2023  - V0.88 Update DNS to PDB archive
