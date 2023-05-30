@@ -32,7 +32,7 @@ class ChemCompProvider(StashableBase):
         cachePath = kwargs.get("cachePath", ".")
         super(ChemCompProvider, self).__init__(cachePath, [dirName])
         #
-        urlTarget = kwargs.get("ccUrlTarget", "http://prerelease.k8s.rcsb.org/pdb/data/monomers/components.cif.gz")
+        urlTarget = kwargs.get("ccUrlTarget", "https://prerelease.k8s.rcsb.org/pdb/data/monomers/components.cif.gz")
         # self.__birdUrlTarget = kwargs.get("birdUrlTarget", "ftp://ftp.wwpdb.org/pub/pdb/data/bird/prd/prdcc-all.cif.gz")
         #
         dirPath = os.path.join(cachePath, dirName)

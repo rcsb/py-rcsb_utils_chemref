@@ -35,7 +35,7 @@ class BirdProvider(StashableBase):
 
         # Default source target locators
         self.__birdUrlTarget = kwargs.get("birdUrlTarget", None)
-        self.__birdUrlTarget = self.__birdUrlTarget if self.__birdUrlTarget else "http://prerelease.k8s.rcsb.org/pdb/data/bird/prd/prd-all.cif.gz"
+        self.__birdUrlTarget = self.__birdUrlTarget if self.__birdUrlTarget else "https://prerelease.k8s.rcsb.org/pdb/data/bird/prd/prd-all.cif.gz"
         #
         dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)
