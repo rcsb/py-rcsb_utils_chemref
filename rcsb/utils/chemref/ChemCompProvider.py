@@ -4,7 +4,7 @@
 # Date:    22-Nov-2019
 #
 # Updates:
-#
+#   5-Jun-2023 aae  Include bond count in chem comp data
 ##
 """
 Utilities to provide essential data items for chemical component definitions.
@@ -95,6 +95,13 @@ class ChemCompProvider(StashableBase):
     def getAtomCountChiral(self, ccId):
         try:
             return self.__ccdD[ccId]["atom_count_chiral"]
+        except Exception:
+            pass
+        return 0
+
+    def getBondCount(self, ccId):
+        try:
+            return self.__ccdD[ccId]["bond_count"]
         except Exception:
             pass
         return 0
@@ -258,7 +265,7 @@ class ChemCompProvider(StashableBase):
                     chFlag = cObj.getValue("pdbx_stereo_config", ii)
                     if chFlag != "N":
                         numAtomsChiral += 1
-            except Exception:
+            except AttributeError:
                 logger.warning("Missing chem_comp_atom category for %s", ccId)
                 numAtoms = 0
                 numAtomsHeavy = 0
@@ -267,5 +274,16 @@ class ChemCompProvider(StashableBase):
             retD[ccId]["atom_count"] = numAtoms
             retD[ccId]["atom_count_chiral"] = numAtomsChiral
             retD[ccId]["atom_count_heavy"] = numAtomsHeavy
+            #
+            # Get the number of bonds
+            try:
+                cObj = dataContainer.getObj("chem_comp_bond")
+                numBonds = cObj.getRowCount()
+            except AttributeError:
+                logger.warning("Missing chem_comp_bond category for %s", ccId)
+                numBonds = 0
+            #
+            retD[ccId]["bond_count"] = numBonds
+
             #
         return retD
