@@ -102,10 +102,12 @@ class ChemCompProviderTests(unittest.TestCase):
         numAtoms = ccP.getAtomCount("ATP")
         numChiralAtoms = ccP.getAtomCountChiral("ATP")
         numHeavyAtoms = ccP.getAtomCountHeavy("ATP")
-        logger.debug("%r %r %r", numAtoms, numChiralAtoms, numHeavyAtoms)
+        numBonds = ccP.getBondCount("ATP")
+        logger.debug("%r %r %r %r", numAtoms, numChiralAtoms, numHeavyAtoms, numBonds)
         self.assertEqual(numAtoms, 47)
         self.assertEqual(numChiralAtoms, 6)
         self.assertEqual(numHeavyAtoms, 31)
+        self.assertEqual(numBonds, 49)
 
         ccIdL = ccP.getComponentIds()
         iCount = 0
