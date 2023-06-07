@@ -4,7 +4,7 @@
 # Date:    22-Nov-2019
 #
 # Updates:
-#
+#   7-Jun-2023 aae  Include bond count in chem comp data and fix typo
 ##
 """
 Utilities to provide essential data items for chemical component definitions.
@@ -37,7 +37,7 @@ class ChemCompProvider(StashableBase):
         #
         dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)
-        ccdFileName = kwargs.get("ccdFileName", "ccd_abbridged_definitions.json")
+        ccdFileName = kwargs.get("ccdFileName", "ccd_abridged_definitions.json")
         #
         self.__mU = MarshalUtil(workPath=dirPath)
         #
@@ -99,6 +99,13 @@ class ChemCompProvider(StashableBase):
             pass
         return 0
 
+    def getBondCount(self, ccId):
+        try:
+            return self.__ccdD[ccId]["bond_count"]
+        except Exception:
+            pass
+        return 0
+
     def getFormulaWeight(self, ccId):
         try:
             return float(self.__ccdD[ccId]["formula_weight"])
@@ -113,7 +120,7 @@ class ChemCompProvider(StashableBase):
             pass
         return []
 
-    def getAbbridged(self):
+    def getAbridged(self):
         return self.__ccdD
 
     def getReleaseDate(self, ccId):
@@ -166,7 +173,7 @@ class ChemCompProvider(StashableBase):
                 ok = fU.get(urlTarget, filePath)
             if ok:
                 cL = self.__mU.doImport(filePath, fmt="mmcif")
-                mD = self.__buildAbbridged(cL)
+                mD = self.__buildAbridged(cL)
                 ok = self.__mU.doExport(ccdFilePath, mD, fmt="json", indent=3)
         #
         return mD
@@ -209,8 +216,8 @@ class ChemCompProvider(StashableBase):
         #
         return cD["release_data"] if "release_data" in cD else {}
 
-    def __buildAbbridged(self, cL):
-        """Return a dictionary of abbridged CCD info."""
+    def __buildAbridged(self, cL):
+        """Return a dictionary of abridged CCD info."""
         atNameList = [
             "id",
             "name",
@@ -258,7 +265,7 @@ class ChemCompProvider(StashableBase):
                     chFlag = cObj.getValue("pdbx_stereo_config", ii)
                     if chFlag != "N":
                         numAtomsChiral += 1
-            except Exception:
+            except AttributeError:
                 logger.warning("Missing chem_comp_atom category for %s", ccId)
                 numAtoms = 0
                 numAtomsHeavy = 0
@@ -267,5 +274,16 @@ class ChemCompProvider(StashableBase):
             retD[ccId]["atom_count"] = numAtoms
             retD[ccId]["atom_count_chiral"] = numAtomsChiral
             retD[ccId]["atom_count_heavy"] = numAtomsHeavy
+            #
+            # Get the number of bonds
+            try:
+                cObj = dataContainer.getObj("chem_comp_bond")
+                numBonds = cObj.getRowCount()
+            except AttributeError:
+                logger.warning("Missing chem_comp_bond category for %s", ccId)
+                numBonds = 0
+            #
+            retD[ccId]["bond_count"] = numBonds
+
             #
         return retD

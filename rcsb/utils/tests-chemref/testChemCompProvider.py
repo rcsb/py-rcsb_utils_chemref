@@ -6,6 +6,7 @@
 #
 # Updates:
 # 28-Mar-2022 bv Fix pylint issue with "Iterated dict modified inside for loop body" in testChemCompProvider
+#  7-Jun-2022 aae Include bond count in chem comp data and fix typo
 #
 ##
 """
@@ -85,7 +86,7 @@ class ChemCompProviderTests(unittest.TestCase):
         ok = ccP.testCache()
         self.assertTrue(ok)
         #
-        rD = ccP.getAbbridged()
+        rD = ccP.getAbridged()
         self.assertGreaterEqual(len(rD), 30000)
         #
         nsL = []
@@ -102,10 +103,12 @@ class ChemCompProviderTests(unittest.TestCase):
         numAtoms = ccP.getAtomCount("ATP")
         numChiralAtoms = ccP.getAtomCountChiral("ATP")
         numHeavyAtoms = ccP.getAtomCountHeavy("ATP")
-        logger.debug("%r %r %r", numAtoms, numChiralAtoms, numHeavyAtoms)
+        numBonds = ccP.getBondCount("ATP")
+        logger.debug("%r %r %r %r", numAtoms, numChiralAtoms, numHeavyAtoms, numBonds)
         self.assertEqual(numAtoms, 47)
         self.assertEqual(numChiralAtoms, 6)
         self.assertEqual(numHeavyAtoms, 31)
+        self.assertEqual(numBonds, 49)
 
         ccIdL = ccP.getComponentIds()
         iCount = 0
