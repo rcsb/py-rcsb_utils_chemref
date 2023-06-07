@@ -4,7 +4,7 @@
 # Date:    22-Nov-2019
 #
 # Updates:
-#   5-Jun-2023 aae  Include bond count in chem comp data
+#   7-Jun-2023 aae  Include bond count in chem comp data and fix typo
 ##
 """
 Utilities to provide essential data items for chemical component definitions.
@@ -37,7 +37,7 @@ class ChemCompProvider(StashableBase):
         #
         dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)
-        ccdFileName = kwargs.get("ccdFileName", "ccd_abbridged_definitions.json")
+        ccdFileName = kwargs.get("ccdFileName", "ccd_abridged_definitions.json")
         #
         self.__mU = MarshalUtil(workPath=dirPath)
         #
@@ -120,7 +120,7 @@ class ChemCompProvider(StashableBase):
             pass
         return []
 
-    def getAbbridged(self):
+    def getAbridged(self):
         return self.__ccdD
 
     def getReleaseDate(self, ccId):
@@ -173,7 +173,7 @@ class ChemCompProvider(StashableBase):
                 ok = fU.get(urlTarget, filePath)
             if ok:
                 cL = self.__mU.doImport(filePath, fmt="mmcif")
-                mD = self.__buildAbbridged(cL)
+                mD = self.__buildAbridged(cL)
                 ok = self.__mU.doExport(ccdFilePath, mD, fmt="json", indent=3)
         #
         return mD
@@ -216,8 +216,8 @@ class ChemCompProvider(StashableBase):
         #
         return cD["release_data"] if "release_data" in cD else {}
 
-    def __buildAbbridged(self, cL):
-        """Return a dictionary of abbridged CCD info."""
+    def __buildAbridged(self, cL):
+        """Return a dictionary of abridged CCD info."""
         atNameList = [
             "id",
             "name",
