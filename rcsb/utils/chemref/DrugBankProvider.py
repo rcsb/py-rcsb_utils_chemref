@@ -210,9 +210,9 @@ class DrugBankProvider(StashableBase):
             dbMapD["version"] = version
             ok = mU.doExport(mappingFilePath, dbMapD, fmt="json", indent=3, enforceAscii=False)
             ok = mU.doExport(docListFilePath, dbObjL, fmt="pickle")
-            if ok:
-                fU.remove(zipFilePath)
-                fU.remove(filePath)
+            # if ok:
+                # fU.remove(zipFilePath)
+                # fU.remove(filePath)
             endTime = time.time()
             logger.info(
                 "Completed db %d/%d processing at %s (%.4f seconds)", len(dbObjL), len(dbMapD["id_map"]), time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - startTime
