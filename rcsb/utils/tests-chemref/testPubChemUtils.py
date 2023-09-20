@@ -96,14 +96,13 @@ class PubChemUtilsTests(unittest.TestCase):
         self.assertFalse(retStatus)
         self.assertFalse(rDL)
 
-    @unittest.skip("Skipping until api is more reliable")
+    # @unittest.skip("Skipping until api is more reliable")
     def testFetchCompoundAltReturnTypes(self):
         pcU = PubChemUtils()
         cIdList = ["123631", "2244"]
         for cId in cIdList:
             chemId = ChemicalIdentifier(idCode=cId, identifier=cId, identifierType="cid")
             for returnType, _ in [("classification", "Hierarchies"), ("property", "PropertyTable"), ("xrefs", "InformationList"), ("synonyms", "InformationList")]:
-                # for returnType, _ in [("classification", "Hierarchies")]:
                 rawResponsePath = os.path.join(self.__workPath, "%s-pubchem-%s-raw.json" % (cId, returnType))
                 extractedResponsePath = os.path.join(self.__workPath, "%s-pubchem-%s-extract.json" % (cId, returnType))
                 retStatus, rDL = pcU.fetch(chemId, returnType=returnType, storeRawResponsePath=rawResponsePath, storeResponsePath=extractedResponsePath)
@@ -122,7 +121,7 @@ class PubChemUtilsTests(unittest.TestCase):
             self.assertTrue(retStatus)
             self.assertGreaterEqual(len(vL), 1)
 
-    @unittest.skip("Skipping until api is more reliable")
+    # @unittest.skip("Skipping until api is more reliable")
     def testFetchCompoundExtTable(self):
         try:
             cIdList = ["2244", "123631"]
@@ -153,11 +152,11 @@ class PubChemUtilsTests(unittest.TestCase):
 
 def fetchPubChemData():
     suiteSelect = unittest.TestSuite()
-    suiteSelect.addTest(PubChemUtilsTests("testFetchCompound"))
-    suiteSelect.addTest(PubChemUtilsTests("testFetchDrugCompound"))
+    suiteSelect.addTest(PubChemUtilsTests("testFetchCompoundRecord"))
     suiteSelect.addTest(PubChemUtilsTests("testFetchCompoundView"))
     suiteSelect.addTest(PubChemUtilsTests("testFetchCompoundAltReturnTypes"))
-    suiteSelect.addTest(PubChemUtilsTests("testSearchCompound"))
+    suiteSelect.addTest(PubChemUtilsTests("testFetchCompoundExtTable"))
+    suiteSelect.addTest(PubChemUtilsTests("testSearchCompoundRecord"))
     return suiteSelect
 
 

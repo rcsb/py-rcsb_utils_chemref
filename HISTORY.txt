@@ -79,3 +79,4 @@
  19-Apr-2023  - V0.87 Update file path in ATCProvider
  19-May-2023  - V0.88 Update DNS to PDB archive
   5-Jun-2023  - V0.89 Include bond count in ChemCompProvider
+ 20-Sep-2023  - V0.90 Adjust request methods in PubChemUtils; Use HTTPS instead of FTP for ChEMBL data

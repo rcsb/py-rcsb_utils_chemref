@@ -5,6 +5,7 @@
 # Updates:
 #
 #   28-May-2020 jdw use alternative url fetch library.
+#   20-Sep-2023 dwp turn off overwriting of user agent from header for GET requests
 ##
 __docformat__ = "google en"
 __author__ = "John Westbrook"
@@ -17,7 +18,6 @@ import logging
 import os
 import time
 from collections import namedtuple, defaultdict
-
 from rcsb.utils.io.MarshalUtil import MarshalUtil
 from rcsb.utils.io.UrlRequestUtil import UrlRequestUtil
 
@@ -223,7 +223,7 @@ class PubChemUtils(object):
         requestType = "POST"
         outputType = "JSON"
         sslCert = "enabled"
-        timeOutSeconds = 10
+        timeOutSeconds = 40
         retCode, ret = None, None
         try:
             baseUrl = self.__urlPrimary
@@ -233,11 +233,22 @@ class PubChemUtils(object):
                 if nameSpace in ["cid", "name", "inchikey"] and returnType in ["record"] and searchType in ["lookup"] and requestType == "GET":
                     uId = quote(identifier.encode("utf8"))
                     endPoint = "/".join(["rest", "pug", domain, nameSpace, uId, outputType])
-                    ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOut=timeOutSeconds)
+                    ret, retCode = ureq.getUnWrapped(
+                        baseUrl,
+                        endPoint,
+                        pD,
+                        httpCodesCatch=httpCodesCatch,
+                        returnContentType="JSON",
+                        sslCert=sslCert,
+                        timeOut=timeOutSeconds,
+                        overwriteUserAgent=False
+                    )
+                    logger.debug("GET retCode %r ret %r:", retCode, ret)
                 elif nameSpace in ["cid", "name", "inchikey"] and returnType in ["record"] and searchType in ["lookup"] and requestType == "POST":
                     endPoint = "/".join(["rest", "pug", domain, nameSpace, outputType])
                     pD = {nameSpace: identifier}
                     ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOut=timeOutSeconds)
+                    logger.debug("POST retCode %r ret %r:", retCode, ret)
                 #
                 elif nameSpace in ["cid", "name", "inchikey"] and returnType in ["xrefs"] and searchType in ["lookup"] and requestType == "POST":
                     endPoint = "/".join(["rest", "pug", domain, nameSpace, returnType, "RegistryID,RN", outputType])
@@ -258,7 +269,16 @@ class PubChemUtils(object):
                     endPoint = "/".join(["rest", "pug", domain, nameSpace, uId, returnType, outputType])
                     # pD = {"classification_type": "simple"}
                     pD = {}
-                    ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOut=timeOutSeconds)
+                    ret, retCode = ureq.getUnWrapped(
+                        baseUrl,
+                        endPoint,
+                        pD,
+                        httpCodesCatch=httpCodesCatch,
+                        returnContentType="JSON",
+                        sslCert=sslCert,
+                        timeOut=timeOutSeconds,
+                        overwriteUserAgent=False
+                    )
                 #
                 elif nameSpace in ["cid"] and returnType in ["classification"] and searchType in ["lookup"] and requestType == "POST":
                     # Needs to be specifically targeted on a particular compound ...
@@ -317,11 +337,24 @@ class PubChemUtils(object):
             if nameSpace in ["cid"] and requestType == "GET":
                 uId = quote(identifier.encode("utf8"))
                 endPoint = "/".join(["rest", "pug_view", "data", domain, uId, outputType])
-                ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOut=timeOutSeconds)
+                logger.debug("GET baseUrl %r, endPoint %r, pD %r:", baseUrl, endPoint, pD)
+                ret, retCode = ureq.getUnWrapped(
+                    baseUrl,
+                    endPoint,
+                    pD,
+                    httpCodesCatch=httpCodesCatch,
+                    returnContentType="JSON",
+                    sslCert=sslCert,
+                    timeOut=timeOutSeconds,
+                    overwriteUserAgent=False
+                )
+                logger.debug("GET PUG VIEW retCode %r ret %r:", retCode, ret)
             elif nameSpace in ["cid"] and requestType == "POST":
                 endPoint = "/".join(["rest", "pug_view", "data", domain, outputType])
                 pD = {nameSpace: identifier}
+                logger.debug("POST baseUrl %r, endPoint %r, pD %r:", baseUrl, endPoint, pD)
                 ret, retCode = ureq.postUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOut=timeOutSeconds)
+                logger.debug("POST PUG VIEW retCode %r ret %r:", retCode, ret)
         except Exception as e:
             logger.error("Failing for identifier %r returnType view with (retCode %r) %s", identifier, retCode, str(e))
         #
@@ -352,7 +385,16 @@ class PubChemUtils(object):
                 # uId = quote(identifier.encode("utf8"))
                 endPoint = "/".join(["sdq", "sdqagent.cgi"])
                 pD = {"infmt": "json", "outfmt": "json", "query": '{"select":"*","collection":"%s","where":{"ands":{"cid":"%s"}}}' % (returnType, identifier)}
-                ret, retCode = ureq.getUnWrapped(baseUrl, endPoint, pD, httpCodesCatch=httpCodesCatch, returnContentType="JSON", sslCert=sslCert, timeOut=timeOutSeconds)
+                ret, retCode = ureq.getUnWrapped(
+                    baseUrl,
+                    endPoint,
+                    pD,
+                    httpCodesCatch=httpCodesCatch,
+                    returnContentType="JSON",
+                    sslCert=sslCert,
+                    timeOut=timeOutSeconds,
+                    overwriteUserAgent=False
+                )
         except Exception as e:
             logger.error("Failing identifier %r return type %r with (retCode %r) %s", identifier, returnType, retCode, str(e))
         #
