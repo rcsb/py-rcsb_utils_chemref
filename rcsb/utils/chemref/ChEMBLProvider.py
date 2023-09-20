@@ -3,7 +3,8 @@
 #  Date:           9-Nov-2020 jdw
 #
 #  Updated:
-#  2-Dec-2020 jdw Add ChEMBL API access methods
+#   2-Dec-2020 jdw Add ChEMBL API access methods
+#  20-Sep-2023 dwp Change protocol to HTTPS instead of FTP; put chembl imports in try/except
 ##
 """
 Accessors for ChEMBL small molecule data.
@@ -14,11 +15,16 @@ import logging
 import os.path
 import time
 
-from chembl_webresource_client.new_client import new_client
-from chembl_webresource_client.unichem import unichem_client
-
 from rcsb.utils.io.FileUtil import FileUtil
 from rcsb.utils.io.MarshalUtil import MarshalUtil
+
+# pylint: disable=ungrouped-imports
+try:
+    from chembl_webresource_client.new_client import new_client  # fails when service is down
+    from chembl_webresource_client.unichem import unichem_client
+except Exception:
+    pass
+
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +39,7 @@ class ChEMBLProvider:
         useCache = kwargs.get("useCache", True)
         self.__dirPath = os.path.join(cachePath, "CACHE", "ChEMBL")
 
-        chemblDbUrl = kwargs.get("ChEMBLDbUrl", "ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/")
+        chemblDbUrl = kwargs.get("ChEMBLDbUrl", "https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/")
         #
         self.__mU = MarshalUtil(workPath=self.__dirPath)
         self.__retD = self.__reload(chemblDbUrl, self.__dirPath, useCache=useCache)
