@@ -5,6 +5,7 @@
 # Version: 0.001
 #
 # Update:
+# 14-Nov-2023 dwp Add products information alongside brand names
 #
 ##
 """
@@ -94,20 +95,20 @@ class DrugBankReader(object):
             "products": [
                 {
                     "name": el.findtext("{ns}name".format(ns=self.__ns)),
-                    "labeller": el.findtext("{ns}labeller".format(ns=self.__ns)),
-                    "ndc-id": el.findtext("{ns}ndc-id".format(ns=self.__ns)),
-                    "ndc-product-code": el.findtext("{ns}ndc-product-code".format(ns=self.__ns)),
-                    "dpd-id": el.findtext("{ns}dpd-id".format(ns=self.__ns)),
-                    "ema-product-code": el.findtext("{ns}ema-product-code".format(ns=self.__ns)),
-                    "ema-ma-number": el.findtext("{ns}ema-ma-number".format(ns=self.__ns)),
+                    # "labeller": el.findtext("{ns}labeller".format(ns=self.__ns)),
+                    # "ndc-id": el.findtext("{ns}ndc-id".format(ns=self.__ns)),
+                    # "ndc-product-code": el.findtext("{ns}ndc-product-code".format(ns=self.__ns)),
+                    # "dpd-id": el.findtext("{ns}dpd-id".format(ns=self.__ns)),
+                    # "ema-product-code": el.findtext("{ns}ema-product-code".format(ns=self.__ns)),
+                    # "ema-ma-number": el.findtext("{ns}ema-ma-number".format(ns=self.__ns)),
                     "started-marketing-on": el.findtext("{ns}started-marketing-on".format(ns=self.__ns)),
                     "ended-marketing-on": el.findtext("{ns}ended-marketing-on".format(ns=self.__ns)),
-                    "dosage-form": el.findtext("{ns}dosage-form".format(ns=self.__ns)),
-                    "strength": el.findtext("{ns}strength".format(ns=self.__ns)),
-                    "route": el.findtext("{ns}route".format(ns=self.__ns)),
-                    "fda-application-number": el.findtext("{ns}fda-application-number".format(ns=self.__ns)),
-                    "generic": el.findtext("{ns}generic".format(ns=self.__ns)),
-                    "over-the-counter": el.findtext("{ns}over-the-counter".format(ns=self.__ns)),
+                    # "dosage-form": el.findtext("{ns}dosage-form".format(ns=self.__ns)),
+                    # "strength": el.findtext("{ns}strength".format(ns=self.__ns)),
+                    # "route": el.findtext("{ns}route".format(ns=self.__ns)),
+                    # "fda-application-number": el.findtext("{ns}fda-application-number".format(ns=self.__ns)),
+                    # "generic": el.findtext("{ns}generic".format(ns=self.__ns)),
+                    # "over-the-counter": el.findtext("{ns}over-the-counter".format(ns=self.__ns)),
                     "approved": el.findtext("{ns}approved".format(ns=self.__ns)),
                     "country": el.findtext("{ns}country".format(ns=self.__ns)),
                     "source": el.findtext("{ns}source".format(ns=self.__ns)),
@@ -124,7 +125,7 @@ class DrugBankReader(object):
         aliases.add(doc["name"])
         doc["aliases"] = aliases
 
-        products = {
+        brand_names = {
             # elem.text.strip().encode("ascii", "xmlcharrefreplace").decode("utf-8")
             elem.text.strip()
             for elem in itt.chain(
@@ -133,7 +134,7 @@ class DrugBankReader(object):
             )
             if elem.text.strip()
         }
-        doc["products"] = list(products)
+        doc["brand_names"] = list(brand_names)
         #
         doc["target_interactions"] = []
         targetCategories = ["target", "enzyme", "carrier", "transporter"]

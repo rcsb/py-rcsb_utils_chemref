@@ -79,7 +79,7 @@ class DrugBankProviderTests(unittest.TestCase):
             logger.debug("%s %s is %r", dbId, fn, fS)
         # logger.info("%r %s", dbId, pprint.pformat(dbu.getD(dbId)))
 
-    @unittest.skip("Long test")
+    # @unittest.skip("Long test")
     def testReadDrugBankInfo(self):
         dbu = DrugBankProvider(cachePath=self.__cachePath, useCache=False, username=self.__user, password=self.__pw)
         dbMapD = dbu.getMapping()

@@ -7,6 +7,7 @@
 #
 # Update:
 # 20-Jul-2021 jdw Make this provider a subclass of StashableBase
+# 14-Nov-2023 dwp Add products information alongside brand names
 ##
 
 __docformat__ = "google en"
@@ -254,6 +255,7 @@ class DrugBankProvider(StashableBase):
          _drugbank_info.description
          _drugbank_info.synonyms
          _drugbank_info.brand_names
+         _drugbank_info.products
          _drugbank_info.affected_organisms
          _drugbank_info.indication
          _drugbank_info.pharmacology
@@ -292,7 +294,8 @@ class DrugBankProvider(StashableBase):
             ("drug_categories", "drug_categories"),
             ("groups", "drug_groups"),
             ("aliases", "synonyms"),
-            ("products", "brand_names"),
+            ("brand_names", "brand_names"),
+            ("products", "products"),
             ("affected_organisms", "affected_organisms"),
             ("atc_codes", "atc_codes"),
         ]
@@ -361,8 +364,11 @@ class DrugBankProvider(StashableBase):
                         if "atc_codes" in dD and dD["atc_codes"]:
                             mD[exD["identifier"]]["atc_codes"] = dD["atc_codes"]
                         #
+                        if "brand_names" in dD and dD["brand_names"]:
+                            mD[exD["identifier"]]["brand_names"] = dD["brand_names"]
+                        #
                         if "products" in dD and dD["products"]:
-                            mD[exD["identifier"]]["brand_names"] = dD["products"]
+                            mD[exD["identifier"]]["products"] = dD["products"]
                         #
                         if "target_interactions" in dD:
                             for tid in dD["target_interactions"]:
