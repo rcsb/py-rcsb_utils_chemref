@@ -255,7 +255,7 @@ class DrugBankProvider(StashableBase):
          _drugbank_info.description
          _drugbank_info.synonyms
          _drugbank_info.brand_names
-         _drugbank_info.products
+         _drugbank_info.drug_products
          _drugbank_info.affected_organisms
          _drugbank_info.indication
          _drugbank_info.pharmacology
@@ -295,7 +295,7 @@ class DrugBankProvider(StashableBase):
             ("groups", "drug_groups"),
             ("aliases", "synonyms"),
             ("brand_names", "brand_names"),
-            ("products", "products"),
+            ("products", "drug_products"),
             ("affected_organisms", "affected_organisms"),
             ("atc_codes", "atc_codes"),
         ]
