@@ -5,7 +5,7 @@
 # Version: 0.001
 #
 # Update:
-# 14-Nov-2023 dwp Add products information alongside brand names
+# 30-Nov-2023 dwp Add drug products information alongside brand names
 #
 ##
 """
@@ -116,6 +116,13 @@ class DrugBankReader(object):
                 for el in drugElement.findall("{ns}products/{ns}product".format(ns=self.__ns))
             ],
         }
+        #
+        # Reprocess products to adhere to schema
+        if "products" in doc:
+            origProductL = doc.pop("products")  # remove "products" from doc
+            newProductL = self.__processDrugProducts(origProductL)
+            doc["drug_products"] = newProductL  # add reprocessed data as "drug_products"
+        #
         aliases = {
             # elem.text.strip().encode("ascii", "xmlcharrefreplace").decode("utf-8")
             elem.text.strip()
@@ -174,6 +181,35 @@ class DrugBankReader(object):
             )
         ]
         if len(hgncIds) == 1:
-            doc["hgnc_id"] = hgncIds[0][len("HGNC:") :]
+            doc["hgnc_id"] = hgncIds[0][len("HGNC:"):]
 
         return doc
+
+    def __processDrugProducts(self, productL):
+        """Reprocess drug products data to adhere to schema."""
+        dpL = []
+        for pD in productL:
+            dpD = {}
+            for k, v in pD.items():
+                if k == "started-marketing-on":
+                    if v != "":
+                        dpD["started_marketing_on"] = datetime.strptime(v, "%Y-%m-%d")
+                elif k == "ended-marketing-on":
+                    if v != "":
+                        dpD["ended_marketing_on"] = datetime.strptime(v, "%Y-%m-%d")
+                elif k == "approved" and v != "":
+                    if v == "true":
+                        dpD["approved"] = "Y"
+                    elif v == "false":
+                        dpD["approved"] = "N"
+                else:
+                    dpD[k] = v
+            dpL.append(dpD)
+        #
+        drugProductL = self.__removeDuplicateDicts(dpL)
+        return drugProductL
+
+    def __removeDuplicateDicts(self, dictList, key=lambda d: tuple(sorted(d.items()))):
+        """Uniquifies a list of dictionaries."""
+        seen = set()
+        return [x for x in dictList if (k := key(x)) not in seen and not seen.add(k)]
