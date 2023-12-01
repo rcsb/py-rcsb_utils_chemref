@@ -117,6 +117,11 @@ class DrugBankReader(object):
             ],
         }
         #
+        # Make sure groups list is unique
+        if "groups" in doc:
+            groupL = doc.pop("groups")
+            doc["drug_groups"] = list(set(groupL))
+
         # Reprocess products to adhere to schema
         if "products" in doc:
             origProductL = doc.pop("products")  # remove "products" from doc

@@ -292,7 +292,7 @@ class DrugBankProvider(StashableBase):
         ]
         listKeys = [
             ("drug_categories", "drug_categories"),
-            ("groups", "drug_groups"),
+            ("drug_groups", "drug_groups"),
             ("aliases", "synonyms"),
             ("brand_names", "brand_names"),
             ("drug_products", "drug_products"),
