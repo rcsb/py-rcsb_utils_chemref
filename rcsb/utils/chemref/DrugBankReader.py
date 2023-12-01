@@ -5,6 +5,7 @@
 # Version: 0.001
 #
 # Update:
+# 30-Nov-2023 dwp Add drug products information alongside brand names
 #
 ##
 """
@@ -94,20 +95,20 @@ class DrugBankReader(object):
             "products": [
                 {
                     "name": el.findtext("{ns}name".format(ns=self.__ns)),
-                    "labeller": el.findtext("{ns}labeller".format(ns=self.__ns)),
-                    "ndc-id": el.findtext("{ns}ndc-id".format(ns=self.__ns)),
-                    "ndc-product-code": el.findtext("{ns}ndc-product-code".format(ns=self.__ns)),
-                    "dpd-id": el.findtext("{ns}dpd-id".format(ns=self.__ns)),
-                    "ema-product-code": el.findtext("{ns}ema-product-code".format(ns=self.__ns)),
-                    "ema-ma-number": el.findtext("{ns}ema-ma-number".format(ns=self.__ns)),
+                    # "labeller": el.findtext("{ns}labeller".format(ns=self.__ns)),
+                    # "ndc-id": el.findtext("{ns}ndc-id".format(ns=self.__ns)),
+                    # "ndc-product-code": el.findtext("{ns}ndc-product-code".format(ns=self.__ns)),
+                    # "dpd-id": el.findtext("{ns}dpd-id".format(ns=self.__ns)),
+                    # "ema-product-code": el.findtext("{ns}ema-product-code".format(ns=self.__ns)),
+                    # "ema-ma-number": el.findtext("{ns}ema-ma-number".format(ns=self.__ns)),
                     "started-marketing-on": el.findtext("{ns}started-marketing-on".format(ns=self.__ns)),
                     "ended-marketing-on": el.findtext("{ns}ended-marketing-on".format(ns=self.__ns)),
-                    "dosage-form": el.findtext("{ns}dosage-form".format(ns=self.__ns)),
-                    "strength": el.findtext("{ns}strength".format(ns=self.__ns)),
-                    "route": el.findtext("{ns}route".format(ns=self.__ns)),
-                    "fda-application-number": el.findtext("{ns}fda-application-number".format(ns=self.__ns)),
-                    "generic": el.findtext("{ns}generic".format(ns=self.__ns)),
-                    "over-the-counter": el.findtext("{ns}over-the-counter".format(ns=self.__ns)),
+                    # "dosage-form": el.findtext("{ns}dosage-form".format(ns=self.__ns)),
+                    # "strength": el.findtext("{ns}strength".format(ns=self.__ns)),
+                    # "route": el.findtext("{ns}route".format(ns=self.__ns)),
+                    # "fda-application-number": el.findtext("{ns}fda-application-number".format(ns=self.__ns)),
+                    # "generic": el.findtext("{ns}generic".format(ns=self.__ns)),
+                    # "over-the-counter": el.findtext("{ns}over-the-counter".format(ns=self.__ns)),
                     "approved": el.findtext("{ns}approved".format(ns=self.__ns)),
                     "country": el.findtext("{ns}country".format(ns=self.__ns)),
                     "source": el.findtext("{ns}source".format(ns=self.__ns)),
@@ -115,6 +116,18 @@ class DrugBankReader(object):
                 for el in drugElement.findall("{ns}products/{ns}product".format(ns=self.__ns))
             ],
         }
+        #
+        # Make sure groups list is unique
+        if "groups" in doc:
+            groupL = doc.pop("groups")
+            doc["drug_groups"] = list(set(groupL))
+
+        # Reprocess products to adhere to schema
+        if "products" in doc:
+            origProductL = doc.pop("products")  # remove "products" from doc
+            newProductL = self.__processDrugProducts(origProductL)
+            doc["drug_products"] = newProductL  # add reprocessed data as "drug_products"
+        #
         aliases = {
             # elem.text.strip().encode("ascii", "xmlcharrefreplace").decode("utf-8")
             elem.text.strip()
@@ -124,7 +137,7 @@ class DrugBankReader(object):
         aliases.add(doc["name"])
         doc["aliases"] = aliases
 
-        products = {
+        brand_names = {
             # elem.text.strip().encode("ascii", "xmlcharrefreplace").decode("utf-8")
             elem.text.strip()
             for elem in itt.chain(
@@ -133,7 +146,7 @@ class DrugBankReader(object):
             )
             if elem.text.strip()
         }
-        doc["products"] = list(products)
+        doc["brand_names"] = list(brand_names)
         #
         doc["target_interactions"] = []
         targetCategories = ["target", "enzyme", "carrier", "transporter"]
@@ -173,6 +186,35 @@ class DrugBankReader(object):
             )
         ]
         if len(hgncIds) == 1:
-            doc["hgnc_id"] = hgncIds[0][len("HGNC:") :]
+            doc["hgnc_id"] = hgncIds[0][len("HGNC:"):]
 
         return doc
+
+    def __processDrugProducts(self, productL):
+        """Reprocess drug products data to adhere to schema."""
+        dpL = []
+        for pD in productL:
+            dpD = {}
+            for k, v in pD.items():
+                if k == "started-marketing-on":
+                    if v != "":
+                        dpD["started_marketing_on"] = datetime.strptime(v, "%Y-%m-%d")
+                elif k == "ended-marketing-on":
+                    if v != "":
+                        dpD["ended_marketing_on"] = datetime.strptime(v, "%Y-%m-%d")
+                elif k == "approved" and v != "":
+                    if v == "true":
+                        dpD["approved"] = "Y"
+                    elif v == "false":
+                        dpD["approved"] = "N"
+                else:
+                    dpD[k] = v
+            dpL.append(dpD)
+        #
+        drugProductL = self.__removeDuplicateDicts(dpL)
+        return drugProductL
+
+    def __removeDuplicateDicts(self, dictList, key=lambda d: tuple(sorted(d.items()))):
+        """Uniquifies a list of dictionaries."""
+        seen = set()
+        return [x for x in dictList if (k := key(x)) not in seen and not seen.add(k)]

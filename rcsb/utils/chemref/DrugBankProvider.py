@@ -7,6 +7,7 @@
 #
 # Update:
 # 20-Jul-2021 jdw Make this provider a subclass of StashableBase
+# 30-Nov-2023 dwp Add drug products information alongside brand names
 ##
 
 __docformat__ = "google en"
@@ -254,6 +255,7 @@ class DrugBankProvider(StashableBase):
          _drugbank_info.description
          _drugbank_info.synonyms
          _drugbank_info.brand_names
+         _drugbank_info.drug_products
          _drugbank_info.affected_organisms
          _drugbank_info.indication
          _drugbank_info.pharmacology
@@ -290,13 +292,13 @@ class DrugBankProvider(StashableBase):
         ]
         listKeys = [
             ("drug_categories", "drug_categories"),
-            ("groups", "drug_groups"),
+            ("drug_groups", "drug_groups"),
             ("aliases", "synonyms"),
-            ("products", "brand_names"),
+            ("brand_names", "brand_names"),
+            ("drug_products", "drug_products"),
             ("affected_organisms", "affected_organisms"),
             ("atc_codes", "atc_codes"),
         ]
-        # For category drugbank_info
         for textKey, docKey in textKeys:
             if textKey in dbObj and dbObj[textKey]:
                 dbiD[docKey] = dbObj[textKey].replace("\r", "").replace("\n", " ")
@@ -361,8 +363,12 @@ class DrugBankProvider(StashableBase):
                         if "atc_codes" in dD and dD["atc_codes"]:
                             mD[exD["identifier"]]["atc_codes"] = dD["atc_codes"]
                         #
-                        if "products" in dD and dD["products"]:
-                            mD[exD["identifier"]]["brand_names"] = dD["products"]
+                        # Added to mapping file here for later use by DictMethodChemRefHelper (as desired)
+                        if "brand_names" in dD and dD["brand_names"]:
+                            mD[exD["identifier"]]["brand_names"] = dD["brand_names"]
+                        #
+                        if "drug_products" in dD and dD["drug_products"]:
+                            mD[exD["identifier"]]["drug_products"] = dD["drug_products"]
                         #
                         if "target_interactions" in dD:
                             for tid in dD["target_interactions"]:
