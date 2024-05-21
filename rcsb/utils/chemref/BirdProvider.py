@@ -140,7 +140,7 @@ class BirdProvider(StashableBase):
             startTime = time.time()
             dataContainerL = dataContainerL[:molLimit] if molLimit else dataContainerL
             for dataContainer in dataContainerL:
-                prdId = prdReleaseStatus = representAs = None
+                prdId = prdReleaseStatus = representAs = chemCompId = classType = None
                 if dataContainer.exists("pdbx_reference_molecule"):
                     prdObj = dataContainer.getObj("pdbx_reference_molecule")
                     prdId = prdObj.getValueOrDefault("prd_id", 0, defaultValue=None)

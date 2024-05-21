@@ -67,6 +67,7 @@ class PubChemUtils(object):
         contentTypes = kwargs.get("contentTypes", ["view", "classification", "property", "xrefs", "synonyms", "dgidb", "pathway", "fdaorangebook", "clinicaltrials", "bioactivity"])
 
         retStatus = False
+        searchType = None
         retD = {}
         assemDL = []
         # -- First identifier the PubChem compound CID for the input chemical identifier.
