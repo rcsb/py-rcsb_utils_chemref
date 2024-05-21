@@ -81,3 +81,4 @@
   5-Jun-2023  - V0.89 Include bond count in ChemCompProvider
  20-Sep-2023  - V0.90 Adjust request methods in PubChemUtils; Use HTTPS instead of FTP for ChEMBL data
  30-Nov-2023  - V0.91 Add drug product information (approved, country, dates of marketing, etc.)
+ 21-May-2024  - V0.92 Fix pylinting
