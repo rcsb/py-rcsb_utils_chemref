@@ -4,6 +4,7 @@
 # Date:    18-Mar-2020
 #
 # Updates:
+#    7-Jun-2024 dwp Change RESID url from "https://" to "ftp://", due to recent certificate issues with https
 #
 ##
 """
@@ -36,7 +37,7 @@ class ResidProvider(StashableBase):
         cachePath = kwargs.get("cachePath", ".")
         super(ResidProvider, self).__init__(cachePath, [dirName])
 
-        urlTarget = kwargs.get("residUrlTarget", "https://ftp.proteininformationresource.org/pir_databases/other_databases/resid/RESIDUES.XML")
+        urlTarget = kwargs.get("residUrlTarget", "ftp://ftp.proteininformationresource.org/pir_databases/other_databases/resid/RESIDUES.XML")
         urlTargetFallback = "https://github.com/rcsb/py-rcsb_exdb_assets/raw/master/fall_back/RESIDUES.XML"
         #
         useCache = kwargs.get("useCache", True)
@@ -165,7 +166,7 @@ class ResidProvider(StashableBase):
             modResL = []
             for feature in dbObj["features"]:
                 if feature.startswith("MOD_RES"):
-                    modResL.append(feature[len("MOD_RES") :].strip())
+                    modResL.append(feature[len("MOD_RES"):].strip())
             genEnzymes = sorted(set(dbObj["genEnzymes"]))
             #
             ontRefs = [t[4:] for t in sorted(set(dbObj["ontRefs"])) if t.startswith("PSI-")]
