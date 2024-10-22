@@ -44,9 +44,15 @@ class AtcProviderTests(unittest.TestCase):
         self.assertTrue(version is not None)
         tnL = atcP.getTreeNodeList()
         logger.info("length of tree list %d", len(tnL))
+        self.assertGreaterEqual(len(tnL), 6000)
+        idLin = atcP.getIdLineage("B05DB")
+        logger.info("ID Lineage %r", idLin)
+        atcName = atcP.getAtcName("B05DB")
+        logger.info("ATC Name %r", atcName)
+        nameLin = atcP.getNameLineage("B05DB")
+        logger.info("Name Lineage %r", nameLin)
         # for tn in tnL:
         #    logger.info(">>>node %r", tn)
-        self.assertGreaterEqual(len(tnL), 6000)
 
 
 def readAtcInfo():
