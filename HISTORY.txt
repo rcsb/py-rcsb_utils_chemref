@@ -83,3 +83,5 @@
  30-Nov-2023  - V0.91 Add drug product information (approved, country, dates of marketing, etc.)
  21-May-2024  - V0.92 Fix pylinting
   7-Jun-2024  - V0.93 Update ResidProvider
+ 29-Oct-2024  - V0.94 Add patch for ATC data processing to handle stringified arrays;
+                      Update CI/CD (to use python 3.10)

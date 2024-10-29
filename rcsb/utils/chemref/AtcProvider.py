@@ -8,6 +8,7 @@
 #   3-Jan-2022 dwp  Update data loading methods to address recent changes in source NCBO ATC files
 #  25-Jul-2022 dwp  Revert last change - source NCBO ATC files were updated again to restore previous format
 #  27-Jul-2022 dwp  Adapt to possible naming schemes for class IDs (may be identified with "ATC" or "UATC")
+#  22-Oct-2024 dwp  Add standardization method for ATC data to handle potential stringified arrays
 ##
 """
   Extract ATC term descriptions from NCBO ATC flat files.
@@ -18,6 +19,7 @@ import collections
 import logging
 import os.path
 import sys
+import ast
 
 from rcsb.utils.io.FileUtil import FileUtil
 from rcsb.utils.io.MarshalUtil import MarshalUtil
@@ -147,13 +149,45 @@ class AtcProvider(StashableBase):
             else:
                 continue
             idCode = rD["Class ID"].replace(ns, "")
-            name = rD["Preferred Label"]
+            name = self.__standardizePreferredLabel(rD["Preferred Label"])
             synonyms = rD["Synonyms"]
             definition = rD["Definitions"]
             level = int(rD["ATC LEVEL"]) if rD["ATC LEVEL"].isdigit() else None
             nD[idCode] = {"name": name, "synonyms": synonyms, "definition": definition, "level": level}
         logger.info("Length of name dictionary %d", len(nD))
         return nD
+
+    def __standardizePreferredLabel(self, label):
+        """Temporary method to standardize the "Preferred Label" value of an ATC datum,
+        due to recent unintended changes to source ATC data in which the column is appearing
+        as a stringified array instead of a simple string. E.g.,:
+
+        Before:
+            http://purl.bioontology.org/ontology/ATC/B05DB,Hypertonic solutions,...<remainder_omitted>
+
+        Now (as of Version 2024AA):
+            http://purl.bioontology.org/ontology/ATC/B05DB,"[""Hypertonic solutions""]",...<remainder_omitted>
+
+        Once this is resolved at the source data level, can stop using this method.
+
+        Args:
+            label (str): raw label
+
+        Returns:
+            label: processed label
+        """
+        try:
+            # Attempt to parse the label as a list
+            parsedLabel = ast.literal_eval(label)
+            # If it's a list, return the first element (assuming it's a single-item array)
+            if isinstance(parsedLabel, list) and len(parsedLabel) == 1:
+                return parsedLabel[0]
+            else:
+                logger.info("parsed label %r", parsedLabel)
+        except (ValueError, SyntaxError):
+            # If not a list or parsing fails, return the original label
+            return label
+        return label
 
     def __extractHierarchy(self, atcL):
         """ """
