@@ -73,7 +73,7 @@ class ChEMBLProvider:
         fU = FileUtil()
         fU.mkdir(dirPath)
         #
-        baseVersion = 29
+        baseVersion = 35
         # ChEMBL current version 27,...
         # template:  chembl_27_chemreps.txt.gz
         #
