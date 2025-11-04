@@ -5,6 +5,7 @@
 #
 # Updates:
 #   7-Jun-2023 aae  Include bond count in chem comp data and fix typo
+#   4-Nov-2025 dwp  Strip newline characters from 'chem_comp.*' data item values (primarily for 'chem_comp.name', but should be safe to apply to other data items)
 ##
 """
 Utilities to provide essential data items for chemical component definitions.
@@ -244,7 +245,10 @@ class ChemCompProvider(StashableBase):
             cObj = dataContainer.getObj("chem_comp")
             ccId = cObj.getValue("id", 0)
             for atName in atNameList:
-                tD[atName] = cObj.getValueOrDefault(atName, 0, defaultValue=None)
+                atVal = cObj.getValueOrDefault(atName, 0, defaultValue=None)
+                if atVal:
+                    atVal = atVal.replace("\n", "")  # strip newline characters
+                tD[atName] = atVal
             tD["formula_weight"] = float(tD["formula_weight"]) if tD["formula_weight"] and "formula_weight" in tD else None
             retD[ccId] = tD
             #
