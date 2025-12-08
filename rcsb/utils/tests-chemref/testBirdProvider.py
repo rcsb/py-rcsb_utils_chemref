@@ -23,9 +23,10 @@ import resource
 import time
 import unittest
 
-
-from rcsb.utils.chemref import __version__
+from importlib.metadata import version as get_package_version
 from rcsb.utils.chemref.BirdProvider import BirdProvider
+
+__version__ = get_package_version("rcsb.utils.chemref")
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 TOPDIR = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
