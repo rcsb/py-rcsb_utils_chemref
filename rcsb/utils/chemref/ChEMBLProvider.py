@@ -216,7 +216,7 @@ class ChEMBLProvider:
             14: {
                 "name": "fdasrs",
                 "baseUrl": "http://fdasis.nlm.nih.gov/srs/srs.jsp",
-                "entryUrl": "http://fdasis.nlm.nih.gov/srs/ProxyServlet?mergeData=true&objectHandle=DBMaint&APPLICATION_NAME=fdasrs&actionHandle=default&nextPage=jsp/srs/ResultScreen.jsp&TXTSUPERLISTID=",
+                "entryUrl": "http://fdasis.nlm.nih.gov/srs/ProxyServlet?mergeData=true&objectHandle=DBMaint&APPLICATION_NAME=fdasrs&actionHandle=default&nextPage=jsp/srs/ResultScreen.jsp&TXTSUPERLISTID=",  # noqa: E501 line too long
             },
             15: {"name": "surechembl", "baseUrl": "https://www.surechembl.org/search/", "entryUrl": "https://www.surechembl.org/chemical/"},
             21: {"name": "pubchem_tpharma", "baseUrl": "http://www.thomson-pharma.com/", "entryUrl": "http://pubchem.ncbi.nlm.nih.gov/substance/"},

@@ -86,3 +86,4 @@
  29-Oct-2024  - V0.94 Add patch for ATC data processing to handle stringified arrays;
                       Update CI/CD (to use python 3.10)
  15-Jul-2025  - V0.95 Update base ChEMBL version to 35
+  4-Nov-2025  - V0.96 Switch to 'pyproject.toml' file and hatch build system, and update pipelines to Python 3.13
