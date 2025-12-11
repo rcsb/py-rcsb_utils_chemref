@@ -31,6 +31,12 @@ class RcsbLigandReferenceGenerator(StashableBase):
             data: Stateful data updated with each step
         Methods:
             query(pdb_id): Fetch ligand quality metrics for given PDB IDs.
+            filter(): Filter the queried ligand quality scores based on defined criteria.
+            reduce(): Reduce the data by combining multiple instances of the same ligand in the same PDB entry.
+            analyze(): Run PCA on the filtered and reduced ligand quality scores to generate reference data.
+            generate(pdb_ids): Full pipeline to generate ligand quality reference data by running the steps of
+                query -> filter -> reduce -> analyze.
+            writeReference(output_file): Write the generated ligand quality reference data to a csv file.
     """
     def __init__(self):
         self.data = None
