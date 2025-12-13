@@ -39,8 +39,8 @@ class RcsbLigandReferenceGeneratorTests(unittest.TestCase):
     def testQuery(self):
         """
         Test query on several PDB IDs.
-        """        
-        pdb_ids = ["1C0T","1DT4","XXXX"]  #1C0T with ligand, 1DT4 without ligand, XXXX invalid ID
+        """
+        pdb_ids = ["1C0T", "1DT4", "XXXX"]  # 1C0T with ligand, 1DT4 without ligand, XXXX invalid ID
         self.cRLRG.query(pdb_ids)
         self.assertTrue(self.cRLRG.data)
         response = self.cRLRG.data
@@ -81,8 +81,8 @@ class RcsbLigandReferenceGeneratorTests(unittest.TestCase):
         """
         Test filter function on several PDB IDs.
         """
-        pdb_ids = ["1C0T","1DT4","6WJC", "4HHB"]
-        self.cRLRG.query(pdb_ids)   
+        pdb_ids = ["1C0T", "1DT4", "6WJC", "4HHB"]
+        self.cRLRG.query(pdb_ids)
         self.cRLRG.filter()
         data_filtered = self.cRLRG.data
         self.assertTrue(data_filtered)
@@ -96,7 +96,7 @@ class RcsbLigandReferenceGeneratorTests(unittest.TestCase):
         """
         Test filter function on all PDB structures.
         """
-        self.cRLRG.query()   
+        self.cRLRG.query()
         self.cRLRG.filter()
         data_filtered = self.cRLRG.data
         self.assertTrue(data_filtered)
@@ -110,8 +110,8 @@ class RcsbLigandReferenceGeneratorTests(unittest.TestCase):
         """
         Test reduce function on several PDB IDs.
         """
-        pdb_ids = ["1C0T","1DT4","6WJC", "4HHB"]
-        self.cRLRG.query(pdb_ids)   
+        pdb_ids = ["1C0T", "1DT4", "6WJC", "4HHB"]
+        self.cRLRG.query(pdb_ids)
         self.cRLRG.filter()
         self.cRLRG.reduce()
         data_reduced = self.cRLRG.data
@@ -126,7 +126,7 @@ class RcsbLigandReferenceGeneratorTests(unittest.TestCase):
         """
         Test reduce function on all PDB structures.
         """
-        self.cRLRG.query()   
+        self.cRLRG.query()
         self.cRLRG.filter()
         self.cRLRG.reduce()
         data_reduced = self.cRLRG.data
@@ -141,7 +141,7 @@ class RcsbLigandReferenceGeneratorTests(unittest.TestCase):
         """
         Test analyze function on several PDB IDs.
         """
-        pdb_ids = ["1C0T","1DT4","6WJC", "4HHB"]
+        pdb_ids = ["1C0T", "1DT4", "6WJC", "4HHB"]
         self.cRLRG.query(pdb_ids)
         self.cRLRG.filter()
         self.cRLRG.reduce()
@@ -174,13 +174,13 @@ class RcsbLigandReferenceGeneratorTests(unittest.TestCase):
         """
         Test generate function that runs the full pipeline on several PDB IDs.
         """
-        pdb_ids = ["1C0T","1DT4","6WJC", "4HHB"]
+        pdb_ids = ["1C0T", "1DT4", "6WJC", "4HHB"]
         self.cRLRG.generate(pdb_ids)
         self.assertTrue(self.cRLRG.data)
         # Write to output file
         output_file = os.path.join(HERE, "test-output", "RcsbLigandReferenceGenerator_testGenerate.json")
-        with open(output_file, "w", encoding="utf-8") as f:
-            json.dump(self.cRLRG.data, f, indent=2)
+        with open(output_file, "w", encoding="utf-8") as file:
+            json.dump(self.cRLRG.data, file, indent=2)
         logger.info("Wrote data to output file %s", output_file)
         # Write reference data to csv
         csv_output_file = os.path.join(HERE, "test-output", "ligand_score_reference_test.csv")

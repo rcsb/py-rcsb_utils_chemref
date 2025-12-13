@@ -10,7 +10,6 @@ Generate ligand quality reference data that is used for ligand quality score com
 """
 import csv
 import logging
-import json
 import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
@@ -43,7 +42,7 @@ class RcsbLigandReferenceGenerator(StashableBase):
         # Increase some settings to speed up querying
         config.DATA_API_MAX_CONCURRENT_REQUESTS = 15
         config.DATA_API_REQUESTS_PER_SECOND = 30
-    
+
     def generate(self, pdb_ids: list[str] = []) -> "RcsbLigandReferenceGenerator":
         """
         Full pipeline to generate ligand quality reference data by running the steps of
@@ -107,7 +106,7 @@ class RcsbLigandReferenceGenerator(StashableBase):
 
     def filter(self) -> "RcsbLigandReferenceGenerator":
         """
-        filter the queried ligand quality scores, and simplify the json data by using combined key of pdb-ligand.
+        filter the queried ligand quality scores, and simplify the data by using combined key of pdb-ligand.
         filter out entries without nonpolymer ligands;
         filter out entries without any ligand quality scores;
         filter out ligands whose quality scores do not meet thresholds;
@@ -171,13 +170,13 @@ class RcsbLigandReferenceGenerator(StashableBase):
         0 < RSR <= 1.0 of physcally meaningful range;
         0 < RSCC <= 1.0 of physically meaningful range;
         value 0 is theoretically possible for the quality metrics, but practically unlikely and sometimes
-        indicate placeholder, hence excluded. 
+        indicate placeholder, hence excluded.
         Instance with any value of None is excluded.
         Exceptional cases are not included in reference building.
-        
+
         :param score: _description_
         :return: _description_
-        """        
+        """
         for key, value in score.items():
             if key in ["average_occupancy", "completeness"]:  # ligand should be well occupied and complete
                 if value is None:
@@ -187,12 +186,12 @@ class RcsbLigandReferenceGenerator(StashableBase):
             if key in ["mogul_bonds_RMSZ", "mogul_angles_RMSZ"]:  # ligand geometry should be reasonable
                 if value is None:
                     return {}
-                if value <=0 or value > 10:
+                if value <= 0 or value > 10:
                     return {}
             if key in ["RSR", "RSCC"]:  # ligand fit to density should be within the bounds
                 if value is None:
                     return {}
-                if value <=0 or value > 1:
+                if value <= 0 or value > 1:
                     return {}
         score_filtered = {}
         try:  # get values for the four primary scores that passed the above filters
@@ -208,7 +207,7 @@ class RcsbLigandReferenceGenerator(StashableBase):
         """
         Reduce the data by combining multiple instances of the same ligand in the same PDB entry.
         This is to avoid the over-representation of ligands that appear hundreds of times in the same entry.
-    
+
         :return: The same object with updated self.data of reduced ligand quality scores.
         """
         da = {}
@@ -232,7 +231,7 @@ class RcsbLigandReferenceGenerator(StashableBase):
         """
         Run PCA on the filtered and reduced ligand quality scores to generate reference data.
         The first principal component (PC1) is used as the ligand quality reference score.
-    
+
         :return: A dictionary of ligand quality reference scores with pdb-ligand as keys.
         """
         # Prepare data for PCA, convert each score type into a separate list for matrix construction
@@ -280,7 +279,7 @@ class RcsbLigandReferenceGenerator(StashableBase):
 
         :param X: numpy matrix of any dimension
         :return: first principal components as a list
-        """        
+        """
         # Scale the data
         scaler = StandardScaler()
         X_std = scaler.fit_transform(X)
@@ -290,8 +289,8 @@ class RcsbLigandReferenceGenerator(StashableBase):
         logger.info("Explained variance ratios: %s", pca.explained_variance_ratio_)  # should be > 0.7(70%) for ligand geo and fit PC1
         loadings = pca.components_[0]
         logger.info("Resulting PCA loadings: %s", loadings)  # should be [sqrt(0.5), sqrt(0.5)] for scaled PCA or with minus sign on one component
-        # Code below ensures loading on the first variable (RSR for fitting, and mogul_bonds_RMSZ for geometry) to be positive, 
-        # This is because PCA direction is arbitrary, i.e. 0.707,-0.707 and -0.707,0.707 are equivalent, but we want to ensure 
+        # Code below ensures loading on the first variable (RSR for fitting, and mogul_bonds_RMSZ for geometry) to be positive,
+        # This is because PCA direction is arbitrary, i.e. 0.707,-0.707 and -0.707,0.707 are equivalent, but we want to ensure
         # lower scores correspond to better quality, which gives a correct direction for subsequent pecentile calculation.
         if loadings[0] < 0:
             loadings = -loadings
