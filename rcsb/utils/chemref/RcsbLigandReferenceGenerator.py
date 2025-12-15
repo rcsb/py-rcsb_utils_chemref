@@ -16,12 +16,12 @@ from sklearn.preprocessing import StandardScaler
 from rcsbapi.data import DataQuery as Query
 from rcsbapi.data import ALL_STRUCTURES  # pylint: disable=no-name-in-module
 from rcsbapi.config import config
-from rcsb.utils.io.StashableBase import StashableBase
+# from rcsb.utils.io.StashableBase import StashableBase
 
 logger = logging.getLogger(__name__)
 
 
-class RcsbLigandReferenceGenerator(StashableBase):
+class RcsbLigandReferenceGenerator:
     """ This class generates ligand quality reference data by performing the following steps:
     Query ligand quality metrics from RCSB GraphQL API;
     Process the ligand quality data by filtering, aggregating, and formatting;
@@ -43,7 +43,7 @@ class RcsbLigandReferenceGenerator(StashableBase):
         config.DATA_API_MAX_CONCURRENT_REQUESTS = 15
         config.DATA_API_REQUESTS_PER_SECOND = 30
 
-    def generate(self, pdb_ids: list[str] = []) -> "RcsbLigandReferenceGenerator":
+    def generate(self, pdb_ids: list[str] = None) -> "RcsbLigandReferenceGenerator":
         """
         Full pipeline to generate ligand quality reference data by running the steps of
         query -> filter -> reduce -> analyze.
@@ -77,7 +77,7 @@ class RcsbLigandReferenceGenerator(StashableBase):
             writer.writerows(self.data)  # write all rows
         return True
 
-    def query(self, pdb_ids: list[str] = []) -> "RcsbLigandReferenceGenerator":
+    def query(self, pdb_ids: list[str] = None) -> "RcsbLigandReferenceGenerator":
         """
         Fetch ligand quality metrics for given PDB IDs, defaulting to all structures.
 
