@@ -14,7 +14,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from rcsbapi.data import DataQuery as Query
-from rcsbapi.data import ALL_STRUCTURES
+from rcsbapi.data import ALL_STRUCTURES  # pylint: disable=no-name-in-module
 from rcsbapi.config import config
 from rcsb.utils.io.StashableBase import StashableBase
 
