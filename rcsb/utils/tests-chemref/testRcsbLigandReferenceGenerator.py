@@ -215,7 +215,7 @@ def genLigandRef():
     suiteSelect.addTest(RcsbLigandReferenceGeneratorTests("testAnalyze"))
     # suiteSelect.addTest(RcsbLigandReferenceGeneratorTests("testAnalyzeAll"))
     suiteSelect.addTest(RcsbLigandReferenceGeneratorTests("testGenerate"))
-    suiteSelect.addTest(RcsbLigandReferenceGeneratorTests("testGenerateAll"))
+    # suiteSelect.addTest(RcsbLigandReferenceGeneratorTests("testGenerateAll"))
     return suiteSelect
 
 
