@@ -71,7 +71,7 @@ class RcsbLigandReferenceGenerator(StashableBase):
             logger.error("Data format incorrect. Expected a list of dictionaries after generate()")
             return False
         fieldnames = self.data[0].keys()
-        with open(output_file, mode="w", newline="") as file:
+        with open(output_file, mode="w", newline="", encoding="utf-8") as file:
             writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writeheader()  # write column headers
             writer.writerows(self.data)  # write all rows
