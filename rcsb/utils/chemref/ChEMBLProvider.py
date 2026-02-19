@@ -19,15 +19,14 @@ import time
 from rcsb.utils.io.FileUtil import FileUtil
 from rcsb.utils.io.MarshalUtil import MarshalUtil
 
+logger = logging.getLogger(__name__)
+
 # pylint: disable=ungrouped-imports
 try:
     from chembl_webresource_client.new_client import new_client  # fails when service is down
     from chembl_webresource_client.unichem import unichem_client
-except Exception:
-    pass
-
-
-logger = logging.getLogger(__name__)
+except Exception as e:
+    logger.error("Failed to import chembl_webresource_client with exception %r", e)
 
 
 class ChEMBLProvider:
@@ -131,7 +130,7 @@ class ChEMBLProvider:
             for ii in range(0, len(moleculeChEMBLIdList), chunkSize):
                 drug = new_client.drug  # pylint: disable=no-member
                 drug.set_format("json")
-                mDL = drug.filter(molecule_chembl_id__in=moleculeChEMBLIdList[ii : ii + chunkSize])
+                mDL = drug.filter(molecule_chembl_id__in=moleculeChEMBLIdList[ii: ii + chunkSize])
                 if mDL:
                     logger.info("mDL (%d)", len(mDL))
                     for mD in mDL:
@@ -156,7 +155,7 @@ class ChEMBLProvider:
             for ii in range(0, len(moleculeChEMBLIdList), chunkSize):
                 drug = new_client.molecule  # pylint: disable=no-member
                 drug.set_format("json")
-                mDL = drug.filter(molecule_chembl_id__in=moleculeChEMBLIdList[ii : ii + chunkSize])
+                mDL = drug.filter(molecule_chembl_id__in=moleculeChEMBLIdList[ii: ii + chunkSize])
                 if mDL:
                     logger.info("mDL (%d)", len(mDL))
                     for mD in mDL:
@@ -181,7 +180,7 @@ class ChEMBLProvider:
             for ii in range(0, len(inchiKeyList), chunkSize):
                 drug = new_client.molecule  # pylint: disable=no-member
                 drug.set_format("json")
-                mDL = drug.get(inchiKeyList[ii : ii + chunkSize])
+                mDL = drug.get(inchiKeyList[ii: ii + chunkSize])
                 if mDL:
                     logger.info("mDL (%d)", len(mDL))
                     for mD in mDL:
