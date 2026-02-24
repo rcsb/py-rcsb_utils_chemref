@@ -46,10 +46,10 @@ class RcsbLigandScoreProvider(StashableBase):
         self.__geoScoreList = None
         self.__fitScoreList = None
 
-    def __getLigandScoreDataPath(self):
+    def getLigandScoreDataPath(self):
         """Return the path to final desired output file.
 
-        Note that this must be identical to what is defined in rcsb.workflow.refstats.LigandQualityReferenceGenerator,
+        Note that this is called by rcsb.workflow.refstats.LigandQualityReferenceGenerator,
         in order to support backup and restore functionalities to BL.
         """
         return os.path.join(self.__dirPath, "ligand_score_reference.csv")
@@ -104,7 +104,7 @@ class RcsbLigandScoreProvider(StashableBase):
         fU = FileUtil()
         fU.mkdir(dirPath)
         #
-        ligandScoreFilePath = self.__getLigandScoreDataPath()
+        ligandScoreFilePath = self.getLigandScoreDataPath()
         #
         if useCache and fU.exists(ligandScoreFilePath):
             ok = True
