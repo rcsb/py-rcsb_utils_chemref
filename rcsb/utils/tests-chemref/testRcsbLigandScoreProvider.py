@@ -51,12 +51,19 @@ class RcsbLigandScoreProviderTests(unittest.TestCase):
         logger.info("Completed %s at %s (%.4f seconds)", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - self.__startTime)
 
     def testFetchScoreFiles(self):
+        logger.info("Testing reload of ligand score files with empty cache (expect failure, since data needs to be pre-built or restored from BL)")
         rlscP = RcsbLigandScoreProvider(cachePath=self.__cachePath, useCache=False)
         ok = rlscP.testCache()
+        self.assertFalse(ok)
+        #
+        logger.info("Testing reload of ligand score files from GitHub fallback (only do this for sake of tests, since official source should be BL)")
+        rlscP.reload(useCache=False, useFallback=True)
+        ok = rlscP.testCache()
         self.assertTrue(ok)
+        #
         meanD, stdD, loadingD = rlscP.getParameterStatistics()
-        for ky in meanD:
-            logger.info("%-20s Mean %.4f stddev %.4f loading %.4f", ky, meanD[ky], stdD[ky], loadingD[ky])
+        for ky, val in meanD.items():
+            logger.info("%-20s Mean %.4f stddev %.4f loading %.4f", ky, val, stdD[ky], loadingD[ky])
         #
         fitRank = rlscP.getFitScoreRanking(-1.9)
         geoRank = rlscP.getGeometryScoreRanking(-1.5)
