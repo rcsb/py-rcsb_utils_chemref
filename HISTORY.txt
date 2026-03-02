@@ -88,3 +88,4 @@
  15-Jul-2025  - V0.95 Update base ChEMBL version to 35
   4-Nov-2025  - V0.96 Switch to 'pyproject.toml' file and hatch build system, and update pipelines to Python 3.13
  18-Feb-2026  - V0.97 Add error logging to failed chembl_webresource_client import
+ 23-Feb-2026  - V0.98 Adjust RcsbLigandScoreProvider backup and restore strategy
