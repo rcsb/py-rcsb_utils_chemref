@@ -36,11 +36,23 @@ class DrugBankProvider(StashableBase):
     def __init__(self, **kwargs):
         self.__dirName = "DrugBank"
         self.__cachePath = kwargs.get("cachePath")
+        # self.__restoreFromStash = True
         super(DrugBankProvider, self).__init__(self.__cachePath, [self.__dirName])
         #
+        # logger.debug("DrugBankProvider kwargs: %r", kwargs)
         self.__dbMapD, self.__dbObjL = self.__reload(**kwargs)
         self.__dbD = None
         #
+
+    # NOTE: Need to confirm that minCount isn't overridden by DictMethodResourceProvider before doing this
+    # def testCache(self, minCount=340, minCountObjL=995):
+    #     try:
+    #         if self.__dbMapD and self.__dbObjL and "id_map" in self.__dbMapD and (len(self.__dbMapD["id_map"]) > minCount) and (len(self.__dbObjL) > minCountObjL):
+    #             logger.info("DrugBank lengths map %d (minCount %r) dbObjL %d (minCountObjL %r)", len(self.__dbMapD["id_map"]), minCount, len(self.__dbObjL), minCountObjL)
+    #             return True
+    #     except Exception as e:
+    #         logger.debug("Failing with %s", str(e))
+    #     return False
 
     def testCache(self):
         try:
@@ -49,7 +61,6 @@ class DrugBankProvider(StashableBase):
                 return True
         except Exception as e:
             logger.debug("Failing with %s", str(e))
-
         return False
 
     def getMapping(self):
@@ -141,6 +152,7 @@ class DrugBankProvider(StashableBase):
         logger.info("Starting db reload at %s", time.strftime("%Y %m %d %H:%M:%S", time.localtime()))
         dirPath = os.path.join(self.__cachePath, self.__dirName)
         useCache = kwargs.get("useCache", True)
+        # restoreFromStash = kwargs.get("restoreFromStash", False)
         mappingFilePath = os.path.join(dirPath, "drugbank_pdb_mapping.json")
         docListFilePath = os.path.join(dirPath, "drugbank_documents.pic")
         #
@@ -167,6 +179,11 @@ class DrugBankProvider(StashableBase):
         #
         elif useCache:
             return dbMapD, dbObjL
+        #
+        # If manual override to restore from stash, don't bother trying to rebuild it
+        # if self.__restoreFromStash:
+        #     logger.info("restoreFromStash is True, will skip re-build")
+        #     return dbMapD, dbObjL
         #
         # Rebuild cache file from source
         urlTarget = kwargs.get("urlTarget", "https://go.drugbank.com/releases/latest/downloads/all-full-database")
@@ -220,6 +237,7 @@ class DrugBankProvider(StashableBase):
             )
         else:
             logger.error("Drugbank resource file missing %r", fp)
+            # raise RuntimeError("Drugbank resource file missing %r" % fp)  # If add raise here, will prevent fallback from stash restore from running (due to messy workflow)
         #
         return dbMapD, dbObjL
 

@@ -5,6 +5,7 @@
 #
 # Updates:
 # 21-Jul-2021 jdw  Make this provider a subclass of StashableBase
+# 13-Jul-2026 dwp  Make use of config values for PDB_REPO_URL and update to beta archive files
 ##
 """
 Utilities to read resource file containing compilation of CCDC models correspondences
@@ -36,7 +37,11 @@ class ChemCompModelProvider(StashableBase):
         cachePath = kwargs.get("cachePath", ".")
         super(ChemCompModelProvider, self).__init__(cachePath, [dirName])
 
-        urlTarget = kwargs.get("urlTarget", "http://files.wwpdb.org/pub/pdb/data/component-models/complete/chem_comp_model.cif.gz")
+        basePdbRepoUrl = kwargs.get("basePdbRepoUrl", "https://files-beta.wwpdb.org")
+        urlTarget = kwargs.get("urlTarget", None)  # TODO: remove this line when confirmed it's not used
+        if urlTarget is None:
+            urlTarget = os.path.join(basePdbRepoUrl, "pub/wwpdb/pdb/data/component-models/complete/chem_comp_model.cif.gz")
+
         dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)
         mappingFileName = kwargs.get("mappingFileName", "ccdc_pdb_mapping.json")

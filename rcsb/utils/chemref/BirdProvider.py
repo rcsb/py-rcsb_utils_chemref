@@ -5,6 +5,7 @@
 #
 # Updates:
 # 21-Jul-2021 jdw  Make this provider a subclass of StashableBase
+# 13-Jul-2026 dwp  Make use of config values for PDB_REPO_URL and update to beta archive files
 ##
 """
 Utilities to read and serialize portions of the dictionary of PDBx/mmCIF BIRD definitions.
@@ -35,7 +36,8 @@ class BirdProvider(StashableBase):
 
         # Default source target locators
         self.__birdUrlTarget = kwargs.get("birdUrlTarget", None)
-        self.__birdUrlTarget = self.__birdUrlTarget if self.__birdUrlTarget else "http://files.wwpdb.org/pub/pdb/data/bird/prd/prd-all.cif.gz"
+        basePdbRepoUrl = kwargs.get("basePdbRepoUrl", "https://files-beta.wwpdb.org")
+        self.__birdUrlTarget = self.__birdUrlTarget if self.__birdUrlTarget else os.path.join(basePdbRepoUrl, "pub/wwpdb/refdata/bird/prd/prd-all.cif.gz")
         #
         dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)
