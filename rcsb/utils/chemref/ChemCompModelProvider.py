@@ -5,7 +5,7 @@
 #
 # Updates:
 # 21-Jul-2021 jdw  Make this provider a subclass of StashableBase
-# 13-Jul-2026 dwp  Make use of config values for PDB_REPO_URL and update to beta archive files
+# 13-Jul-2026 dwp  Make use of config values for PDB_REPO_URL to use pre-release (and beta archive) files
 ##
 """
 Utilities to read resource file containing compilation of CCDC models correspondences
@@ -37,10 +37,16 @@ class ChemCompModelProvider(StashableBase):
         cachePath = kwargs.get("cachePath", ".")
         super(ChemCompModelProvider, self).__init__(cachePath, [dirName])
 
-        basePdbRepoUrl = kwargs.get("basePdbRepoUrl", "https://files-beta.wwpdb.org")
+        basePdbRepoUrl = kwargs.get("basePdbRepoUrl", "https://files-beta.wwpdb.org")  # TODO: change default to "files.wwpdb.org" once beta archive is official archive
+        # NOTE: basePdbRepoUrl is set from PDB_REPO_URL in DictMethodResourceProvider
+        #
         urlTarget = kwargs.get("urlTarget", None)  # TODO: remove this line when confirmed it's not used
         if urlTarget is None:
-            urlTarget = os.path.join(basePdbRepoUrl, "pub/wwpdb/pdb/data/component-models/complete/chem_comp_model.cif.gz")
+            # TODO: remove the first conditional when fully transitioned over the beta archive
+            if basePdbRepoUrl.endswith("/pub"):  # For prefix, "https://files.wwpdb.org/pub" (prior to beta-archive)
+                urlTarget = os.path.join(basePdbRepoUrl, "pdb/data/component-models/complete/chem_comp_model.cif.gz")
+            else:  # For prefix, "https://files-beta.wwpdb.org" or "https://files.wwpdb.org" (after beta-archive)
+                urlTarget = os.path.join(basePdbRepoUrl, "pub/wwpdb/pdb/data/component-models/complete/chem_comp_model.cif.gz")
 
         dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)

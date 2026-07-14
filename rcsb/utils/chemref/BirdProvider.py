@@ -5,7 +5,7 @@
 #
 # Updates:
 # 21-Jul-2021 jdw  Make this provider a subclass of StashableBase
-# 13-Jul-2026 dwp  Make use of config values for PDB_REPO_URL and update to beta archive files
+# 13-Jul-2026 dwp  Make use of config values for PDB_REPO_URL to use pre-release (and beta archive) files
 ##
 """
 Utilities to read and serialize portions of the dictionary of PDBx/mmCIF BIRD definitions.
@@ -36,8 +36,16 @@ class BirdProvider(StashableBase):
 
         # Default source target locators
         self.__birdUrlTarget = kwargs.get("birdUrlTarget", None)
-        basePdbRepoUrl = kwargs.get("basePdbRepoUrl", "https://files-beta.wwpdb.org")
-        self.__birdUrlTarget = self.__birdUrlTarget if self.__birdUrlTarget else os.path.join(basePdbRepoUrl, "pub/wwpdb/refdata/bird/prd/prd-all.cif.gz")
+        basePdbRepoUrl = kwargs.get("basePdbRepoUrl", "https://files-beta.wwpdb.org")  # TODO: change default to "files.wwpdb.org" once beta archive is official archive
+        # NOTE: basePdbRepoUrl is set from PDB_REPO_URL in DictMethodResourceProvider
+        #
+        if self.__birdUrlTarget is None:
+            # TODO: remove the first conditional when fully transitioned over the beta archive
+            if basePdbRepoUrl.endswith("/pub"):  # For prefix, "https://files.wwpdb.org/pub" (prior to beta-archive)
+                self.__birdUrlTarget = os.path.join(basePdbRepoUrl, "pdb/data/bird/prd/prd-all.cif.gz")
+            else:  # For prefix, "https://files-beta.wwpdb.org" or "https://files.wwpdb.org" (after beta-archive)
+                self.__birdUrlTarget = os.path.join(basePdbRepoUrl, "pub/wwpdb/refdata/bird/prd/prd-all.cif.gz")
+
         #
         dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)

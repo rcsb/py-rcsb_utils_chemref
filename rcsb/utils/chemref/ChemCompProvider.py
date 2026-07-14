@@ -5,7 +5,7 @@
 #
 # Updates:
 #   7-Jun-2023 aae  Include bond count in chem comp data and fix typo
-#  13-Jul-2026 dwp  Make use of config values for PDB_REPO_URL and update to beta archive files
+#  13-Jul-2026 dwp  Make use of config values for PDB_REPO_URL to use pre-release (and beta archive) files
 ##
 """
 Utilities to provide essential data items for chemical component definitions.
@@ -33,10 +33,16 @@ class ChemCompProvider(StashableBase):
         cachePath = kwargs.get("cachePath", ".")
         super(ChemCompProvider, self).__init__(cachePath, [dirName])
         #
-        basePdbRepoUrl = kwargs.get("basePdbRepoUrl", "https://files-beta.wwpdb.org")
+        basePdbRepoUrl = kwargs.get("basePdbRepoUrl", "https://files-beta.wwpdb.org")  # TODO: change default to "files.wwpdb.org" once beta archive is official archive
+        # NOTE: basePdbRepoUrl is set from PDB_REPO_URL in DictMethodResourceProvider
+        #
         urlTarget = kwargs.get("ccUrlTarget", None)  # TODO: remove this line when confirmed it's not used
         if urlTarget is None:
-            urlTarget = os.path.join(basePdbRepoUrl, "pub/wwpdb/refdata/chem_comp/components.cif.gz")
+            # TODO: remove the first conditional when fully transitioned over the beta archive
+            if basePdbRepoUrl.endswith("/pub"):  # For prefix, "https://files.wwpdb.org/pub" (prior to beta-archive)
+                urlTarget = os.path.join(basePdbRepoUrl, "pdb/data/monomers/components.cif.gz")
+            else:  # For prefix, "https://files-beta.wwpdb.org" or "https://files.wwpdb.org" (after beta-archive)
+                urlTarget = os.path.join(basePdbRepoUrl, "pub/wwpdb/refdata/chem_comp/components.cif.gz")
         #
         dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)
