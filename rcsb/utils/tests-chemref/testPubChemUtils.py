@@ -129,7 +129,7 @@ class PubChemUtilsTests(unittest.TestCase):
             for cId in cIdList:
                 pcU = PubChemUtils()
                 chemId = ChemicalIdentifier(idCode="test", identifierType="cid", identifier=cId)
-                for extTable in ["dgidb", "pathway", "fdaorangebook", "clinicaltrials", "bioactivity"]:
+                for extTable in ["compound", "pathway", "fdaorangebook", "clinicaltrials", "bioactivity"]:
                     rawResponsePath = os.path.join(self.__workPath, "%s-pubchem-%s-raw.json" % (cId, extTable))
                     extractedResponsePath = os.path.join(self.__workPath, "%s-pubchem-%s-extracted.json" % (cId, extTable))
                     retStatus, vL = pcU.fetch(chemId, returnType=extTable, storeRawResponsePath=rawResponsePath, storeResponsePath=extractedResponsePath)
@@ -147,7 +147,7 @@ class PubChemUtilsTests(unittest.TestCase):
             retStatus, retDL = pcU.assemble(chemId, exportPath=os.path.join(self.__workPath, "PubChem"))
             self.assertTrue(retStatus)
             self.assertTrue("record" in retDL[0]["data"])
-            self.assertTrue("dgidb" in retDL[0]["data"])
+            self.assertTrue("compound" in retDL[0]["data"])
 
 
 def fetchPubChemData():

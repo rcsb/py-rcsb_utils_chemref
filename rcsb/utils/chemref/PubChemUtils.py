@@ -6,6 +6,7 @@
 #
 #   28-May-2020 jdw use alternative url fetch library.
 #   20-Sep-2023 dwp turn off overwriting of user agent from header for GET requests
+#   10-Aug-2026 dwp update SgdRequest endpoint to "/sdq/sphinxql.cgi", and replace collection "dgidb" with "compound"
 ##
 __docformat__ = "google en"
 __author__ = "John Westbrook"
@@ -53,7 +54,7 @@ class PubChemUtils(object):
             exportIntermediates (bool, optional): flag controlling export of intermediate results (default: False)
             matchIdOnly (bool, optional): flag to stop after performing record lookup to obtain matching identifiers
             contentTypes (list): PubChem content types to fetch (default: ["view", "classification", "property", "xrefs", \
-                                                                           "synonyms", "dgidb", "pathway", \
+                                                                           "synonyms", "compound", "pathway", \
                                                                            "fdaorangebook", "clinicaltrials", "bioactivity"])
 
 
@@ -64,7 +65,7 @@ class PubChemUtils(object):
         exportPath = kwargs.get("exportPath", None)
         exportIntermediates = kwargs.get("exportIntermediates", False)
         matchIdOnly = kwargs.get("matchIdOnly", False)
-        contentTypes = kwargs.get("contentTypes", ["view", "classification", "property", "xrefs", "synonyms", "dgidb", "pathway", "fdaorangebook", "clinicaltrials", "bioactivity"])
+        contentTypes = kwargs.get("contentTypes", ["view", "classification", "property", "xrefs", "synonyms", "compound", "pathway", "fdaorangebook", "clinicaltrials", "bioactivity"])
 
         retStatus = False
         searchType = None
@@ -161,7 +162,7 @@ class PubChemUtils(object):
         #
         ok = False
         retL = None
-        if returnType in ["dgidb", "pathway", "fdaorangebook", "clinicaltrials", "bioactivity"] and chemicalIdentifier.identifierType == "cid":
+        if returnType in ["compound", "pathway", "fdaorangebook", "clinicaltrials", "bioactivity"] and chemicalIdentifier.identifierType == "cid":
             response, retCode = self.__doSgdRequest(chemicalIdentifier.identifier, returnType=returnType)
         elif returnType == "view":
             response, retCode = self.__doPugViewRequest(chemicalIdentifier.identifier, nameSpace=chemicalIdentifier.identifierType, domain="compound")
@@ -187,7 +188,7 @@ class PubChemUtils(object):
             retL = self.__parsePubChemSynonyms(response)
         elif ok and returnType == "view":
             retL = [self.__parsePubChemCompoundView(response)]
-        elif ok and returnType in ["dgidb", "pathway", "fdaorangebook", "clinicaltrials", "bioactivity"]:
+        elif ok and returnType in ["compound", "pathway", "fdaorangebook", "clinicaltrials", "bioactivity"]:
             retL = self.__parseSdqResponse(returnType, response)
         #
         if storeResponsePath and retL:
@@ -361,14 +362,14 @@ class PubChemUtils(object):
         #
         return ret, retCode
 
-    def __doSgdRequest(self, identifier, returnType="dgidb"):
+    def __doSgdRequest(self, identifier, returnType="compound"):
         """Wrapper for PubChem SGD API requests
 
             Example:
 
-        /sdq/sdqagent.cgi?infmt=json&outfmt=csv&query={"download":"*","collection":"dgidb","where":{"ands":[{"cid":"2244"}]},
-                          "order":["relevancescore,desc"],"start":1,"limit":10000000,"downloadfilename":"CID_2244_dgidb"}
-        /sdq/sdqagent.cgi?infmt=json&outfmt=csv&query={"download":"*","collection":"pathway","where":{"ands":[{"cid":"2244"},{"core":"1"}]},
+        /sdq/sphinxql.cgi?infmt=json&outfmt=csv&query={"download":"*","collection":"compound","where":{"ands":[{"cid":"2244"}]},
+                          "order":["relevancescore,desc"],"start":1,"limit":10000000,"downloadfilename":"CID_2244_compound"}
+        /sdq/sphinxql.cgi?infmt=json&outfmt=csv&query={"download":"*","collection":"pathway","where":{"ands":[{"cid":"2244"},{"core":"1"}]},
                           "order":["name,asc"],"start":1,"limit":10000000,"downloadfilename":"CID_2244_pathway"}
 
         """
@@ -382,10 +383,11 @@ class PubChemUtils(object):
             baseUrl = self.__urlPrimary
             pD = {}
             ureq = UrlRequestUtil()
-            if nameSpace in ["cid"] and requestType == "GET" and returnType in ["dgidb", "pathway", "fdaorangebook", "clinicaltrials", "bioactivity"]:
+            if nameSpace in ["cid"] and requestType == "GET" and returnType in ["compound", "pathway", "fdaorangebook", "clinicaltrials", "bioactivity"]:
                 # uId = quote(identifier.encode("utf8"))
-                endPoint = "/".join(["sdq", "sdqagent.cgi"])
+                endPoint = "/".join(["sdq", "sphinxql.cgi"])
                 pD = {"infmt": "json", "outfmt": "json", "query": '{"select":"*","collection":"%s","where":{"ands":{"cid":"%s"}}}' % (returnType, identifier)}
+                logger.debug("url/endpoint: %s/%s - pD: %r", baseUrl, endPoint, pD)
                 ret, retCode = ureq.getUnWrapped(
                     baseUrl,
                     endPoint,
@@ -409,7 +411,7 @@ class PubChemUtils(object):
         # Preliminary mapping to capture what is currently deemed useful from these collections.
         #
         cMapD = {
-            "dgidb": [
+            "compound": [
                 ("pmids", None),
                 ("gid", None),
                 ("srcid", None),
