@@ -6,6 +6,7 @@
 #   2-Dec-2020 jdw Add ChEMBL API access methods
 #  20-Sep-2023 dwp Change protocol to HTTPS instead of FTP; put chembl imports in try/except
 #  15-Jul-2025 dwp Update ChEMBL base version from 29 to 35
+#  15-Jul-2025 dwp Update ChEMBL base version from 35 to 37
 ##
 """
 Accessors for ChEMBL small molecule data.
@@ -73,9 +74,9 @@ class ChEMBLProvider:
         fU = FileUtil()
         fU.mkdir(dirPath)
         #
-        baseVersion = 35
-        # ChEMBL current version 35 - as of 15 July 2025
-        # template:  chembl_35_chemreps.txt.gz
+        baseVersion = 37
+        # ChEMBL current version 37 - as of 22 Sep 2026
+        # template:  chembl_37_chemreps.txt.gz
         #
         inpFileName = "chembl_" + str(baseVersion) + ".fa.gz"
         #
