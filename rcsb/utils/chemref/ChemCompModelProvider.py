@@ -6,6 +6,7 @@
 # Updates:
 # 21-Jul-2021 jdw  Make this provider a subclass of StashableBase
 # 13-Jul-2026 dwp  Make use of config values for PDB_REPO_URL to use pre-release (and beta archive) files
+# 21-Oct-2026 dwp  Fall back to the default when basePdbRepoUrl is None; strip any trailing slash
 ##
 """
 Utilities to read resource file containing compilation of CCDC models correspondences
@@ -37,7 +38,7 @@ class ChemCompModelProvider(StashableBase):
         cachePath = kwargs.get("cachePath", ".")
         super(ChemCompModelProvider, self).__init__(cachePath, [dirName])
 
-        basePdbRepoUrl = kwargs.get("basePdbRepoUrl", "https://files-beta.wwpdb.org")  # TODO: change default to "files.wwpdb.org" once beta archive is official archive
+        basePdbRepoUrl = (kwargs.get("basePdbRepoUrl") or "https://files-beta.wwpdb.org").rstrip("/")  # TODO: change default to "files.wwpdb.org" once beta archive is official archive
         # NOTE: basePdbRepoUrl is set from PDB_REPO_URL in DictMethodResourceProvider
         #
         urlTarget = kwargs.get("urlTarget", None)  # TODO: remove this line when confirmed it's not used

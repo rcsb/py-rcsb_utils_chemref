@@ -6,6 +6,7 @@
 # Updates:
 # 21-Jul-2021 jdw  Make this provider a subclass of StashableBase
 # 13-Jul-2026 dwp  Make use of config values for PDB_REPO_URL to use pre-release (and beta archive) files
+# 21-Oct-2026 dwp  Fall back to the default when basePdbRepoUrl is None; strip any trailing slash
 ##
 """
 Utilities to read and serialize portions of the dictionary of PDBx/mmCIF BIRD definitions.
@@ -36,7 +37,7 @@ class BirdProvider(StashableBase):
 
         # Default source target locators
         self.__birdUrlTarget = kwargs.get("birdUrlTarget", None)
-        basePdbRepoUrl = kwargs.get("basePdbRepoUrl", "https://files-beta.wwpdb.org")  # TODO: change default to "files.wwpdb.org" once beta archive is official archive
+        basePdbRepoUrl = (kwargs.get("basePdbRepoUrl") or "https://files-beta.wwpdb.org").rstrip("/")  # TODO: change default to "files.wwpdb.org" once beta archive is official archive
         # NOTE: basePdbRepoUrl is set from PDB_REPO_URL in DictMethodResourceProvider
         #
         if self.__birdUrlTarget is None:
