@@ -91,5 +91,6 @@
  23-Feb-2026  - V0.98 Adjust RcsbLigandScoreProvider backup and restore strategy
  10-Aug-2026  - V0.99 Updates/fixes to PubChemUtils
  22-Sep-2026  - V1.00 Update ChEMBL version to 37
- 21-Oct-2026  - V1.01 Set BIRD, chem comp and chem comp model URLs from PDB_REPO_URL (basePdbRepoUrl), supporting both the
-                      current (/pub) and beta archive layouts
+ 28-Oct-2026  - V1.01 Set BIRD, chem comp and chem comp model URLs from PDB_REPO_URL (basePdbRepoUrl), supporting both the
+                      current (/pub) and beta archive (no /pub, or containing "beta") layouts; default to the current
+                      archive (https://files.wwpdb.org/pub)

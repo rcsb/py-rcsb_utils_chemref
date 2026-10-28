@@ -7,6 +7,9 @@
 #   7-Jun-2023 aae  Include bond count in chem comp data and fix typo
 #  13-Jul-2026 dwp  Make use of config values for PDB_REPO_URL to use pre-release (and beta archive) files
 #  21-Oct-2026 dwp  Fall back to the default when basePdbRepoUrl is None; strip any trailing slash
+#  28-Oct-2026 dwp  Default basePdbRepoUrl to "https://files.wwpdb.org/pub" (current archive); use the beta archive
+#                   layout for any base URL containing "beta"; move URL selection into buildUrlTarget(); drop the
+#                   unused ccUrlTarget kwarg
 ##
 """
 Utilities to provide essential data items for chemical component definitions.
@@ -34,16 +37,8 @@ class ChemCompProvider(StashableBase):
         cachePath = kwargs.get("cachePath", ".")
         super(ChemCompProvider, self).__init__(cachePath, [dirName])
         #
-        basePdbRepoUrl = (kwargs.get("basePdbRepoUrl") or "https://files-beta.wwpdb.org").rstrip("/")  # TODO: change default to "files.wwpdb.org" once beta archive is official archive
         # NOTE: basePdbRepoUrl is set from PDB_REPO_URL in DictMethodResourceProvider
-        #
-        urlTarget = kwargs.get("ccUrlTarget", None)  # TODO: remove this line when confirmed it's not used
-        if urlTarget is None:
-            # TODO: remove the first conditional when fully transitioned over the beta archive
-            if basePdbRepoUrl.endswith("/pub"):  # For prefix, "https://files.wwpdb.org/pub" (prior to beta-archive)
-                urlTarget = os.path.join(basePdbRepoUrl, "pdb/data/monomers/components.cif.gz")
-            else:  # For prefix, "https://files-beta.wwpdb.org" or "https://files.wwpdb.org" (after beta-archive)
-                urlTarget = os.path.join(basePdbRepoUrl, "pub/wwpdb/refdata/chem_comp/components.cif.gz")
+        urlTarget = self.buildUrlTarget(kwargs.get("basePdbRepoUrl"))
         #
         dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)
@@ -56,6 +51,26 @@ class ChemCompProvider(StashableBase):
         #
         self.__ccdD = self.__reload(urlTarget, dirPath, ccdFileName, useCache=useCache)
         #
+
+    @staticmethod
+    def buildUrlTarget(basePdbRepoUrl=None):
+        """Return the chemical component dictionary URL (components.cif.gz) for the input PDB repository base URL.
+
+        Args:
+            basePdbRepoUrl (str, optional): PDB repository base URL (PDB_REPO_URL). Defaults to "https://files.wwpdb.org/pub".
+
+        Returns:
+            str: chemical component dictionary URL
+        """
+        # TODO: change default to "https://files.wwpdb.org" once beta archive is official archive
+        baseUrl = (basePdbRepoUrl or "https://files.wwpdb.org/pub").rstrip("/")
+        # TODO: remove the current archive layout branch when fully transitioned over to the beta archive
+        if not baseUrl.endswith("/pub") or "beta" in baseUrl.lower():
+            # Beta archive layout, for prefix "https://files-beta.wwpdb.org" (or "https://files.wwpdb.org" after the beta transition)
+            baseUrl = baseUrl.removesuffix("/pub")  # e.g., "https://files-beta.wwpdb.org/pub" (beta layout paths already start with "pub/")
+            return os.path.join(baseUrl, "pub/wwpdb/refdata/chem_comp/components.cif.gz")
+        # Current archive layout, for prefix "https://files.wwpdb.org/pub" (prior to the beta transition)
+        return os.path.join(baseUrl, "pdb/data/monomers/components.cif.gz")
 
     def testCache(self, minCount=30000):
 

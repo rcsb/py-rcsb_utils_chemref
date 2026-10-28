@@ -7,6 +7,7 @@
 # Updates:
 # 28-Mar-2022 bv Fix pylint issue with "Iterated dict modified inside for loop body" in testChemCompProvider
 #  7-Jun-2022 aae Include bond count in chem comp data and fix typo
+# 28-Oct-2026 dwp Add URL selection (current and beta archive layouts) and URL availability tests
 #
 ##
 """
@@ -26,6 +27,7 @@ import unittest
 import copy
 
 from rcsb.utils.chemref.ChemCompProvider import ChemCompProvider
+from rcsb.utils.io.FileUtil import FileUtil
 from rcsb.utils.io.MarshalUtil import MarshalUtil
 from rcsb.utils.io.TimeUtil import TimeUtil
 
@@ -130,10 +132,39 @@ class ChemCompProviderTests(unittest.TestCase):
         fEntryId = ccP.getEntryOfFirstRelease("ALA")
         self.assertEqual(fEntryId, "2pti")
 
+    def testBuildUrlTarget(self):
+        """Test URL selection for the current (.../pub) and beta archive layouts"""
+        curUrl = "https://files.wwpdb.org/pub/pdb/data/monomers/components.cif.gz"
+        betaUrl = "https://files-beta.wwpdb.org/pub/wwpdb/refdata/chem_comp/components.cif.gz"
+        for basePdbRepoUrl, urlTarget in [
+            (None, curUrl),
+            ("", curUrl),
+            ("https://files.wwpdb.org/pub", curUrl),
+            ("https://files.wwpdb.org/pub/", curUrl),
+            ("http://mirror.example.org/pub", "http://mirror.example.org/pub/pdb/data/monomers/components.cif.gz"),
+            ("https://files-beta.wwpdb.org", betaUrl),
+            ("https://files-beta.wwpdb.org/", betaUrl),
+            ("https://files-beta.wwpdb.org/pub", betaUrl),
+            ("http://mirror-beta.example.org", "http://mirror-beta.example.org/pub/wwpdb/refdata/chem_comp/components.cif.gz"),
+            ("http://mirror-beta.example.org/pub/", "http://mirror-beta.example.org/pub/wwpdb/refdata/chem_comp/components.cif.gz"),
+            ("https://files.wwpdb.org", "https://files.wwpdb.org/pub/wwpdb/refdata/chem_comp/components.cif.gz"),
+        ]:
+            self.assertEqual(ChemCompProvider.buildUrlTarget(basePdbRepoUrl), urlTarget, msg=repr(basePdbRepoUrl))
+
+    def testUrlTargetsExist(self):
+        """Test that the source file is available on both the current (files.wwpdb.org) and beta (files-beta.wwpdb.org) archives"""
+        fU = FileUtil()
+        for basePdbRepoUrl in ["https://files.wwpdb.org/pub", "https://files-beta.wwpdb.org"]:
+            urlTarget = ChemCompProvider.buildUrlTarget(basePdbRepoUrl)
+            logger.info("Checking %s", urlTarget)
+            self.assertTrue(fU.exists(urlTarget), msg=urlTarget)
+
 
 def readChemCompInfo():
     suiteSelect = unittest.TestSuite()
     suiteSelect.addTest(ChemCompProviderTests("testReadChemCompRef"))
+    suiteSelect.addTest(ChemCompProviderTests("testBuildUrlTarget"))
+    suiteSelect.addTest(ChemCompProviderTests("testUrlTargetsExist"))
     return suiteSelect
 
 

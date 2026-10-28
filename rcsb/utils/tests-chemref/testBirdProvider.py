@@ -5,6 +5,7 @@
 # Version: 0.001
 #
 # Update:
+# 28-Oct-2026 dwp  Add URL selection (current and beta archive layouts) and URL availability tests
 ##
 """
 Tests for utilities to read and process BIRD dictionary definitions.
@@ -25,6 +26,7 @@ import unittest
 
 from importlib.metadata import version as get_package_version
 from rcsb.utils.chemref.BirdProvider import BirdProvider
+from rcsb.utils.io.FileUtil import FileUtil
 
 __version__ = get_package_version("rcsb.utils.chemref")
 
@@ -67,10 +69,39 @@ class BirdProviderTests(unittest.TestCase):
         ok = bP.testCache(minCount=1000)
         self.assertTrue(ok)
 
+    def testBuildUrlTarget(self):
+        """Test URL selection for the current (.../pub) and beta archive layouts"""
+        curUrl = "https://files.wwpdb.org/pub/pdb/data/bird/prd/prd-all.cif.gz"
+        betaUrl = "https://files-beta.wwpdb.org/pub/wwpdb/refdata/bird/prd/prd-all.cif.gz"
+        for basePdbRepoUrl, urlTarget in [
+            (None, curUrl),
+            ("", curUrl),
+            ("https://files.wwpdb.org/pub", curUrl),
+            ("https://files.wwpdb.org/pub/", curUrl),
+            ("http://mirror.example.org/pub", "http://mirror.example.org/pub/pdb/data/bird/prd/prd-all.cif.gz"),
+            ("https://files-beta.wwpdb.org", betaUrl),
+            ("https://files-beta.wwpdb.org/", betaUrl),
+            ("https://files-beta.wwpdb.org/pub", betaUrl),
+            ("http://mirror-beta.example.org", "http://mirror-beta.example.org/pub/wwpdb/refdata/bird/prd/prd-all.cif.gz"),
+            ("http://mirror-beta.example.org/pub/", "http://mirror-beta.example.org/pub/wwpdb/refdata/bird/prd/prd-all.cif.gz"),
+            ("https://files.wwpdb.org", "https://files.wwpdb.org/pub/wwpdb/refdata/bird/prd/prd-all.cif.gz"),
+        ]:
+            self.assertEqual(BirdProvider.buildUrlTarget(basePdbRepoUrl), urlTarget, msg=repr(basePdbRepoUrl))
+
+    def testUrlTargetsExist(self):
+        """Test that the source file is available on both the current (files.wwpdb.org) and beta (files-beta.wwpdb.org) archives"""
+        fU = FileUtil()
+        for basePdbRepoUrl in ["https://files.wwpdb.org/pub", "https://files-beta.wwpdb.org"]:
+            urlTarget = BirdProvider.buildUrlTarget(basePdbRepoUrl)
+            logger.info("Checking %s", urlTarget)
+            self.assertTrue(fU.exists(urlTarget), msg=urlTarget)
+
 
 def buildCacheFiles():
     suiteSelect = unittest.TestSuite()
     suiteSelect.addTest(BirdProviderTests("testBuildBirdCache"))
+    suiteSelect.addTest(BirdProviderTests("testBuildUrlTarget"))
+    suiteSelect.addTest(BirdProviderTests("testUrlTargetsExist"))
     return suiteSelect
 
 
