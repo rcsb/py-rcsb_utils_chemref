@@ -5,6 +5,10 @@
 #
 # Updates:
 # 21-Jul-2021 jdw  Make this provider a subclass of StashableBase
+# 13-Jul-2026 dwp  Make use of config values for PDB_REPO_URL to use pre-release (and beta archive) files
+# 21-Oct-2026 dwp  Fall back to the default when basePdbRepoUrl is None; strip any trailing slash
+# 28-Oct-2026 dwp  Default basePdbRepoUrl to "https://files.wwpdb.org/pub" (current archive); use the beta archive
+#                  layout for any base URL containing "beta"; move URL selection into buildUrlTarget()
 ##
 """
 Utilities to read and serialize portions of the dictionary of PDBx/mmCIF BIRD definitions.
@@ -35,7 +39,9 @@ class BirdProvider(StashableBase):
 
         # Default source target locators
         self.__birdUrlTarget = kwargs.get("birdUrlTarget", None)
-        self.__birdUrlTarget = self.__birdUrlTarget if self.__birdUrlTarget else "http://files.wwpdb.org/pub/pdb/data/bird/prd/prd-all.cif.gz"
+        # NOTE: basePdbRepoUrl is set from PDB_REPO_URL in DictMethodResourceProvider
+        if self.__birdUrlTarget is None:
+            self.__birdUrlTarget = self.buildUrlTarget(kwargs.get("basePdbRepoUrl"))
         #
         dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)
@@ -43,6 +49,26 @@ class BirdProvider(StashableBase):
         #
         self.__mU = MarshalUtil(workPath=dirPath)
         self.__birdD = self.__reload(self.__birdUrlTarget, dirPath, useCache=useCache, molLimit=molLimit)
+
+    @staticmethod
+    def buildUrlTarget(basePdbRepoUrl=None):
+        """Return the BIRD definition file URL (prd-all.cif.gz) for the input PDB repository base URL.
+
+        Args:
+            basePdbRepoUrl (str, optional): PDB repository base URL (PDB_REPO_URL). Defaults to "https://files.wwpdb.org/pub".
+
+        Returns:
+            str: BIRD definition file URL
+        """
+        # TODO: change default to "https://files.wwpdb.org" once beta archive is official archive
+        baseUrl = (basePdbRepoUrl or "https://files.wwpdb.org/pub").rstrip("/")
+        # TODO: remove the current archive layout branch when fully transitioned over to the beta archive
+        if not baseUrl.endswith("/pub") or "beta" in baseUrl.lower():
+            # Beta archive layout, for prefix "https://files-beta.wwpdb.org" (or "https://files.wwpdb.org" after the beta transition)
+            baseUrl = baseUrl.removesuffix("/pub")  # e.g., "https://files-beta.wwpdb.org/pub" (beta layout paths already start with "pub/")
+            return os.path.join(baseUrl, "pub/wwpdb/refdata/bird/prd/prd-all.cif.gz")
+        # Current archive layout, for prefix "https://files.wwpdb.org/pub" (prior to the beta transition)
+        return os.path.join(baseUrl, "pdb/data/bird/prd/prd-all.cif.gz")
 
     def testCache(self, minCount=1):
         if self.__birdD and len(self.__birdD) >= minCount:

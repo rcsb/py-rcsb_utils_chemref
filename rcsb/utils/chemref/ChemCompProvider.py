@@ -5,6 +5,11 @@
 #
 # Updates:
 #   7-Jun-2023 aae  Include bond count in chem comp data and fix typo
+#  13-Jul-2026 dwp  Make use of config values for PDB_REPO_URL to use pre-release (and beta archive) files
+#  21-Oct-2026 dwp  Fall back to the default when basePdbRepoUrl is None; strip any trailing slash
+#  28-Oct-2026 dwp  Default basePdbRepoUrl to "https://files.wwpdb.org/pub" (current archive); use the beta archive
+#                   layout for any base URL containing "beta"; move URL selection into buildUrlTarget(); drop the
+#                   unused ccUrlTarget kwarg
 ##
 """
 Utilities to provide essential data items for chemical component definitions.
@@ -32,8 +37,8 @@ class ChemCompProvider(StashableBase):
         cachePath = kwargs.get("cachePath", ".")
         super(ChemCompProvider, self).__init__(cachePath, [dirName])
         #
-        urlTarget = kwargs.get("ccUrlTarget", "http://files.wwpdb.org/pub/pdb/data/monomers/components.cif.gz")
-        # self.__birdUrlTarget = kwargs.get("birdUrlTarget", "ftp://ftp.wwpdb.org/pub/pdb/data/bird/prd/prdcc-all.cif.gz")
+        # NOTE: basePdbRepoUrl is set from PDB_REPO_URL in DictMethodResourceProvider
+        urlTarget = self.buildUrlTarget(kwargs.get("basePdbRepoUrl"))
         #
         dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)
@@ -46,6 +51,26 @@ class ChemCompProvider(StashableBase):
         #
         self.__ccdD = self.__reload(urlTarget, dirPath, ccdFileName, useCache=useCache)
         #
+
+    @staticmethod
+    def buildUrlTarget(basePdbRepoUrl=None):
+        """Return the chemical component dictionary URL (components.cif.gz) for the input PDB repository base URL.
+
+        Args:
+            basePdbRepoUrl (str, optional): PDB repository base URL (PDB_REPO_URL). Defaults to "https://files.wwpdb.org/pub".
+
+        Returns:
+            str: chemical component dictionary URL
+        """
+        # TODO: change default to "https://files.wwpdb.org" once beta archive is official archive
+        baseUrl = (basePdbRepoUrl or "https://files.wwpdb.org/pub").rstrip("/")
+        # TODO: remove the current archive layout branch when fully transitioned over to the beta archive
+        if not baseUrl.endswith("/pub") or "beta" in baseUrl.lower():
+            # Beta archive layout, for prefix "https://files-beta.wwpdb.org" (or "https://files.wwpdb.org" after the beta transition)
+            baseUrl = baseUrl.removesuffix("/pub")  # e.g., "https://files-beta.wwpdb.org/pub" (beta layout paths already start with "pub/")
+            return os.path.join(baseUrl, "pub/wwpdb/refdata/chem_comp/components.cif.gz")
+        # Current archive layout, for prefix "https://files.wwpdb.org/pub" (prior to the beta transition)
+        return os.path.join(baseUrl, "pdb/data/monomers/components.cif.gz")
 
     def testCache(self, minCount=30000):
 

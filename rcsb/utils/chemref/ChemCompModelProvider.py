@@ -5,6 +5,11 @@
 #
 # Updates:
 # 21-Jul-2021 jdw  Make this provider a subclass of StashableBase
+# 13-Jul-2026 dwp  Make use of config values for PDB_REPO_URL to use pre-release (and beta archive) files
+# 21-Oct-2026 dwp  Fall back to the default when basePdbRepoUrl is None; strip any trailing slash
+# 28-Oct-2026 dwp  Default basePdbRepoUrl to "https://files.wwpdb.org/pub" (current archive); use the beta archive
+#                  layout for any base URL containing "beta"; move URL selection into buildUrlTarget(); drop the
+#                  unused urlTarget kwarg
 ##
 """
 Utilities to read resource file containing compilation of CCDC models correspondences
@@ -36,7 +41,9 @@ class ChemCompModelProvider(StashableBase):
         cachePath = kwargs.get("cachePath", ".")
         super(ChemCompModelProvider, self).__init__(cachePath, [dirName])
 
-        urlTarget = kwargs.get("urlTarget", "http://files.wwpdb.org/pub/pdb/data/component-models/complete/chem_comp_model.cif.gz")
+        # NOTE: basePdbRepoUrl is set from PDB_REPO_URL in DictMethodResourceProvider
+        urlTarget = self.buildUrlTarget(kwargs.get("basePdbRepoUrl"))
+
         dirPath = os.path.join(cachePath, dirName)
         useCache = kwargs.get("useCache", True)
         mappingFileName = kwargs.get("mappingFileName", "ccdc_pdb_mapping.json")
@@ -44,6 +51,26 @@ class ChemCompModelProvider(StashableBase):
         #
         self.__mU = MarshalUtil(workPath=dirPath)
         self.__mappingD, self.__auditD = self.__reload(urlTarget, dirPath, mappingFileName, auditFileName, useCache=useCache)
+
+    @staticmethod
+    def buildUrlTarget(basePdbRepoUrl=None):
+        """Return the chemical component model file URL (chem_comp_model.cif.gz) for the input PDB repository base URL.
+
+        Args:
+            basePdbRepoUrl (str, optional): PDB repository base URL (PDB_REPO_URL). Defaults to "https://files.wwpdb.org/pub".
+
+        Returns:
+            str: chemical component model file URL
+        """
+        # TODO: change default to "https://files.wwpdb.org" once beta archive is official archive
+        baseUrl = (basePdbRepoUrl or "https://files.wwpdb.org/pub").rstrip("/")
+        # TODO: remove the current archive layout branch when fully transitioned over to the beta archive
+        if not baseUrl.endswith("/pub") or "beta" in baseUrl.lower():
+            # Beta archive layout, for prefix "https://files-beta.wwpdb.org" (or "https://files.wwpdb.org" after the beta transition)
+            baseUrl = baseUrl.removesuffix("/pub")  # e.g., "https://files-beta.wwpdb.org/pub" (beta layout paths already start with "pub/")
+            return os.path.join(baseUrl, "pub/wwpdb/pdb/data/component-models/complete/chem_comp_model.cif.gz")
+        # Current archive layout, for prefix "https://files.wwpdb.org/pub" (prior to the beta transition)
+        return os.path.join(baseUrl, "pdb/data/component-models/complete/chem_comp_model.cif.gz")
 
     def testCache(self):
         if len(self.__mappingD) > 1000 and len(self.__auditD) > 1000:
