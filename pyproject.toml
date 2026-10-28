@@ -31,6 +31,9 @@ dependencies = [
     "obonet >= 0.2.5",
     "networkx >= 2.4",
     "chembl-webresource-client >= 0.10.2",
+    "rcsb-api >= 1.5.0",
+    "numpy >= 2.3.5",
+    "scikit-learn >= 1.8.0",
 ]
 
 [project.optional-dependencies]
