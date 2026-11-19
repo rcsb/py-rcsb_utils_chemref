@@ -94,3 +94,7 @@
  28-Oct-2026  - V1.01 Set BIRD, chem comp and chem comp model URLs from PDB_REPO_URL (basePdbRepoUrl), supporting both the
                       current (/pub) and beta archive (no /pub, or containing "beta") layouts; default to the current
                       archive (https://files.wwpdb.org/pub)
+ 18-Nov-2026  - V1.02 Build the BIRD, chem comp and chem comp model URLs as the archive server root of PDB_REPO_URL plus the
+                      archive short link (/birds/download/prd-all.cif.gz, /ligands/download/components.cif.gz,
+                      /ligands/download/chem_comp_model.cif.gz), the same on the current and beta archives; drops the
+                      archive layout check (requires the jshortlink short links, rcsb/jshortlink#14)
