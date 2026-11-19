@@ -9,6 +9,8 @@
 # 21-Oct-2026 dwp  Fall back to the default when basePdbRepoUrl is None; strip any trailing slash
 # 28-Oct-2026 dwp  Default basePdbRepoUrl to "https://files.wwpdb.org/pub" (current archive); use the beta archive
 #                  layout for any base URL containing "beta"; move URL selection into buildUrlTarget()
+# 18-Nov-2026 dwp  Build the URL from the archive short link (/birds/download/prd-all.cif.gz) at the PDB_REPO_URL server
+#                  root, the same on the current and the extended-id archive
 ##
 """
 Utilities to read and serialize portions of the dictionary of PDBx/mmCIF BIRD definitions.
@@ -21,6 +23,7 @@ __license__ = "Apache 2.0"
 import logging
 import os
 import time
+from urllib.parse import urlsplit
 
 from rcsb.utils.io.FileUtil import FileUtil
 from rcsb.utils.io.MarshalUtil import MarshalUtil
@@ -55,20 +58,15 @@ class BirdProvider(StashableBase):
         """Return the BIRD definition file URL (prd-all.cif.gz) for the input PDB repository base URL.
 
         Args:
-            basePdbRepoUrl (str, optional): PDB repository base URL (PDB_REPO_URL). Defaults to "https://files.wwpdb.org/pub".
+            basePdbRepoUrl (str, optional): PDB repository base URL (PDB_REPO_URL); only its scheme and host are used.
+                Defaults to "https://files.wwpdb.org".
 
         Returns:
             str: BIRD definition file URL
         """
-        # TODO: change default to "https://files.wwpdb.org" once beta archive is official archive
-        baseUrl = (basePdbRepoUrl or "https://files.wwpdb.org/pub").rstrip("/")
-        # TODO: remove the current archive layout branch when fully transitioned over to the beta archive
-        if not baseUrl.endswith("/pub") or "beta" in baseUrl.lower():
-            # Beta archive layout, for prefix "https://files-beta.wwpdb.org" (or "https://files.wwpdb.org" after the beta transition)
-            baseUrl = baseUrl.removesuffix("/pub")  # e.g., "https://files-beta.wwpdb.org/pub" (beta layout paths already start with "pub/")
-            return os.path.join(baseUrl, "pub/wwpdb/refdata/bird/prd/prd-all.cif.gz")
-        # Current archive layout, for prefix "https://files.wwpdb.org/pub" (prior to the beta transition)
-        return os.path.join(baseUrl, "pdb/data/bird/prd/prd-all.cif.gz")
+        # Short link served at the archive server root, the same on the current and the extended-id (beta) archive
+        urlParts = urlsplit(basePdbRepoUrl or "https://files.wwpdb.org")
+        return urlParts.scheme + "://" + urlParts.netloc + "/birds/download/prd-all.cif.gz"
 
     def testCache(self, minCount=1):
         if self.__birdD and len(self.__birdD) >= minCount:

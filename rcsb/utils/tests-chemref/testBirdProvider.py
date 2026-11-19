@@ -6,6 +6,7 @@
 #
 # Update:
 # 28-Oct-2026 dwp  Add URL selection (current and beta archive layouts) and URL availability tests
+# 18-Nov-2026 dwp  URLs are now the archive short links (same on the current and beta archives)
 ##
 """
 Tests for utilities to read and process BIRD dictionary definitions.
@@ -70,26 +71,25 @@ class BirdProviderTests(unittest.TestCase):
         self.assertTrue(ok)
 
     def testBuildUrlTarget(self):
-        """Test URL selection for the current (.../pub) and beta archive layouts"""
-        curUrl = "https://files.wwpdb.org/pub/pdb/data/bird/prd/prd-all.cif.gz"
-        betaUrl = "https://files-beta.wwpdb.org/pub/wwpdb/refdata/bird/prd/prd-all.cif.gz"
+        """Test the short link built from the server root of PDB_REPO_URL (current and beta archives alike)"""
+        curUrl = "https://files.wwpdb.org/birds/download/prd-all.cif.gz"
+        betaUrl = "https://files-beta.wwpdb.org/birds/download/prd-all.cif.gz"
         for basePdbRepoUrl, urlTarget in [
             (None, curUrl),
             ("", curUrl),
             ("https://files.wwpdb.org/pub", curUrl),
             ("https://files.wwpdb.org/pub/", curUrl),
-            ("http://mirror.example.org/pub", "http://mirror.example.org/pub/pdb/data/bird/prd/prd-all.cif.gz"),
+            ("https://files.wwpdb.org", curUrl),
+            ("http://mirror.example.org/pub", "http://mirror.example.org/birds/download/prd-all.cif.gz"),
             ("https://files-beta.wwpdb.org", betaUrl),
             ("https://files-beta.wwpdb.org/", betaUrl),
             ("https://files-beta.wwpdb.org/pub", betaUrl),
-            ("http://mirror-beta.example.org", "http://mirror-beta.example.org/pub/wwpdb/refdata/bird/prd/prd-all.cif.gz"),
-            ("http://mirror-beta.example.org/pub/", "http://mirror-beta.example.org/pub/wwpdb/refdata/bird/prd/prd-all.cif.gz"),
-            ("https://files.wwpdb.org", "https://files.wwpdb.org/pub/wwpdb/refdata/bird/prd/prd-all.cif.gz"),
         ]:
             self.assertEqual(BirdProvider.buildUrlTarget(basePdbRepoUrl), urlTarget, msg=repr(basePdbRepoUrl))
 
     def testUrlTargetsExist(self):
-        """Test that the source file is available on both the current (files.wwpdb.org) and beta (files-beta.wwpdb.org) archives"""
+        """Test that the source file is available on both the current (files.wwpdb.org) and beta (files-beta.wwpdb.org) archives
+        (needs the jshortlink bulk-file short links deployed)"""
         fU = FileUtil()
         for basePdbRepoUrl in ["https://files.wwpdb.org/pub", "https://files-beta.wwpdb.org"]:
             urlTarget = BirdProvider.buildUrlTarget(basePdbRepoUrl)
